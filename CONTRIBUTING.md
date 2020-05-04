@@ -1,8 +1,6 @@
-
-
 # Contributing to secure-state-remediation-jobs
 
-The secure-state-remediation-jobs project team welcomes contributions from the community. Before you start working with secure-state-remediation-jobs, please
+The Secure State team welcomes contributions from the community. Before you start working with secure-state-remediation-jobs, please
 read our [Developer Certificate of Origin](https://cla.vmware.com/dco). All contributions to this repository must be
 signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on
 as an open-source patch.

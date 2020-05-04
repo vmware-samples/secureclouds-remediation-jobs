@@ -1,30 +1,14 @@
-
-
-# secure-state-remediation-jobs
+# Secure State Remediation Jobs
+[![License][license-img]][license]
 
 ## Overview
 
-## Try it out
-
-### Prerequisites
-
-* Prereq 1
-* Prereq 2
-* Prereq 3
-
-### Build & Run
-
-1. Step 1
-2. Step 2
-3. Step 3
-
-## Documentation
-
 ## Contributing
 
-The secure-state-remediation-jobs project team welcomes contributions from the community. Before you start working with secure-state-remediation-jobs, please
-read our [Developer Certificate of Origin](https://cla.vmware.com/dco). All contributions to this repository must be
-signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on
-as an open-source patch. For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
+The Secure State team welcomes contributions from the community. Before you start working with secure-state-remediation-jobs, please read our [Developer Certificate of Origin](https://cla.vmware.com/dco).
+All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.
 
-## License
+For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
+
+[license-img]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+[license]: https://opensource.org/licenses/Apache-2.0
