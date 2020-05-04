@@ -1,0 +1,14 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "RDSBackupRetention30Days",
+            "Effect": "Allow",
+            "Action": [
+                "rds:ModifyDBCluster",
+                "rds:ModifyDBInstance"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

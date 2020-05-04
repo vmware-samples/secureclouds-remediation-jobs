@@ -1,0 +1,9 @@
+.idea
+.Python
+pyvenv.cfg
+.venv
+pip-selfcheck.json
+.pytest_cache
+venv
+test/unit/__pycache__
+remediation_worker.egg-info
