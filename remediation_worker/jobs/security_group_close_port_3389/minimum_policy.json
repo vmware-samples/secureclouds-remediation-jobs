@@ -1,0 +1,13 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "EC2ClosePort22And3389",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:RevokeSecurityGroupIngress"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
