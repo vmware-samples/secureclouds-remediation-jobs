@@ -1,8 +1,6 @@
 # Secure State Remediation Jobs
 [![License][license-img]][license]
 
-## Overview
-
 ## Contributing
 
 The Secure State team welcomes contributions from the community. Before you start working with secure-state-remediation-jobs, please read our [Developer Certificate of Origin](https://cla.vmware.com/dco).
