@@ -13,10 +13,8 @@
 # limitations under the License.
 
 import pytest
-from botocore.exceptions import ClientError
-from remediation_worker.jobs.ec2_close_port_22.ec2_close_port_22 import (
-    EC2ClosePort22,
-)
+
+from remediation_worker.jobs.ec2_close_port_22.ec2_close_port_22 import EC2ClosePort22
 
 
 @pytest.fixture
@@ -37,5 +35,5 @@ class TestEC2ClosePort22:
     def test_parse_payload(self, valid_payload):
         obj = EC2ClosePort22()
         param, region = obj.parse(valid_payload)
-        assert 'instance_id' in param
-        assert param['instance_id'] == 'i-00347a2be30cf1a15'
+        assert "instance_id" in param
+        assert param["instance_id"] == "i-00347a2be30cf1a15"

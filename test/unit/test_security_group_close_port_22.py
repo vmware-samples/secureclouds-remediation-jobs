@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pytest
-from botocore.exceptions import ClientError
+
 from remediation_worker.jobs.security_group_close_port_22.security_group_close_port_22 import (
     SecurityGroupClosePort22,
 )
@@ -36,8 +36,8 @@ def valid_payload1():
 class TestSecurityGroupClosePort22(object):
     def test_parse_payload(self, valid_payload1):
         params = SecurityGroupClosePort22().parse(valid_payload1)
-        assert params['security_group_id'] == 'security_group_id'
-        assert params['region'] == 'region'
+        assert params["security_group_id"] == "security_group_id"
+        assert params["region"] == "region"
 
     def test_remediate_success(self):
         class TestClient(object):

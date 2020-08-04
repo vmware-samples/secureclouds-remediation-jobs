@@ -14,27 +14,29 @@
 
 from __future__ import annotations
 
-import boto3
 import json
-import sys
 import logging
+import sys
+
+import boto3
+
 logging.basicConfig(level=logging.INFO)
 
+
 class S3ListBuckets:
-    def parse(self, payload, error_="""Parse payload received from Remediation Service.
+    def parse(self, payload):
+        """Parse payload received from Remediation Service.
 
         :param payload: JSON string containing parameters sent to the remediation job.
         :type payload: str.
         :returns: Dictionary of parsed parameters
         :rtype: dict
         :raises: Exception, IndexError, JSONDecodeError
-        """):
-        error_
+        """
         remediation_entry = json.loads(payload)
 
-        logging.info('parsed params')
+        logging.info("parsed params")
         logging.info(f"  remediation_entry: {remediation_entry}")
-
 
         return {}
 
@@ -50,7 +52,7 @@ class S3ListBuckets:
         response = client.list_buckets()
         for bucket in response["Buckets"]:
             logging.info(f"  bucket: {bucket['Name']}")
-        logging.info('successfully executed s3-list-buckets')
+        logging.info("successfully executed s3-list-buckets")
 
         return 0
 
@@ -63,12 +65,12 @@ class S3ListBuckets:
         """
         client = boto3.client("s3")
         params = self.parse(args[1])
-        logging.info('acquired s3 client and parsed params - starting remediation')
+        logging.info("acquired s3 client and parsed params - starting remediation")
         rc = self.remediate(client=client, **params)
         return rc
 
 
 if __name__ == "__main__":
-    logging.info('s3_list_buckets.py called - running now')
+    logging.info("s3_list_buckets.py called - running now")
     obj = S3ListBuckets()
     obj.run(sys.argv)

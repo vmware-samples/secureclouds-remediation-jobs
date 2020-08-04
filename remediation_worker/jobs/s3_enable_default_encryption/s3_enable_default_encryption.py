@@ -14,11 +14,14 @@
 
 from __future__ import annotations
 
-import boto3
 import json
-import sys
 import logging
+import sys
+
+import boto3
+
 logging.basicConfig(level=logging.INFO)
+
 
 class S3EnableDefaultEncryption:
     def parse(self, payload):
@@ -39,7 +42,7 @@ class S3EnableDefaultEncryption:
             logging.error("Missing parameters for 'BUCKET_NAME'.")
             raise Exception("Missing parameters for 'BUCKET_NAME'.")
 
-        logging.info('parsed params')
+        logging.info("parsed params")
         logging.info(f"  bucket_name: {bucket_name}")
 
         return {"bucket_name": bucket_name}
@@ -55,7 +58,9 @@ class S3EnableDefaultEncryption:
         :raises: botocore.exceptions.ClientError
         """
 
-        logging.info(f"making api call to client.put_bucket_encryption for bucket {bucket_name}")
+        logging.info(
+            f"making api call to client.put_bucket_encryption for bucket {bucket_name}"
+        )
         client.put_bucket_encryption(
             Bucket=bucket_name,
             ServerSideEncryptionConfiguration={
@@ -76,12 +81,12 @@ class S3EnableDefaultEncryption:
         """
         params = self.parse(args[1])
         client = boto3.client("s3")
-        logging.info('acquired s3 client and parsed params - starting remediation')
+        logging.info("acquired s3 client and parsed params - starting remediation")
         rc = self.remediate(client=client, **params)
         return rc
 
 
 if __name__ == "__main__":
-    logging.info('s3_enable_default_encryption.py called - running now')
+    logging.info("s3_enable_default_encryption.py called - running now")
     obj = S3EnableDefaultEncryption()
     obj.run(sys.argv)

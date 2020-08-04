@@ -13,14 +13,15 @@
 # limitations under the License.
 
 from __future__ import annotations
+from botocore.exceptions import ClientError
+import json
+import logging
+import sys
 
 import boto3
-import json
-import sys
-import logging
+
 logging.basicConfig(level=logging.INFO)
 
-from botocore.exceptions import ClientError
 
 class EC2ClosePort22(object):
     def parse(self, payload):
@@ -49,7 +50,7 @@ class EC2ClosePort22(object):
             logging.warning("no region specified - defaulting to us-east-1")
             region = "us-east-1"
 
-        logging.info('parsed params')
+        logging.info("parsed params")
         logging.info(f"  instance_id: {instance_id}")
         logging.info(f"  region: {region}")
 
@@ -67,14 +68,16 @@ class EC2ClosePort22(object):
         """
 
         port = 22
-
-        for sg_info in client.describe_instances(InstanceIds=[instance_id])['Reservations'][0]['Instances'][0]['SecurityGroups']:
-            security_group_id = sg_info['GroupId']
+        security_groups = client.describe_instances(InstanceIds=[instance_id])[
+            "Reservations"
+        ][0]["Instances"][0]["SecurityGroups"]
+        for sg_info in security_groups:
+            security_group_id = sg_info["GroupId"]
 
             # Revoke ipv4 permission
-            logging.info('revoking ivp4 permissions')
+            logging.info("revoking ivp4 permissions")
             try:
-                logging.info('    executing client.revoke_security_group_ingress')
+                logging.info("    executing client.revoke_security_group_ingress")
                 logging.info('      CidrIp="0.0.0.0/0"')
                 logging.info(f"      FromPort={port}")
                 logging.info(f"      GroupId={security_group_id}")
@@ -88,14 +91,14 @@ class EC2ClosePort22(object):
                     ToPort=port,
                 )
             except ClientError as e:
-                if 'InvalidPermission.NotFound' not in str(e):
+                if "InvalidPermission.NotFound" not in str(e):
                     logging.error(f"{str(e)}")
                     raise
 
             # Revoke ipv6 permission
-            logging.info('revoking ivp6 permissions')
+            logging.info("revoking ivp6 permissions")
             try:
-                logging.info('    executing client.revoke_security_group_ingress')
+                logging.info("    executing client.revoke_security_group_ingress")
                 logging.info(f"      FromPort={port}")
                 logging.info(f"      GroupId={security_group_id}")
                 logging.info('      IpProtocol="tcp"')
@@ -113,11 +116,11 @@ class EC2ClosePort22(object):
                     ],
                 )
             except ClientError as e:
-                if 'InvalidPermission.NotFound' not in str(e):
+                if "InvalidPermission.NotFound" not in str(e):
                     logging.error(f"{str(e)}")
                     raise
 
-        logging.info('successfully executed remediation')
+        logging.info("successfully executed remediation")
 
         return 0
 
@@ -130,12 +133,12 @@ class EC2ClosePort22(object):
         """
         params, region = self.parse(args[1])
         client = boto3.client("ec2", region_name=region)
-        logging.info('acquired ec2 client and parsed params - starting remediation')
+        logging.info("acquired ec2 client and parsed params - starting remediation")
         rc = self.remediate(client=client, **params)
         return rc
 
 
 if __name__ == "__main__":
-    logging.info(f'{sys.argv[0]} called - running now')
+    logging.info(f"{sys.argv[0]} called - running now")
     obj = EC2ClosePort22()
     obj.run(sys.argv)

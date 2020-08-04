@@ -13,16 +13,17 @@
 # limitations under the License.
 
 from __future__ import annotations
-
-import boto3
-import json
-import sys
-import logging
-import copy
-
 from botocore.exceptions import ClientError
 
+import copy
+import json
+import logging
+import sys
+
+import boto3
+
 logging.basicConfig(level=logging.INFO)
+
 
 class S3EnableAccessLogging(object):
     def parse(self, payload):
@@ -54,7 +55,7 @@ class S3EnableAccessLogging(object):
                 "Missing parameters for 'payload.notificationInfo.ObjectId'."
             )
 
-        logging.info('parsed params')
+        logging.info("parsed params")
         logging.info(f"  source_bucket: {source_bucket}")
 
         target_prefix = source_bucket
@@ -69,42 +70,46 @@ class S3EnableAccessLogging(object):
         return return_dict
 
     def grant_log_delivery_permissions(self, client, bucket_name):
-        #Give the group log-delievery WRITE and READ_ACP permisions to the
-        #target bucket
+        # Give the group log-delievery WRITE and READ_ACP permisions to the
+        # target bucket
         acl = client.get_bucket_acl(Bucket=bucket_name)
         write_grant = {
-            'Grantee': {
-                'URI': "http://acs.amazonaws.com/groups/s3/LogDelivery",
-                'Type' : 'Group'
+            "Grantee": {
+                "URI": "http://acs.amazonaws.com/groups/s3/LogDelivery",
+                "Type": "Group",
             },
-            'Permission': 'WRITE',
+            "Permission": "WRITE",
         }
         read_acp_grant = {
-            'Grantee': {
-                'URI': "http://acs.amazonaws.com/groups/s3/LogDelivery",
-                'Type' : 'Group'
+            "Grantee": {
+                "URI": "http://acs.amazonaws.com/groups/s3/LogDelivery",
+                "Type": "Group",
             },
-            'Permission': 'READ_ACP',
+            "Permission": "READ_ACP",
         }
-        del acl['ResponseMetadata']
+        del acl["ResponseMetadata"]
 
         modified_acl = copy.deepcopy(acl)
-        modified_acl['Grants'].append(write_grant)
-        modified_acl['Grants'].append(read_acp_grant)
+        modified_acl["Grants"].append(write_grant)
+        modified_acl["Grants"].append(read_acp_grant)
         client.put_bucket_acl(Bucket=bucket_name, AccessControlPolicy=modified_acl)
 
     def ensure_log_target_bucket(self, client, target_bucket, region):
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(target_bucket)
-
-        if bucket.creation_date:
+        try:
+            client.head_bucket(Bucket=target_bucket)
             return None
-        else:
-            # The bucket does not exist
-            if region == "us-east-1":
-                client.create_bucket(Bucket=target_bucket)
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                # The bucket does not exist
+                if region == "us-east-1":
+                    client.create_bucket(Bucket=target_bucket)
+                else:
+                    client.create_bucket(
+                        Bucket=target_bucket,
+                        CreateBucketConfiguration={"LocationConstraint": region},
+                    )
             else:
-                client.create_bucket(Bucket=target_bucket, CreateBucketConfiguration={'LocationConstraint': region})
+                raise e
 
     def remediate(self, region, client, source_bucket, target_bucket, target_prefix):
         """Enable access logging for an S3 bucket.
@@ -127,20 +132,22 @@ class S3EnableAccessLogging(object):
         :raises: botocore.exceptions.ClientError
         """
         self.ensure_log_target_bucket(client, target_bucket, region)
-        logging.info('ensuring logs can be delivered')
+        logging.info("ensuring logs can be delivered")
         self.grant_log_delivery_permissions(client, target_bucket)
-        logging.info('making client.put_bucket_logging to enable logging')
-        logging.info(f"  Bucket: {source_bucket} | TargetBucket: {target_bucket} | TargetPrefix: {target_prefix}")
-        client.put_bucket_logging(
-                Bucket=source_bucket,
-                BucketLoggingStatus={
-                    "LoggingEnabled": {
-                        "TargetBucket": target_bucket,
-                        "TargetPrefix": f"{target_prefix}/",
-                    }
-                },
+        logging.info("making client.put_bucket_logging to enable logging")
+        logging.info(
+            f"  Bucket: {source_bucket} | TargetBucket: {target_bucket} | TargetPrefix: {target_prefix}"
         )
-        logging.info('successfully completed remediation job')
+        client.put_bucket_logging(
+            Bucket=source_bucket,
+            BucketLoggingStatus={
+                "LoggingEnabled": {
+                    "TargetBucket": target_bucket,
+                    "TargetPrefix": f"{target_prefix}/",
+                }
+            },
+        )
+        logging.info("successfully completed remediation job")
         return 0
 
     def run(self, args):
@@ -152,12 +159,12 @@ class S3EnableAccessLogging(object):
         """
         params = self.parse(args[1])
         client = boto3.client("s3")
-        logging.info('acquired s3 client and parsed params - starting remediation')
+        logging.info("acquired s3 client and parsed params - starting remediation")
         rc = self.remediate(client=client, **params)
         return rc
 
 
 if __name__ == "__main__":
-    logging.info('s3_enable_access_logging.py called - running now')
+    logging.info("s3_enable_access_logging.py called - running now")
     obj = S3EnableAccessLogging()
     obj.run(sys.argv)

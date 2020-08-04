@@ -12,19 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import boto3
+from botocore.exceptions import ClientError
 import json
-import sys
 import logging
+import sys
+
+import boto3
+
 logging.basicConfig(level=logging.INFO)
 
-from botocore.exceptions import ClientError
 
 def logcall(f, *args, **kwargs):
-    logging.info('%s(%s)', f.__name__, ', '.join(list(args) + [f'{k}={repr(v)}' for k, v in kwargs.items()]))
+    logging.info(
+        "%s(%s)",
+        f.__name__,
+        ", ".join(list(args) + [f"{k}={repr(v)}" for k, v in kwargs.items()]),
+    )
     res = f(*args, **kwargs)
     logging.info(res)
     return res
+
 
 class RDSBackupRetention30Days(object):
     def parse(self, payload):
@@ -37,10 +44,16 @@ class RDSBackupRetention30Days(object):
         :raises: KeyError, JSONDecodeError
         """
         payload_dict = json.loads(payload)
-        return {'db_instance_id': payload_dict['notificationInfo']['FindingInfo']['ObjectId'], 'region': payload_dict['notificationInfo']['FindingInfo']['Region']}
+        return {
+            "db_instance_id": payload_dict["notificationInfo"]["FindingInfo"][
+                "ObjectId"
+            ],
+            "region": payload_dict["notificationInfo"]["FindingInfo"]["Region"],
+        }
 
     def remediate(self, client, db_instance_id):
-        """Set the backup retention period of a DB instance to 30 days. If the instance belongs to a cluster, instead modifies the backup retention period of the cluster.
+        """Set the backup retention period of a DB instance to 30 days. If the instance belongs to a cluster,
+        instead modifies the backup retention period of the cluster.
 
         :param client: Instance of the AWS boto3 client.
         :param db_instance_id: The ID of the DB instance.
@@ -51,35 +64,40 @@ class RDSBackupRetention30Days(object):
         """
 
         instance_info = logcall(
-            client.describe_db_instances,
-            DBInstanceIdentifier=db_instance_id
-        )['DBInstances'][0]
+            client.describe_db_instances, DBInstanceIdentifier=db_instance_id
+        )["DBInstances"][0]
 
-        backup_period = instance_info['BackupRetentionPeriod']
-        db_cluster_id = instance_info.get('DBClusterIdentifier') # not all instances have a cluster
+        backup_period = instance_info["BackupRetentionPeriod"]
+        db_cluster_id = instance_info.get(
+            "DBClusterIdentifier"
+        )  # not all instances have a cluster
 
         if backup_period < 30:
-            logging.info('backup retention period %d, changing to 30', backup_period)
+            logging.info("backup retention period %d, changing to 30", backup_period)
             try:
                 logcall(
                     client.modify_db_instance,
                     DBInstanceIdentifier=db_instance_id,
                     BackupRetentionPeriod=30,
-                    ApplyImmediately=True
+                    ApplyImmediately=True,
                 )
             except ClientError as error:
-                if error.response['Error']['Code'] == 'InvalidParameterCombination':
-                    logging.info('modifying instance failed, modifying backup retention period of cluster instead')
+                if error.response["Error"]["Code"] == "InvalidParameterCombination":
+                    logging.info(
+                        "modifying instance failed, modifying backup retention period of cluster instead"
+                    )
                     logcall(
                         client.modify_db_cluster,
                         DBClusterIdentifier=db_cluster_id,
                         BackupRetentionPeriod=30,
-                        ApplyImmediately=True
+                        ApplyImmediately=True,
                     )
                 else:
                     raise error
         else:
-            logging.info('backup retention period already %d, not modifying', backup_period)
+            logging.info(
+                "backup retention period already %d, not modifying", backup_period
+            )
 
         return 0
 
@@ -91,9 +109,9 @@ class RDSBackupRetention30Days(object):
         :returns: int
         """
         params = self.parse(args[1])
-        client = boto3.client('rds', region_name=params['region'])
-        return self.remediate(client, params['db_instance_id'])
+        client = boto3.client("rds", region_name=params["region"])
+        return self.remediate(client, params["db_instance_id"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(RDSBackupRetention30Days().run(sys.argv))

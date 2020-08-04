@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pytest
-from botocore.exceptions import ClientError
+
 from remediation_worker.jobs.rds_backup_retention_30_days.rds_backup_retention_30_days import (
     RDSBackupRetention30Days,
 )
@@ -36,30 +36,30 @@ def valid_payload1():
 class TestRDSBackupRetention30Days(object):
     def test_parse_payload(self, valid_payload1):
         params = RDSBackupRetention30Days().parse(valid_payload1)
-        assert params['db_instance_id'] == 'db_instance_id'
-        assert params['region'] == 'region'
+        assert params["db_instance_id"] == "db_instance_id"
+        assert params["region"] == "region"
 
     def test_remediate_success(self):
         class TestClient(object):
             def describe_db_instances(self, **kwargs):
-                return {'DBInstances': [{'BackupRetentionPeriod': 29}]}
+                return {"DBInstances": [{"BackupRetentionPeriod": 29}]}
 
             def modify_db_instance(self, **kwargs):
                 return None
 
         client = TestClient()
         action = RDSBackupRetention30Days()
-        assert action.remediate(client, 'db_instance_id') == 0
+        assert action.remediate(client, "db_instance_id") == 0
 
     def test_remediate_with_exception(self):
         class TestClient(object):
             def describe_db_instances(self, **kwargs):
-                return {'DBInstances': [{'BackupRetentionPeriod': 29}]}
+                return {"DBInstances": [{"BackupRetentionPeriod": 29}]}
 
             def modify_db_instance(self, **kwargs):
-                raise RuntimeError('Exception')
+                raise RuntimeError("Exception")
 
         client = TestClient()
         action = RDSBackupRetention30Days()
         with pytest.raises(Exception):
-            assert action.remediate(client, 'db_instance_id')
+            assert action.remediate(client, "db_instance_id")

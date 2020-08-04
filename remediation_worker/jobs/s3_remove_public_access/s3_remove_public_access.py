@@ -14,11 +14,14 @@
 
 from __future__ import annotations
 
-import boto3
 import json
-import sys
 import logging
+import sys
+
+import boto3
+
 logging.basicConfig(level=logging.INFO)
+
 
 class S3RemovePublicAccess:
     def parse(self, payload):
@@ -40,7 +43,7 @@ class S3RemovePublicAccess:
             logging.error("Missing parameters for 'BUCKET_NAME'.")
             raise Exception("Missing parameters for 'BUCKET_NAME'.")
 
-        logging.info('parsed params')
+        logging.info("parsed params")
         logging.info(f"  bucket_name: {bucket_name}")
 
         return {"bucket_name": bucket_name}
@@ -56,7 +59,7 @@ class S3RemovePublicAccess:
         :raises: botocore.exceptions.ClientError
         """
 
-        logging.info('making api call to client.put_public_access_block')
+        logging.info("making api call to client.put_public_access_block")
         client.put_public_access_block(
             Bucket=bucket_name,
             PublicAccessBlockConfiguration={
@@ -78,12 +81,12 @@ class S3RemovePublicAccess:
         """
         client = boto3.client("s3")
         params = self.parse(args[1])
-        logging.info('acquired s3 client and parsed params - starting remediation')
+        logging.info("acquired s3 client and parsed params - starting remediation")
         rc = self.remediate(client=client, **params)
         return rc
 
 
 if __name__ == "__main__":
-    logging.info('s3_remove_public_access.py called - running now')
+    logging.info("s3_remove_public_access.py called - running now")
     obj = S3RemovePublicAccess()
     obj.run(sys.argv)

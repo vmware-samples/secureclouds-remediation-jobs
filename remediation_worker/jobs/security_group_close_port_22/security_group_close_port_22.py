@@ -12,17 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import boto3
 import json
-import sys
 import logging
+import sys
+
+import boto3
+
 logging.basicConfig(level=logging.INFO)
 
-from botocore.exceptions import ClientError
 
 def logcall(f, *args, **kwargs):
-    logging.info('%s(%s)', f.__name__, ', '.join(list(args) + [f'{k}={repr(v)}' for k, v in kwargs.items()]))
+    logging.info(
+        "%s(%s)",
+        f.__name__,
+        ", ".join(list(args) + [f"{k}={repr(v)}" for k, v in kwargs.items()]),
+    )
     logging.info(f(*args, **kwargs))
+
 
 class SecurityGroupClosePort22(object):
     def parse(self, payload):
@@ -35,7 +41,12 @@ class SecurityGroupClosePort22(object):
         :raises: KeyError, JSONDecodeError
         """
         payload_dict = json.loads(payload)
-        return {'security_group_id': payload_dict['notificationInfo']['FindingInfo']['ObjectId'], 'region': payload_dict['notificationInfo']['FindingInfo']['Region']}
+        return {
+            "security_group_id": payload_dict["notificationInfo"]["FindingInfo"][
+                "ObjectId"
+            ],
+            "region": payload_dict["notificationInfo"]["FindingInfo"]["Region"],
+        }
 
     def remediate(self, client, security_group_id):
         """Block public access to port 22 for both IPv4 and IPv6.
@@ -53,27 +64,27 @@ class SecurityGroupClosePort22(object):
         port = 22
 
         # Revoke ipv4 permission
-        logging.info('revoking ivp4 permissions')
+        logging.info("revoking ivp4 permissions")
         logcall(
             client.revoke_security_group_ingress,
-            CidrIp='0.0.0.0/0',
+            CidrIp="0.0.0.0/0",
             FromPort=port,
             GroupId=security_group_id,
-            IpProtocol='tcp',
+            IpProtocol="tcp",
             ToPort=port,
         )
 
         # Revoke ipv6 permission
-        logging.info('revoking ivp6 permissions')
+        logging.info("revoking ivp6 permissions")
         logcall(
             client.revoke_security_group_ingress,
             GroupId=security_group_id,
             IpPermissions=[
                 {
-                    'FromPort': port,
-                    'IpProtocol': 'tcp',
-                    'Ipv6Ranges': [{'CidrIpv6': '::/0'}],
-                    'ToPort': port,
+                    "FromPort": port,
+                    "IpProtocol": "tcp",
+                    "Ipv6Ranges": [{"CidrIpv6": "::/0"}],
+                    "ToPort": port,
                 },
             ],
         )
@@ -88,9 +99,9 @@ class SecurityGroupClosePort22(object):
         :returns: int
         """
         params = self.parse(args[1])
-        client = boto3.client('ec2', region_name=params['region'])
-        return self.remediate(client, params['security_group_id'])
+        client = boto3.client("ec2", region_name=params["region"])
+        return self.remediate(client, params["security_group_id"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(SecurityGroupClosePort22().run(sys.argv))
