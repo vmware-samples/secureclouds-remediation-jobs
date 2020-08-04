@@ -33,7 +33,7 @@ def valid_payload1():
 """
 
 
-class TestSecurityGroupClosePort22(object):
+class TestRDSBackupRetention30Days(object):
     def test_parse_payload(self, valid_payload1):
         params = RDSBackupRetention30Days().parse(valid_payload1)
         assert params['db_instance_id'] == 'db_instance_id'
@@ -41,6 +41,9 @@ class TestSecurityGroupClosePort22(object):
 
     def test_remediate_success(self):
         class TestClient(object):
+            def describe_db_instances(self, **kwargs):
+                return {'DBInstances': [{'BackupRetentionPeriod': 29}]}
+
             def modify_db_instance(self, **kwargs):
                 return None
 
@@ -50,6 +53,9 @@ class TestSecurityGroupClosePort22(object):
 
     def test_remediate_with_exception(self):
         class TestClient(object):
+            def describe_db_instances(self, **kwargs):
+                return {'DBInstances': [{'BackupRetentionPeriod': 29}]}
+
             def modify_db_instance(self, **kwargs):
                 raise RuntimeError('Exception')
 

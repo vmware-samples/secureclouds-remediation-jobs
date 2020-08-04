@@ -50,29 +50,36 @@ class RDSBackupRetention30Days(object):
         :raises: botocore.exceptions.ClientError
         """
 
-        logging.info('setting the backup retention period of the instance')
-        try:
-            logcall(
-                client.modify_db_instance,
-                DBInstanceIdentifier=db_instance_id,
-                BackupRetentionPeriod=30,
-                ApplyImmediately=True
-            )
-        except ClientError as error:
-            if error.response['Error']['Code'] == 'InvalidParameterCombination':
-                logging.info('modifying instance failed, modifying backup retention period of cluster instead')
-                db_cluster_id = logcall(
-                    client.describe_db_instances,
-                    DBInstanceIdentifier=db_instance_id
-                )['DBInstances'][0]['DBClusterIdentifier']
+        instance_info = logcall(
+            client.describe_db_instances,
+            DBInstanceIdentifier=db_instance_id
+        )['DBInstances'][0]
+
+        backup_period = instance_info['BackupRetentionPeriod']
+        db_cluster_id = instance_info.get('DBClusterIdentifier') # not all instances have a cluster
+
+        if backup_period < 30:
+            logging.info('backup retention period %d, changing to 30', backup_period)
+            try:
                 logcall(
-                    client.modify_db_cluster,
-                    DBClusterIdentifier=db_cluster_id,
+                    client.modify_db_instance,
+                    DBInstanceIdentifier=db_instance_id,
                     BackupRetentionPeriod=30,
                     ApplyImmediately=True
                 )
-            else:
-                raise error
+            except ClientError as error:
+                if error.response['Error']['Code'] == 'InvalidParameterCombination':
+                    logging.info('modifying instance failed, modifying backup retention period of cluster instead')
+                    logcall(
+                        client.modify_db_cluster,
+                        DBClusterIdentifier=db_cluster_id,
+                        BackupRetentionPeriod=30,
+                        ApplyImmediately=True
+                    )
+                else:
+                    raise error
+        else:
+            logging.info('backup retention period already %d, not modifying', backup_period)
 
         return 0
 

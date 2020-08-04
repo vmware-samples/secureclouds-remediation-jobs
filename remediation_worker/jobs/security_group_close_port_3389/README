@@ -1,0 +1,45 @@
+# Close Port 3389 for a Security Group
+
+This job blocks public access to port 3389 for both IPv4 and IPv6.
+
+## Getting Started
+
+### Prerequisites
+
+The provided AWS credential must have access to `ec2:RevokeSecurityGroupIngress`.
+
+You may find the latest example policy file [here](minimum_policy.json)
+
+### Running the script
+
+You may run this script using following commands:
+```shell script
+  pip install -r ../../requirements.txt
+  python3 security_group_close_port_3389.py
+```
+
+## Running the tests
+You may run test using following command under vss-remediation-worker-job-code-python directory:
+```shell script
+    python3 -m pytest test
+```
+
+## Contributing
+
+TODO: Add contributing.md
+An example could be find here:
+Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+
+## Authors
+
+* **VMware Secure State** - *Initial work*
+
+See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the Apache License - see the [LICENSE](https://github.com/vmware-samples/secure-state-remediation-jobs/blob/master/LICENSE.txt) file for details

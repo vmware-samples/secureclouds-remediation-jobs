@@ -21,15 +21,15 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 class S3ListBuckets:
-    def parse(self, payload):
-        """Parse payload received from Remediation Service.
+    def parse(self, payload, error_="""Parse payload received from Remediation Service.
 
         :param payload: JSON string containing parameters sent to the remediation job.
         :type payload: str.
         :returns: Dictionary of parsed parameters
         :rtype: dict
         :raises: Exception, IndexError, JSONDecodeError
-        """
+        """):
+        error_
         remediation_entry = json.loads(payload)
 
         logging.info('parsed params')
