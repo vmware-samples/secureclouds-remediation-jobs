@@ -1,6 +1,6 @@
-# Close Port 22 for all Security Groups associated with an EC2 Instance
+# Close Port 3389 for all Security Groups associated with an EC2 Instance
 
-This job blocks public access to port 22 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
+This job blocks public access to port 3389 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
 
 ## Getting Started
 
@@ -15,7 +15,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 ec2_close_port_22.py
+  python3 ec2_close_port_3389.py
 ```
 
 ## Running the tests
@@ -25,10 +25,10 @@ You may run test using following command under vss-remediation-worker-job-code-p
 ```
 
 ## Contributing
+The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
+All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.
 
-TODO: Add contributing.md
-An example could be find here:
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+For more detailed information, refer to [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## Versioning
 

@@ -25,10 +25,10 @@ You may run test using following command under vss-remediation-worker-job-code-p
 ```
 
 ## Contributing
+The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
+All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.
 
-TODO: Add contributing.md
-An example could be find here:
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+For more detailed information, refer to [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## Versioning
 
