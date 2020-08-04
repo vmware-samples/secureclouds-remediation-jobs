@@ -33,12 +33,9 @@ Install Docker on the newly provisioned EC2 instance. You can refer to the [docs
 SSH into the EC2 instance and run the command below to deploy the worker image:
 ```shell script
   docker run --rm -it --name worker \
-  -e WORKER_GROUP_ID={ENTER GROUP ID} \
   -e VSS_CLIENT_ID={ENTER CLIENT ID}
   -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET} \
-  -e VSS_ORG_ID={ENTER ORG ID} \
-  -e VSS_STARTUP_HOST=https://api.securestate.vmware.com \
-  registry.securestate.vmware.com/vss-remediation-worker-pythonmaster:latest
+  vmware/vss-remediation-worker:latest-python
 ```
 
 
