@@ -17,7 +17,7 @@ to make use of this code, you must utilize the worker and have a SecureState wor
 
 ## Quick Start Guide
 There are a couple conventions that must be followed in order to contribute working jobs to this repository:
-* The directory structure and
+* The directory structure, and
 * The file names
 
 Each job must be entire self-contained within a directory, which is where the job gets its name from.
