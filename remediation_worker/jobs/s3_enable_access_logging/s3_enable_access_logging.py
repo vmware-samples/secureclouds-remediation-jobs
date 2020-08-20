@@ -25,6 +25,10 @@ import boto3
 logging.basicConfig(level=logging.INFO)
 
 
+class SelfRemediationError(ValueError):
+    pass
+
+
 class S3EnableAccessLogging(object):
     def parse(self, payload):
         """Parse payload received from Remediation Service.
@@ -131,6 +135,12 @@ class S3EnableAccessLogging(object):
         :rtype: int
         :raises: botocore.exceptions.ClientError
         """
+        if source_bucket == target_bucket:
+            raise SelfRemediationError(
+                f"Cannot remediate the logging bucket (i.e. write access logs to self). "
+                f"Consider suppressing the violation for this bucket ({source_bucket})."
+            )
+
         self.ensure_log_target_bucket(client, target_bucket, region)
         logging.info("ensuring logs can be delivered")
         self.grant_log_delivery_permissions(client, target_bucket)
