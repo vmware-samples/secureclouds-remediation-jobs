@@ -94,5 +94,8 @@ Members:
 * [VMware Code](https://code.vmware.com/home)
 * [VMware Developer Community](https://communities.vmware.com/community/vmtn/developer)
 
+## Feedback
+If you find a bug, please open a [GitHub issue](https://github.com/vmware-samples/secure-state-remediation-jobs/issues).
+
 [license-img]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
 [license]: https://opensource.org/licenses/Apache-2.0
