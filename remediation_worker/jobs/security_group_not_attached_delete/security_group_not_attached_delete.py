@@ -100,13 +100,13 @@ class SecurityGroupDelete(object):
         """
         params, region = self.parse(args[1])
         client = boto3.client("ec2", region_name=region)
-        logging.info('acquired ec2 client and parsed params - starting remediation')
+        logging.info('acquired security group params - starting remediation')
         rc = self.remediate(client=client, **params)
         return rc
 
 
 if __name__ == "__main__":
-    logging.info('security_group_close_port_22.py called - running now')
+    logging.info('security_group_not_attached_delete.py called - running now')
     logging.info(sys.argv[1].replace('"', '\\"').replace('\n', '\\n'))
     obj = SecurityGroupDelete()
     obj.run(sys.argv)
