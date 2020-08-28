@@ -101,7 +101,6 @@ class S3EnableAccessLogging(object):
     def ensure_log_target_bucket(self, client, target_bucket, region):
         try:
             client.head_bucket(Bucket=target_bucket)
-            return None
         except ClientError as e:
             if e.response["Error"]["Code"] == "404":
                 # The bucket does not exist
@@ -112,6 +111,10 @@ class S3EnableAccessLogging(object):
                         Bucket=target_bucket,
                         CreateBucketConfiguration={"LocationConstraint": region},
                     )
+            elif e.response["Error"]["Code"] == "403":
+                # The assumed role does not have the permission
+                logging.error("The role does not have permission to list buckets")
+                raise e
             else:
                 raise e
 
