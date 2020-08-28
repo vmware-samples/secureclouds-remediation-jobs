@@ -19,6 +19,7 @@ from botocore.exceptions import ClientError
 
 from remediation_worker.jobs.s3_enable_access_logging.s3_enable_access_logging import (
     S3EnableAccessLogging,
+    SelfRemediationError,
 )
 
 
@@ -112,6 +113,79 @@ def full_payload():
     )
 
 
+@pytest.fixture
+def self_payload():
+    return json.dumps(
+        {
+            "cloudAccount": {
+                "provider": "",
+                "roleArn": "arn:aws:iam::530342348278:role/SecureStateRemediation",
+            },
+            "notificationInfo": {
+                "RuleId": "5c6cc5cc03dcc90f3631468d",
+                "RuleName": "",
+                "RuleDisplayName": "",
+                "Level": "Low",
+                "Service": "s3",
+                "FindingInfo": {
+                    "FindingId": "05eedc79-65b5-4774-8a6a-cfffb17a3a99",
+                    "ObjectId": "vss-logging-target-530342348278-us-east-1",
+                    "ObjectChain": "{"
+                    '    "cloudAccountId": "530342348278",'
+                    '    "creationTime": "2020-06-23T21:40:33.000Z",'
+                    '    "depthCount": {'
+                    '        "depth_0": 1,'
+                    '        "depth_1": 1'
+                    "    },"
+                    '    "entityId": "AWS.S3.530342348278.us-east-1.Bucket.rule-executor-s3-test-892fbb42-45ee-489b-bcc9-e9a4dc285ea0",'  # noqa: E501
+                    '    "entityName": "rule-executor-s3-test-892fbb42-45ee-489b-bcc9-e9a4dc285ea0",'
+                    '    "entityType": "AWS.S3.Bucket",'
+                    '    "lastUpdateTime": "2020-06-23T21:40:33.000Z",'
+                    '    "partitionKey": "530342348278",'
+                    '    "properties": [{'
+                    '        "name": "BucketName",'
+                    '        "stringV": "rule-executor-s3-test-892fbb42-45ee-489b-bcc9-e9a4dc285ea0",'
+                    '        "type": "string"'
+                    "    }, {"
+                    '        "name": "VersioningStatus",'
+                    '        "stringV": "Enabled",'
+                    '        "type": "string"'
+                    "    }, {"
+                    '        "name": "CreationDate",'
+                    '        "stringV": "2020-06-22T20:48:49.000Z",'
+                    '        "type": "datetime"'
+                    "    }, {"
+                    '        "boolV": false,'
+                    '        "name": "ReplicationEnabled",'
+                    '        "type": "bool"'
+                    "    }, {"
+                    '        "name": "VersioningMFADelete",'
+                    '        "stringV": "Disabled",'
+                    '        "type": "string"'
+                    "    }, {"
+                    '        "name": "Location",'
+                    '        "stringV": "us-east-1",'
+                    '        "type": "string"'
+                    "    }, {"
+                    '        "boolV": false,'
+                    '        "name": "LoggingEnabled",'
+                    '        "type": "bool"'
+                    "    }],"
+                    '    "provider": "AWS",'
+                    '    "region": "us-east-1",'
+                    '    "service": "S3"'
+                    "}",
+                    "CloudTags": None,
+                    "RiskScore": 10,
+                    "Region": "us-east-1",
+                    "Service": "s3",
+                },
+            },
+            "autoRemediate": False,
+        }
+    )
+
+
 class TestS3EnableAccessLogging(object):
     def test_parse_payload_success(self, full_payload):
         obj = S3EnableAccessLogging()
@@ -172,3 +246,7 @@ class TestS3EnableAccessLogging(object):
             assert action.remediate(
                 "region", client, "source_bucket", "target_bucket", "target_prefix"
             )
+
+    def test_dont_log_to_self(self, self_payload):
+        with pytest.raises(SelfRemediationError):
+            assert S3EnableAccessLogging().run([None, self_payload])

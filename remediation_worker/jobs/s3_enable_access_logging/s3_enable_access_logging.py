@@ -25,6 +25,10 @@ import boto3
 logging.basicConfig(level=logging.INFO)
 
 
+class SelfRemediationError(ValueError):
+    pass
+
+
 class S3EnableAccessLogging(object):
     def parse(self, payload):
         """Parse payload received from Remediation Service.
@@ -97,7 +101,6 @@ class S3EnableAccessLogging(object):
     def ensure_log_target_bucket(self, client, target_bucket, region):
         try:
             client.head_bucket(Bucket=target_bucket)
-            return None
         except ClientError as e:
             if e.response["Error"]["Code"] == "404":
                 # The bucket does not exist
@@ -108,6 +111,10 @@ class S3EnableAccessLogging(object):
                         Bucket=target_bucket,
                         CreateBucketConfiguration={"LocationConstraint": region},
                     )
+            elif e.response["Error"]["Code"] == "403":
+                # The assumed role does not have the permission
+                logging.error("Not enough permissions to list buckets")
+                raise e
             else:
                 raise e
 
@@ -131,6 +138,12 @@ class S3EnableAccessLogging(object):
         :rtype: int
         :raises: botocore.exceptions.ClientError
         """
+        if source_bucket == target_bucket:
+            raise SelfRemediationError(
+                f"Cannot remediate the logging bucket (i.e. write access logs to self). "
+                f"Consider suppressing the violation for this bucket ({source_bucket})."
+            )
+
         self.ensure_log_target_bucket(client, target_bucket, region)
         logging.info("ensuring logs can be delivered")
         self.grant_log_delivery_permissions(client, target_bucket)

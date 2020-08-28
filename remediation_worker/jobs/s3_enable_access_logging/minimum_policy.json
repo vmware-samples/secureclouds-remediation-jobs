@@ -8,7 +8,8 @@
                 "s3:PutBucketLogging",
                 "s3:PutBucketAcl",
                 "s3:GetBucketAcl",
-                "s3:CreateBucket"
+                "s3:CreateBucket",
+                "s3:ListBucket"
             ],
             "Resource": "*"
         }

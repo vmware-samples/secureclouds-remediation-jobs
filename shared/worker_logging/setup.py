@@ -17,5 +17,5 @@ from setuptools import find_packages
 
 
 setup(
-    name="remediation_worker", version="0.0.1", packages=find_packages(),
+    name="worker_logging", version="0.0.1", packages=find_packages(),
 )

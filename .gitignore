@@ -7,3 +7,5 @@ pip-selfcheck.json
 venv
 test/unit/__pycache__
 remediation_worker.egg-info
+.tox
+__pycache__
