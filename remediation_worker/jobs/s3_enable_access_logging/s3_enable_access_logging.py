@@ -113,7 +113,7 @@ class S3EnableAccessLogging(object):
                     )
             elif e.response["Error"]["Code"] == "403":
                 # The assumed role does not have the permission
-                logging.error("The role does not have permission to list buckets")
+                logging.error("Not enough permissions to list buckets")
                 raise e
             else:
                 raise e
