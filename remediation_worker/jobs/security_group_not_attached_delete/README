@@ -1,12 +1,13 @@
-# Close Port 22 for a Security Group
+# Delete empty Security Groups - Except Default Security Groups
 
-This job blocks public access to port 22 for both IPv4 and IPv6.
+This job deletes security gruops that are empty. This will NOT work on default security groups.
+
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:RevokeSecurityGroupIngress`.
+The provided AWS credential must have access to `ec2:DeleteSecurityGroup`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
@@ -15,7 +16,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 security_group_close_port_22.py
+  python3 security_group_not_attached_delete.py
 ```
 
 ## Running the tests
