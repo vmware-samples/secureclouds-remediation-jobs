@@ -44,9 +44,11 @@ class S3EnableAccessLogging(object):
         finding_info = notification_info.get("FindingInfo", None)
         source_bucket = finding_info.get("ObjectId", None)
 
-        cloud_account = remediation_entry.get("cloudAccount")
-        role_arn = cloud_account.get("roleArn")
-        cloud_account_id = role_arn.split(":")[4]
+        object_chain = remediation_entry["notificationInfo"]["FindingInfo"][
+            "ObjectChain"
+        ]
+        object_chain_dict = json.loads(object_chain)
+        cloud_account_id = object_chain_dict["cloudAccountId"]
         region = finding_info.get("Region")
 
         logging.info(f"cloud_account_id: {cloud_account_id}")

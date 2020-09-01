@@ -37,10 +37,6 @@ def invalid_payload():
 def full_payload():
     return json.dumps(
         {
-            "cloudAccount": {
-                "provider": "",
-                "roleArn": "arn:aws:iam::530342348278:role/SecureStateRemediation",
-            },
             "notificationInfo": {
                 "RuleId": "5c6cc5cc03dcc90f3631468d",
                 "RuleName": "",
@@ -117,10 +113,6 @@ def full_payload():
 def self_payload():
     return json.dumps(
         {
-            "cloudAccount": {
-                "provider": "",
-                "roleArn": "arn:aws:iam::530342348278:role/SecureStateRemediation",
-            },
             "notificationInfo": {
                 "RuleId": "5c6cc5cc03dcc90f3631468d",
                 "RuleName": "",
