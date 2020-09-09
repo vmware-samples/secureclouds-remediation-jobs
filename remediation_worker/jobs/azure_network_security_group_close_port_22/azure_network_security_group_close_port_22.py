@@ -17,7 +17,6 @@ import os
 import sys
 import logging
 
-# from cred_wrapper import CredentialWrapper
 from azure.mgmt.network import NetworkManagementClient
 from azure.common.credentials import ServicePrincipalCredentials
 
@@ -44,14 +43,11 @@ class NetworkSecurityGroupClosePort22(object):
         :raises: KeyError, JSONDecodeError
         """
         remediation_entry = json.loads(payload)
-        logging.info("unparsed params")
-        logging.info(f"    {remediation_entry}")
 
         security_group_name = remediation_entry["notificationInfo"]["FindingInfo"][
             "ObjectId"
         ]
         region = remediation_entry["notificationInfo"]["FindingInfo"]["Region"]
-
         object_chain = remediation_entry["notificationInfo"]["FindingInfo"][
             "ObjectChain"
         ]
@@ -197,7 +193,6 @@ class NetworkSecurityGroupClosePort22(object):
         """
         params = self.parse(args[1])
 
-        # credentials = CredentialWrapper()
         credentials = ServicePrincipalCredentials(
             client_id=os.environ.get("AZURE_CLIENT_ID"),
             secret=os.environ.get("AZURE_CLIENT_SECRET"),
