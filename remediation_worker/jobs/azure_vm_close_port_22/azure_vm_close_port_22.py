@@ -62,6 +62,7 @@ class VMSecurityGroupClosePort22(object):
                 break
 
         logging.info("parsed params")
+        logging.info(f"  resource_group_name: {resource_group_name}")
         logging.info(f"  vm_name: {vm_name}")
         logging.info(f"  subscription_id: {subscription_id}")
         logging.info(f"  region: {region}")
