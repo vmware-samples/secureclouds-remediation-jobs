@@ -105,39 +105,39 @@ class VMSecurityGroupClosePort22(object):
                 network_security_group_name=security_group_name,
             )
 
-        security_rules = network_security_group.security_rules
+            security_rules = network_security_group.security_rules
 
-        for rule in security_rules:
-            if (
-                rule.access != "Allow"
-                or rule.direction != "Inbound"
-                or rule.source_address_prefix != "*"
-            ):
-                continue
-            if rule.destination_port_range is not None:
-                if int(rule.destination_port_range) == port:
-                    security_rules.remove(rule)
-            else:
-                port_ranges = rule.destination_port_ranges
-                new_ranges = self._find_and_remove_port(port_ranges, port)
-                rule.destination_port_ranges = new_ranges
+            for rule in security_rules:
+                if (
+                    rule.access != "Allow"
+                    or rule.direction != "Inbound"
+                    or rule.source_address_prefix != "*"
+                ):
+                    continue
+                if rule.destination_port_range is not None:
+                    if int(rule.destination_port_range) == port:
+                        security_rules.remove(rule)
+                else:
+                    port_ranges = rule.destination_port_ranges
+                    new_ranges = self._find_and_remove_port(port_ranges, port)
+                    rule.destination_port_ranges = new_ranges
 
-        network_security_group.security_rules = security_rules
+            network_security_group.security_rules = security_rules
 
-        # Revoke permission for port 3389
-        logging.info("revoking permissions for port 3389")
-        try:
-            logging.info(
-                "    executing client.network_security_groups.create_or_update"
-            )
-            logging.info(f"      resource_group_name={resource_group_name}")
-            logging.info(f"      network_security_group_name={security_group_name}")
-            network_client.network_security_groups.create_or_update(
-                resource_group_name, security_group_name, network_security_group
-            )
-        except Exception as e:
-            logging.error(f"{str(e)}")
-            raise
+            # Revoke permission for port 22
+            logging.info("revoking permissions for port 22")
+            try:
+                logging.info(
+                    "    executing client.network_security_groups.create_or_update"
+                )
+                logging.info(f"      resource_group_name={resource_group_name}")
+                logging.info(f"      network_security_group_name={security_group_name}")
+                network_client.network_security_groups.create_or_update(
+                    resource_group_name, security_group_name, network_security_group
+                )
+            except Exception as e:
+                logging.error(f"{str(e)}")
+                raise
 
         return 0
 
