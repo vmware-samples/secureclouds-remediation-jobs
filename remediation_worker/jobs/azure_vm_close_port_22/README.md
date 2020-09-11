@@ -15,7 +15,7 @@ Details for the permissions can be found [here](https://docs.microsoft.com/en-us
 
 You may run this script using following commands:
 ```shell script
-  pip install -r ../../requirements.txt
+  pip install -r requirements.txt
   python3 azure_vm_close_port_22.py
 ```
 
