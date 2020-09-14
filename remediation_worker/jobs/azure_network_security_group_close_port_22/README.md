@@ -1,6 +1,14 @@
 # Close Port 22 for a Network Security Group
 
-This job blocks public access to port 22
+This job blocks public access to port 22.
+
+### Applicable Rule
+
+#### Rule ID:
+5c8c26847a550e1fb6560cab
+
+#### Rule Name:
+The security group allows access to SSH port (22)
 
 ## Getting Started
 
@@ -41,7 +49,7 @@ SSH into the EC2 instance and run the command below to deploy the worker image:
 
 
 ## Contributing
-The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
+The Secure State team welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
 All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.
 
 For more detailed information, refer to [CONTRIBUTING.md](../../../CONTRIBUTING.md).
