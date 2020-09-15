@@ -1,22 +1,22 @@
-# Close Port 22 for a Network Security Group
+# Remove Blob public access
 
-This job blocks public access to port 22.
+This job removes public access to the blobs in a container for a storage account
 
 ### Applicable Rule
 
-#### Rule ID:
-5c8c26847a550e1fb6560cab
+##### Rule ID:
+5c8c26997a550e1fb6560cd9
 
-#### Rule Name:
-The security group allows access to SSH port (22)
+##### Rule Name:
+Public read access is enabled for blob storage
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided Azure service principal must have permissions to make changes to the network security groups and security
-rules.
-Details for the permissions can be found [here](https://docs.microsoft.com/en-us/azure/virtual-network/manage-network-security-group#permissions):
+The provided Azure service principal must have permissions to make changes to the storage account
+
+Details for the permissions can be found [here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-account-contributor):
 
 
 ### Running the script
@@ -24,7 +24,7 @@ Details for the permissions can be found [here](https://docs.microsoft.com/en-us
 You may run this script using following commands:
 ```shell script
   pip install -r requirements.txt
-  python3 azure_network_security_group_close_port_22.py
+  python3 azure_remove_blob_public_access.py
 ```
 
 ## Running the tests
@@ -33,6 +33,7 @@ You may run test using following command under vss-remediation-worker-job-code-p
     pip install -r requirements-dev.txt
     python3 -m pytest test
 ```
+
 ## Deployment
 1. Provision a Virtual Machine
 Create an EC2 instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
@@ -62,8 +63,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 * **VMware Secure State** - *Initial work*
 
-See also the list of [contributors](https://github.com/vmware-samples/secure-state-remediation-jobs/contributors) who
- participated in this project.
+See also the list of [contributors](https://github.com/vmware-samples/secure-state-remediation-jobs/contributors) who participated in this project.
 
 ## License
 

@@ -1,14 +1,14 @@
-# Close Port 22 for a Network Security Group
+# Close Port 3389 for a Network Security Group
 
-This job blocks public access to port 22.
+This job blocks public access to port 3389
 
 ### Applicable Rule
 
 #### Rule ID:
-5c8c26847a550e1fb6560cab
+5c8c267e7a550e1fb6560c9c
 
 #### Rule Name:
-The security group allows access to SSH port (22)
+The security group allows access to Remote Desktop port (3389)
 
 ## Getting Started
 
@@ -33,6 +33,7 @@ You may run test using following command under vss-remediation-worker-job-code-p
     pip install -r requirements-dev.txt
     python3 -m pytest test
 ```
+
 ## Deployment
 1. Provision a Virtual Machine
 Create an EC2 instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
@@ -62,8 +63,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 * **VMware Secure State** - *Initial work*
 
-See also the list of [contributors](https://github.com/vmware-samples/secure-state-remediation-jobs/contributors) who
- participated in this project.
+See also the list of [contributors](https://github.com/vmware-samples/secure-state-remediation-jobs/contributors) who participated in this project.
 
 ## License
 
