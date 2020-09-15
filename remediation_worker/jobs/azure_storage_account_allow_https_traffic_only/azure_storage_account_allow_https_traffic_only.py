@@ -44,13 +44,13 @@ class StorageAccountAllowHttpsTrafficOnly(object):
         :raises: KeyError, JSONDecodeError
         """
         remediation_entry = json.loads(payload)
-        logging.info("unparsed params")
-        logging.info(f"    {remediation_entry}")
 
         account_name = remediation_entry["notificationInfo"]["FindingInfo"]["ObjectId"]
         region = remediation_entry["notificationInfo"]["FindingInfo"]["Region"]
 
-        object_chain = remediation_entry["notificationInfo"]["FindingInfo"]["ObjectChain"]
+        object_chain = remediation_entry["notificationInfo"]["FindingInfo"][
+            "ObjectChain"
+        ]
         object_chain_dict = json.loads(object_chain)
         subscription_id = object_chain_dict["cloudAccountId"]
 
@@ -93,9 +93,7 @@ class StorageAccountAllowHttpsTrafficOnly(object):
         # Allow only https traffic for the storage account
         logging.info("Enabling HTTPS only traffic for storage account")
         try:
-            logging.info(
-                "    executing client.storage_accounts.update"
-            )
+            logging.info("    executing client.storage_accounts.update")
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      account_name={account_name}")
             client.storage_accounts.update(
@@ -126,7 +124,7 @@ class StorageAccountAllowHttpsTrafficOnly(object):
 
         client = StorageManagementClient(credentials, params["subscription_id"])
         return self.remediate(
-            client, params["resource_group_name"], params["account_name"], params["container_name"]
+            client, params["resource_group_name"], params["account_name"]
         )
 
 
