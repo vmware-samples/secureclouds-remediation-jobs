@@ -215,10 +215,7 @@ class VMSecurityGroupClosePort22(object):
         compute_client = ComputeManagementClient(credentials, params["subscription_id"])
         nw_client = NetworkManagementClient(credentials, params["subscription_id"])
         return self.remediate(
-            compute_client,
-            nw_client,
-            params["resource_group_name"],
-            params["security_group_name"],
+            compute_client, nw_client, params["resource_group_name"], params["vm_name"],
         )
 
 
