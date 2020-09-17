@@ -14,9 +14,11 @@ The security group allows access to SSH port (22)
 
 ### Prerequisites
 
-The provided Azure service principal must have permissions to make changes to the network security groups and security
-rules.
-Details for the permissions can be found [here](https://docs.microsoft.com/en-us/azure/virtual-network/manage-network-security-group#permissions):
+The provided Azure service principal must have the following permissions:
+`Microsoft.Network/networkSecurityGroups/read`
+`Microsoft.Network/networkSecurityGroups/write`
+
+A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
 
 ### Running the script

@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "roleName": "remediate_blob_public_access",
+    "description": "This role has required permissions to make changes to the blob containers",
+    "assignableScopes": [
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.Storage/storageAccounts/blobServices/containers/read",
+          "Microsoft.Storage/storageAccounts/blobServices/containers/write"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
+  }
+}

@@ -15,10 +15,11 @@ Secure connections are not enabled for storage transactions
 
 ### Prerequisites
 
-The provided Azure service principal must have permissions to make changes to the storage accounts.
+The provided Azure service principal must have the following permissions:
+`Microsoft.Storage/storageAccounts/read`
+`Microsoft.Storage/storageAccounts/write`
 
-Details for the permissions can be found [here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-account-contributor):
-
+A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
 ### Running the script
 
