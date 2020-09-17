@@ -75,10 +75,44 @@ class S3EnableAccessLogging(object):
         logging.info(return_dict)
         return return_dict
 
+    def check_log_delivery_permissions(self, acl):
+        write_grant = False
+        read_acp_grant = False
+
+        grants = acl.get("Grants")
+
+        if grants is None:
+            return write_grant, read_acp_grant
+
+        for grant in grants:
+            grantee = grant.get("Grantee")
+            if grantee is None:
+                continue
+            grantee_type = grantee.get("Type")
+            grantee_uri = grantee.get("URI")
+            if grantee_type is None or grantee_uri is None:
+                continue
+            if (
+                grantee_type == "Group"
+                and grantee_uri == "http://acs.amazonaws.com/groups/s3/LogDelivery"
+            ):
+                if grant["Permission"] == "WRITE":
+                    write_grant = True
+                elif grant["Permission"] == "READ_ACP":
+                    read_acp_grant = True
+
+        return write_grant, read_acp_grant
+
     def grant_log_delivery_permissions(self, client, bucket_name):
         # Give the group log-delievery WRITE and READ_ACP permisions to the
         # target bucket
         acl = client.get_bucket_acl(Bucket=bucket_name)
+
+        # check if the required permissions are already granted, and if present return
+        write_granted, read_acp_granted = self.check_log_delivery_permissions(acl)
+        if write_granted and read_acp_granted:
+            return
+
         write_grant = {
             "Grantee": {
                 "URI": "http://acs.amazonaws.com/groups/s3/LogDelivery",
@@ -96,8 +130,10 @@ class S3EnableAccessLogging(object):
         del acl["ResponseMetadata"]
 
         modified_acl = copy.deepcopy(acl)
-        modified_acl["Grants"].append(write_grant)
-        modified_acl["Grants"].append(read_acp_grant)
+        if not write_granted:
+            modified_acl["Grants"].append(write_grant)
+        if not read_acp_granted:
+            modified_acl["Grants"].append(read_acp_grant)
         client.put_bucket_acl(Bucket=bucket_name, AccessControlPolicy=modified_acl)
 
     def ensure_log_target_bucket(self, client, target_bucket, region):
