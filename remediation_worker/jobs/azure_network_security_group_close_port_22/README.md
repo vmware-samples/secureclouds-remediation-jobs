@@ -1,29 +1,42 @@
-# Remove S3 Public Admin ACL
+# Close Port 22 for a Network Security Group
 
-This job will remove the public "write bucket permissions" permission. All other ACL permissions will be left alone. This means that if "AllUsers" have access to FULL_CONTROL, the permissions will be changed to allow "READ", "WRITE", and "READ_ACP" rather than "FULL_CONTROL" which includes "WRITE_ACP".
+This job blocks public access to port 22.
+
+### Applicable Rule
+
+#### Rule ID:
+5c8c26847a550e1fb6560cab
+
+#### Rule Name:
+The security group allows access to SSH port (22)
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided AWS credential must have access to `s3:PutBucketPublicAccessBlock`.
+The provided Azure service principal must have the following permissions:
+`Microsoft.Network/networkSecurityGroups/read`
+`Microsoft.Network/networkSecurityGroups/write`
 
-You may find the latest example policy file [here](minimum_policy.json)
+A sample role with requisite permissions can be found [here](minimum_permissions.json)
+
+More information about already builtin roles and permissions can be found
+[here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles)
 
 ### Running the script
 
 You may run this script using following commands:
 ```shell script
-  pip install -r ../../requirements.txt
-  python3 s3_remove_public_admin_acl.py
+  pip install -r requirements.txt
+  python3 azure_network_security_group_close_port_22.py
 ```
 
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
 ```shell script
+    pip install -r requirements-dev.txt
     python3 -m pytest test
 ```
-
 ## Deployment
 1. Provision a Virtual Machine
 Create an EC2 instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
@@ -40,7 +53,7 @@ SSH into the EC2 instance and run the command below to deploy the worker image:
 
 
 ## Contributing
-The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
+The Secure State team welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
 All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.
 
 For more detailed information, refer to [CONTRIBUTING.md](../../../CONTRIBUTING.md).
@@ -53,7 +66,8 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 * **VMware Secure State** - *Initial work*
 
-See also the list of [contributors](https://github.com/vmware-samples/secure-state-remediation-jobs/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/vmware-samples/secure-state-remediation-jobs/contributors) who
+ participated in this project.
 
 ## License
 

@@ -15,6 +15,7 @@
 import json
 
 import pytest
+from mock import Mock
 from botocore.exceptions import ClientError
 
 from remediation_worker.jobs.s3_enable_access_logging.s3_enable_access_logging import (
@@ -37,10 +38,6 @@ def invalid_payload():
 def full_payload():
     return json.dumps(
         {
-            "cloudAccount": {
-                "provider": "",
-                "roleArn": "arn:aws:iam::530342348278:role/SecureStateRemediation",
-            },
             "notificationInfo": {
                 "RuleId": "5c6cc5cc03dcc90f3631468d",
                 "RuleName": "",
@@ -117,10 +114,6 @@ def full_payload():
 def self_payload():
     return json.dumps(
         {
-            "cloudAccount": {
-                "provider": "",
-                "roleArn": "arn:aws:iam::530342348278:role/SecureStateRemediation",
-            },
             "notificationInfo": {
                 "RuleId": "5c6cc5cc03dcc90f3631468d",
                 "RuleName": "",
@@ -250,3 +243,74 @@ class TestS3EnableAccessLogging(object):
     def test_dont_log_to_self(self, self_payload):
         with pytest.raises(SelfRemediationError):
             assert S3EnableAccessLogging().run([None, self_payload])
+
+    def test_check_log_delivery(self):
+        acl = {
+            "Grants": [
+                {
+                    "Grantee": {
+                        "Type": "Group",
+                        "URI": "http://acs.amazonaws.com/groups/s3/LogDelivery",
+                    },
+                    "Permission": "WRITE",
+                }
+            ]
+        }
+
+        action = S3EnableAccessLogging()
+        write_enabled, read_acp_enabled = action.check_log_delivery_permissions(acl)
+        assert write_enabled
+        assert not read_acp_enabled
+
+    def test_grant_log_delivery_permissions(self):
+        client = Mock()
+        client.get_bucket_acl.return_value = {
+            "ResponseMetadata": {
+                "RequestId": "6B0F579EDDCCAB3C",
+                "HostId": "9Csk0PXuRLyPhcKimBPbhfEmwQywAXPiWVWdpZPV+rjwVZO1DJMEKD/M65RJL+GguB3UMhOmpAQ=",
+                "HTTPStatusCode": 200,
+                "HTTPHeaders": {
+                    "x-amz-id-2": "9Csk0PXuRLyPhcKimBPbhfEmwQywAXPiWVWdpZPV+rjwVZO1DJMEKD/M65RJL+GguB3UMhOmpAQ=",
+                    "x-amz-request-id": "6B0F579EDDCCAB3C",
+                    "date": "Wed, 16 Sep 2020 16:57:36 GMT",
+                },
+                "RetryAttempts": 0,
+            },
+            "Owner": {
+                "DisplayName": "awsmasteremail",
+                "ID": "b101f924005dbb04273644ca983ef2ea93d43ad46757f21f65c40d48d75368c3",
+            },
+            "Grants": [
+                {
+                    "Grantee": {
+                        "DisplayName": "awsmasteremail",
+                        "ID": "b101f924005dbb04273644ca983ef2ea93d43ad46757f21f65c40d48d75368c3",
+                        "Type": "CanonicalUser",
+                    },
+                    "Permission": "FULL_CONTROL",
+                },
+                {
+                    "Grantee": {
+                        "Type": "Group",
+                        "URI": "http://acs.amazonaws.com/groups/s3/LogDelivery",
+                    },
+                    "Permission": "READ_ACP",
+                },
+            ],
+        }
+
+        bucket_name = "my_bucket"
+        action = S3EnableAccessLogging()
+        action.grant_log_delivery_permissions(client, bucket_name)
+        assert client.put_bucket_acl.call_count == 1
+        call_args = client.put_bucket_acl.call_args.kwargs
+
+        assert len(call_args) == 2
+        assert call_args.get("Bucket") == bucket_name
+
+        acp = call_args.get("AccessControlPolicy")
+        assert acp is not None
+        assert len(acp["Grants"]) >= 2
+        write_granted, read_granted = action.check_log_delivery_permissions(acp)
+        assert write_granted
+        assert read_granted

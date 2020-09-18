@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "roleName": "remediate_vm",
+    "description": "This role has required permissions Role with permissions to remediate VM violations for port 22",
+    "assignableScopes": [
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.Compute/virtualMachines/read",
+          "Microsoft.Network/networkInterfaces/read",
+          "Microsoft.Network/networkSecurityGroups/read",
+          "Microsoft.Network/networkSecurityGroups/write"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
+  }
+}
