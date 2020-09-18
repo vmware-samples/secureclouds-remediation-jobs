@@ -102,7 +102,15 @@ class NetworkSecurityGroupClosePort3389(object):
             ):
                 continue
             if rule.destination_port_range is not None:
-                if int(rule.destination_port_range) == port:
+                port_range = rule.destination_port_range
+                if "-" in port_range:
+                    new_ranges = self._find_and_remove_port([port_range], port)
+                    if len(new_ranges) == 1:
+                        rule.destination_port_range = new_ranges[0]
+                    else:
+                        rule.destination_port_range = None
+                        rule.destination_port_ranges = new_ranges
+                elif int(rule.destination_port_range) == port:
                     security_rules.remove(rule)
             else:
                 port_ranges = rule.destination_port_ranges

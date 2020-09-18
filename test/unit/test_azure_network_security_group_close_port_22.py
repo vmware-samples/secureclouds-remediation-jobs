@@ -58,14 +58,14 @@ class TestNetworkSecurityGroupClosePort22(object):
                     access="Allow",
                     direction="Inbound",
                     source_address_prefix="*",
-                    destination_port_ranges=["22", "3389"],
+                    destination_port_ranges=["22-30", "3389"],
                 ),
                 SecurityRule(
                     protocol="All",
                     access="Allow",
                     direction="Inbound",
                     source_address_prefix="*",
-                    destination_port_ranges=["20-30", "3389"],
+                    destination_port_range="20-30",
                 ),
                 SecurityRule(
                     protocol="All",
@@ -73,6 +73,13 @@ class TestNetworkSecurityGroupClosePort22(object):
                     direction="Inbound",
                     source_address_prefix="*",
                     destination_port_range="22",
+                ),
+                SecurityRule(
+                    protocol="All",
+                    access="Allow",
+                    direction="Inbound",
+                    source_address_prefix="*",
+                    destination_port_range="35",
                 ),
             ],
         )
@@ -84,9 +91,11 @@ class TestNetworkSecurityGroupClosePort22(object):
         call_args = client.network_security_groups.create_or_update.call_args
         updated_sg = call_args.args[2]
         security_rules = updated_sg.security_rules
-        assert len(security_rules) == 2
-        assert security_rules[0].destination_port_ranges == ["3389"]
-        assert security_rules[1].destination_port_ranges == ["20-21", "23-30", "3389"]
+        assert len(security_rules) == 3
+        assert security_rules[0].destination_port_ranges == ["23-30","3389"]
+        assert security_rules[1].destination_port_ranges == ["20-21", "23-30"]
+        assert security_rules[1].destination_port_range is None
+        assert security_rules[2].destination_port_range == "35"
 
     def test_remediate_with_exception(self):
         client = Mock()

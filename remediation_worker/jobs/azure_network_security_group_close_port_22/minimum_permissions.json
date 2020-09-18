@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "roleName": "remediate_network_security_group",
+    "description": "This role has required permissions to make changes in the network security groups",
+    "assignableScopes": [
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.Network/networkSecurityGroups/read",
+          "Microsoft.Network/networkSecurityGroups/write"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
+  }
+}
