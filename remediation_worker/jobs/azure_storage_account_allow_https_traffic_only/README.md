@@ -21,6 +21,9 @@ The provided Azure service principal must have the following permissions:
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
+More information about already builtin roles and permissions can be found
+[here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles)
+
 ### Running the script
 
 You may run this script using following commands:
