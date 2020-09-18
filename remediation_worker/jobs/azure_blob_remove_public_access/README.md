@@ -14,10 +14,14 @@ Public read access is enabled for blob storage
 
 ### Prerequisites
 
-The provided Azure service principal must have permissions to make changes to the storage account
+The provided Azure service principal must have the following permissions:
+`Microsoft.Storage/storageAccounts/blobServices/containers/read`
+`Microsoft.Storage/storageAccounts/blobServices/containers/write`
 
-Details for the permissions can be found [here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-account-contributor):
+A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
+More information about already builtin roles and permissions can be found
+[here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles)
 
 ### Running the script
 
