@@ -14,10 +14,16 @@ A virtual machine is publicly accessible to the internet via port 22
 
 ### Prerequisites
 
-The provided Azure service principal must have permissions to make changes to the network security groups and security
-rules.
-Details for the permissions can be found [here](https://docs.microsoft.com/en-us/azure/virtual-network/manage-network-security-group#permissions):
+The provided Azure service principal must have the following permissions:
+`Microsoft.Compute/virtualMachines/read`
+`Microsoft.Network/networkInterfaces/read`
+`Microsoft.Network/networkSecurityGroups/read`
+`Microsoft.Network/networkSecurityGroups/write`
 
+A sample role with requisite permissions can be found [here](minimum_permissions.json)
+
+More information about already builtin roles and permissions can be found
+[here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles)
 
 ### Running the script
 
