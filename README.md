@@ -43,13 +43,8 @@ The worker executes jobs in a fashion similar to running `python ./s3-remove-pub
 The finding payload is in the form:
 ```$json
 {
-  "cloudAccount": {
-    "provider": <string>,
-    "roleArn": <string,omitempty>,
-    "subscriptionId": <string,omitempty>,
-    "applicationId": <string,omitempty>
-  },
   "notificationInfo": {
+    "CloudAccountID" : <string>,
     "RuleID": <string>,
     "RuleName": <string>,
     "RuleDisplayName": <string>,
