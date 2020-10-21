@@ -10,13 +10,15 @@ This job blocks public access to an S3 bucket.
 * 5c8c26537a550e1fb6560c5a
 * 5c8c26537a550e1fb6560c5b
 * 5c8c26547a550e1fb6560c5c
+* 5c8c26637a550e1fb6560c6b
 
 ##### Rule Name:
-* An S3 bucket is configured so that all users have unrestricted permisions
+* An S3 bucket is configured so that all users have unrestricted permissions
 * Read access to an S3 bucket is unrestricted
 * An S3 bucket is configured to allow all users to read permissions
 * Write access to an S3 bucket is unrestricted
 * An S3 bucket is configured to allow unrestricted access control changes
+* The S3 bucket policy allows unrestricted get access
 
 ## Getting Started
 
