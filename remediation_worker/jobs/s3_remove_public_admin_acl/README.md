@@ -2,6 +2,14 @@
 
 This job will remove the public "write bucket permissions" permission. All other ACL permissions will be left alone. This means that if "AllUsers" have access to FULL_CONTROL, the permissions will be changed to allow "READ", "WRITE", and "READ_ACP" rather than "FULL_CONTROL" which includes "WRITE_ACP".
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c26617a550e1fb6560c69
+
+##### Rule Name:
+The S3 bucket policy allows unrestricted access
+
 ## Getting Started
 
 ### Prerequisites

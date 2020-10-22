@@ -2,6 +2,14 @@
 
 This job blocks public access to port 5432 for both IPv4 and IPv6.
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c25f07a550e1fb6560bc6
+
+##### Rule Name:
+A security group's PostgreSQL Server port (5432) is accessible through any source address
+
 ## Getting Started
 
 ### Prerequisites

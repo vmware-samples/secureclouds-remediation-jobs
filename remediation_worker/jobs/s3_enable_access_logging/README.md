@@ -2,6 +2,14 @@
 
 This job enables access logging for an S3 bucket.
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c265e7a550e1fb6560c67
+
+##### Rule Name:
+S3 access logging is not enabled
+
 ## Getting Started
 
 ### Prerequisites

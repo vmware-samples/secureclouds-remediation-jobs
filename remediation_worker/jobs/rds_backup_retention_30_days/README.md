@@ -4,6 +4,14 @@ This job makes the RDS backup retention period 30 days.
 It first tries to modify the retention period of the DB instance.
 If that fails, it will try to set the retention period of the DB cluster that the instance belongs to.
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c264a7a550e1fb6560c4d
+
+##### Rule Name:
+The RDS backup retention period is less than 30 days
+
 ## Getting Started
 
 ### Prerequisites

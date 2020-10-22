@@ -2,6 +2,14 @@
 
 This job blocks public access to port 22 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c26417a550e1fb6560c3f
+
+##### Rule Name:
+An EC2 instance's SSH port (22) is accessible from the public Internet for any source address
+
 ## Getting Started
 
 ### Prerequisites
