@@ -2,6 +2,14 @@
 
 This job blocks public access to port 3389 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c26437a550e1fb6560c42
+
+##### Rule Name:
+An EC2 instance's Remote Desktop port (3389) is accessible from the public Internet for any source address
+
 ## Getting Started
 
 ### Prerequisites

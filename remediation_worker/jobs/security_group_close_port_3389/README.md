@@ -2,6 +2,14 @@
 
 This job blocks public access to port 3389 for both IPv4 and IPv6.
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c25ef7a550e1fb6560bc4
+
+##### Rule Name:
+A security group's Remote Desktop port (3389) is accessible through any source address
+
 ## Getting Started
 
 ### Prerequisites

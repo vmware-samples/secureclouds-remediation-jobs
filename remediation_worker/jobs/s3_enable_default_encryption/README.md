@@ -2,6 +2,14 @@
 
 This job enables default encryption for an S3 bucket using AES256.
 
+### Applicable Rule
+
+##### Rule ID:
+1d187035-9fff-48b2-a7c3-ffc56a4da5e6
+
+##### Rule Name:
+An S3 bucket default encryption is not enabled
+
 ## Getting Started
 
 ### Prerequisites
