@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "roleName": "remediate_enable_ddos_protection",
+    "description": "This role has required permissions to make changes to the virtual network",
+    "assignableScopes": [
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.Network/virtualNetworks/read",
+          "Microsoft.Network/virtualNetworks/write",
+          "Microsoft.Network/ddosProtectionPlans/read",
+          "Microsoft.Network/ddosProtectionPlans/join/action"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
+  }
+}
