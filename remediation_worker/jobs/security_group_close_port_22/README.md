@@ -2,6 +2,14 @@
 
 This job blocks public access to port 22 for both IPv4 and IPv6.
 
+### Applicable Rule
+
+##### Rule ID:
+5c8c25ec7a550e1fb6560bbe
+
+##### Rule Name:
+A security group's SSH port (22) is accessible through any source address
+
 ## Getting Started
 
 ### Prerequisites
