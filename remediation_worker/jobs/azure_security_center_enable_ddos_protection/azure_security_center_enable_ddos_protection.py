@@ -90,9 +90,7 @@ class VirtualNetworkEnableDdosProtection(object):
 
 		virtual_network.enable_ddos_protection = True
 
-		updated_SubResource = SubResource()
-
-		updated_SubResource.id = resource_id
+		updated_SubResource = SubResource(id = resource_id)
 
 		virtual_network.ddos_protection_plan = updated_SubResource
 
