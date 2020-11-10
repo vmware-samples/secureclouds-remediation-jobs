@@ -12,13 +12,13 @@ DDos protection is enabled for virtual network
 
 ## Getting Started
 ### Prerequisites
-The provided Azure service principal must have the following permissions: 
+The provided Azure service principal must have the following permissions:
 `Microsoft.Network/virtualNetworks/read`
 `Microsoft.Network/virtualNetworks/write`
-`Microsoft.Network/ddosProtectionPlans/read` 
+`Microsoft.Network/ddosProtectionPlans/read`
 `Microsoft.Network/ddosProtectionPlans/join/action`
 
-A sample role with requisite permissions can be found [here](minimum_policy.json)
+A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
 More information about already builtin roles and permissions can be found [here](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles)
 
