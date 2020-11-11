@@ -8,7 +8,7 @@ This job sets DefaultAction in network rule set for a Storage Account as Deny.
 99d645b8-aa87-11ea-bb37-0242ac130002
 
 ##### Rule Name:
-Default network access rule for Storage Accounts is set to Allow
+Storage account is publicly accessible
 
 ## Getting Started
 ### Prerequisites
