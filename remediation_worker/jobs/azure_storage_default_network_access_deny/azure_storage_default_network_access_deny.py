@@ -82,9 +82,9 @@ class StorageAccountDefaultActionDeny(object):
 
         # Setting Default Action for network as Deny
         updated_network_rule_set = NetworkRuleSet(default_action="Deny")
-        logging.info("revoking public access for container")
+        logging.info("Setting default action in network rule set to Deny")
         try:
-            logging.info("    executing client.blob_containers.update")
+            logging.info("    executing client.storage_accounts.update")
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      account_name={account_name}")
 
