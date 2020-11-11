@@ -1,6 +1,6 @@
 # Enable DDoS protection for Virtual Network
 
-This job enables DDos protection for a virtual network by listing all the available DDoS protection plans and assigning any one to the virtual network.
+This job enables DDoS protection for a virtual network by listing all the available DDoS protection plans and assigning any one to the virtual network.
 
 ### Applicable Rule
 
@@ -8,7 +8,7 @@ This job enables DDos protection for a virtual network by listing all the availa
 3abf3147-ea53-4302-b237-caab4d764c77
 
 ##### Rule Name:
-DDos protection is enabled for virtual network
+DDoS Protection Standard should be enabled
 
 ## Getting Started
 ### Prerequisites
