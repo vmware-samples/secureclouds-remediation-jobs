@@ -23,15 +23,6 @@ from azure.common.credentials import ServicePrincipalCredentials
 logging.basicConfig(level=logging.INFO)
 
 
-def logcall(f, *args, **kwargs):
-    logging.info(
-        "%s(%s)",
-        f.__name__,
-        ", ".join(list(args) + [f"{k}={repr(v)}" for k, v in kwargs.items()]),
-    )
-    logging.info(f(*args, **kwargs))
-
-
 class NetworkSecurityGroupClosePort3389(object):
     def parse(self, payload):
         """Parse payload received from Remediation Service.
