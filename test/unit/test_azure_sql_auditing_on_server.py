@@ -48,8 +48,8 @@ class TestEnableDdosProtection(object):
 
     def test_remediate_success_without_server_identity(self):
         client = Mock()
-        client_stg = Mock()
-        client_auth = Mock()
+        client_storage = Mock()
+        client_authorization = Mock()
         client.servers.get.return_value = Server(
             id="/subscriptions/d687b1a3-9b78-43b1-a17b-7de297fd1fce/resourceGroups/accelerators-team-resources/providers/Microsoft.Sql/servers/remserver5",
             name="remserver5",
@@ -84,8 +84,8 @@ class TestEnableDdosProtection(object):
         assert (
             action.remediate(
                 client,
-                client_stg,
-                client_auth,
+                client_storage,
+                client_authorization,
                 "resource_group",
                 "sql_server_name",
                 "subscription_id",
@@ -100,8 +100,8 @@ class TestEnableDdosProtection(object):
 
     def test_remediate_success_with_server_identity(self):
         client = Mock()
-        client_stg = Mock()
-        client_auth = Mock()
+        client_storage = Mock()
+        client_authorization = Mock()
         resource_identity = ResourceIdentity(
             principal_id="139bcf82-e14e-4773-bcf4-1da136674792",
             type="SystemAssigned",
@@ -123,8 +123,8 @@ class TestEnableDdosProtection(object):
         assert (
             action.remediate(
                 client,
-                client_stg,
-                client_auth,
+                client_storage,
+                client_authorization,
                 "resource_group",
                 "sql_server_name",
                 "subscription_id",
@@ -139,7 +139,20 @@ class TestEnableDdosProtection(object):
 
     def test_remediate_with_exception(self):
         client = Mock()
-        client.virtual_networks.begin_create_or_update.side_effect = Exception
+        client_storage = Mock()
+        client_authorization = Mock()
+        client.server_blob_auditing_policies.create_or_update.side_effect = Exception
         action = SqlServerEnableBlobAuditingPolicy()
         with pytest.raises(Exception):
-            assert action.remediate(client, "security_group_id", "resource_group")
+            assert (
+            action.remediate(
+                client,
+                client_storage,
+                client_authorization,
+                "resource_group",
+                "security_group",
+                "subscription_id",
+                "region",
+            )
+            == 0
+        )

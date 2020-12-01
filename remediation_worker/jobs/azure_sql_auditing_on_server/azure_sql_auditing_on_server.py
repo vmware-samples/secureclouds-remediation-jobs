@@ -85,8 +85,8 @@ class SqlServerEnableBlobAuditingPolicy(object):
     def remediate(
         self,
         client,
-        client_stg,
-        client_auth,
+        client_storage,
+        client_authorization,
         resource_group_name,
         sql_server_name,
         region,
@@ -133,7 +133,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
             stg_account_name = get_random_string(6)
             logging.info(f"Creating a storage account with name {stg_account_name}")
 
-            client_stg.storage_accounts.begin_create(
+            client_storage.storage_accounts.begin_create(
                 resource_group_name=resource_group_name,
                 account_name=stg_account_name,
                 parameters=create_params,
@@ -148,7 +148,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
                 resourceGroupName=resource_group_name,
                 resourceName=stg_account_name,
             )
-            client_auth.role_assignments.create(
+            client_authorization.role_assignments.create(
                 scope=Scope,
                 role_assignment_name=guid,
                 parameters=RoleAssignmentCreateParameters(
@@ -204,14 +204,14 @@ class SqlServerEnableBlobAuditingPolicy(object):
         client = SqlManagementClient(
             credentials, params["subscription_id"], base_url=None
         )
-        client_stg = StorageManagementClient(credentials1, params["subscription_id"])
-        client_auth = AuthorizationManagementClient(
+        client_storage = StorageManagementClient(credentials1, params["subscription_id"])
+        client_authorization = AuthorizationManagementClient(
             credentials, params["subscription_id"]
         )
         return self.remediate(
             client,
-            client_stg,
-            client_auth,
+            client_storage,
+            client_authorization,
             params["resource_group_name"],
             params["sql_server_name"],
             params["region"],
