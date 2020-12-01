@@ -1,0 +1,6 @@
+azure-identity==1.4.1 \
+    --hash=sha256:6f95b3505fc134ad16bd16da053456e1933188ac43161704d48ddb4edebf72c9 \
+    --hash=sha256:7b071089faf0789059ac24052e311e2b096a002c173d42b96896db09c6e2ba5d
+azure-mgmt-sql==0.24.0 \
+    --hash=sha256:347f6b7d5e252d48331658fd5febefdacbc341641918df3111c735f4a6906e5e \
+    --hash=sha256:da391ed00d82cd8e20ca50affdc43b99fd9a7919b54a3a0d53c73cb41eea09d3
