@@ -1,0 +1,16 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "ELBEnableAccessLogs",
+            "Effect": "Allow",
+            "Action": [
+                "elb:DescribeLoadBalancerAttributes",
+                "s3:CreateBucket",
+                "s3:PutBucketPolicy",
+                "elb:ModifyLoadBalancerAttributes"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
