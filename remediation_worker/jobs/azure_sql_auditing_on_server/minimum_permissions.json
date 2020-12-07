@@ -1,24 +1,24 @@
 {
-    "properties": {
-      "roleName": "remediate_enable_server_blob_auditing_policies",
-      "description": "This role has required permissions to make changes to the SQL Server",
-      "assignableScopes": [
-      ],
-      "permissions": [
-        {
-          "actions": [
-            "Microsoft.Sql/servers/read",
-            "Microsoft.Sql/servers/write",
-            "Microsoft.Sql/servers/auditingSettings/read",
-            "Microsoft.Sql/servers/auditingSettings/write",
-            "Microsoft.Storage/storageAccounts/write",
-            "Microsoft.Storage/storageAccounts/read",
-            "Microsoft.Authorization/roleAssignments/write"
-          ],
-          "notActions": [],
-          "dataActions": [],
-          "notDataActions": []
-        }
-      ]
-    }
+  "properties": {
+    "roleName": "remediate_enable_server_blob_auditing_policies",
+    "description": "This role has required permissions to make changes to the SQL Server",
+    "assignableScopes": [
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.Sql/servers/read",
+          "Microsoft.Sql/servers/write",
+          "Microsoft.Sql/servers/auditingSettings/read",
+          "Microsoft.Sql/servers/auditingSettings/write",
+          "Microsoft.Storage/storageAccounts/write",
+          "Microsoft.Storage/storageAccounts/read",
+          "Microsoft.Authorization/roleAssignments/write"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
   }
+}

@@ -41,6 +41,38 @@ def get_random_string(length):
     return result_str
 
 
+def create_storage_account(
+    resource_group_name, name, region, client_storage,
+):
+    create_params = StorageAccountCreateParameters(
+        location=region,
+        sku=Sku(name=SkuName.STANDARD_LRS, tier=SkuTier.STANDARD),
+        kind="StorageV2",
+        enable_https_traffic_only=True,
+        network_rule_set=NetworkRuleSet(default_action=DefaultAction.DENY),
+    )
+    poller = client_storage.storage_accounts.begin_create(
+        resource_group_name=resource_group_name,
+        account_name=name,
+        parameters=create_params,
+    )
+    return poller.result
+
+
+def create_role_assignment(
+    stg_account_name, subscription_id, client_authorization, guid, Scope, principalId,
+):
+    client_authorization.role_assignments.create(
+        scope=Scope,
+        role_assignment_name=guid,
+        parameters=RoleAssignmentCreateParameters(
+            role_definition_id=f"/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+            principal_id=principalId,
+            principal_type=PrincipalType.service_principal,
+        ),
+    )
+
+
 class SqlServerEnableBlobAuditingPolicy(object):
     def parse(self, payload):
         """Parse payload received from Remediation Service.
@@ -111,6 +143,9 @@ class SqlServerEnableBlobAuditingPolicy(object):
                 logging.info(
                     f"Assigning Azure Active Directory Identity to the SQL Database Server {sql_server_name}"
                 )
+                logging.info("executing client.servers.update")
+                logging.info(f"      resource_group_name={resource_group_name}")
+                logging.info(f"      server_name={sql_server_name}")
                 updated_server = client.servers.update(
                     resource_group_name=resource_group_name,
                     server_name=sql_server_name,
@@ -123,41 +158,33 @@ class SqlServerEnableBlobAuditingPolicy(object):
             else:
                 principalId = server.identity.principal_id
 
-            create_params = StorageAccountCreateParameters(
-                location=region,
-                sku=Sku(name=SkuName.STANDARD_LRS, tier=SkuTier.STANDARD),
-                kind="StorageV2",
-                enable_https_traffic_only=True,
-                network_rule_set=NetworkRuleSet(default_action=DefaultAction.DENY),
-            )
             stg_account_name = get_random_string(6)
             logging.info(f"Creating a storage account with name {stg_account_name}")
+            logging.info("executing client_storage.storage_accounts.begin_create")
+            logging.info(f"      resource_group_name={resource_group_name}")
+            logging.info(f"      storage_account_name={stg_account_name}")
 
-            client_storage.storage_accounts.begin_create(
-                resource_group_name=resource_group_name,
-                account_name=stg_account_name,
-                parameters=create_params,
+            create_storage_account(
+                resource_group_name, stg_account_name, region, client_storage
             )
+
+            guid = uuid.uuid4()
+            Scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{stg_account_name}"
 
             logging.info(
                 f"Creating a Role Assignment for Storage Account {stg_account_name} and assigning Storage Blob Data Contributer Role to the SQL Database Server {sql_server_name}"
             )
-            guid = uuid.uuid4()
-            Scope = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{resourceName}".format(
-                subscriptionId=subscription_id,
-                resourceGroupName=resource_group_name,
-                resourceName=stg_account_name,
-            )
-            client_authorization.role_assignments.create(
-                scope=Scope,
-                role_assignment_name=guid,
-                parameters=RoleAssignmentCreateParameters(
-                    role_definition_id="/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe".format(
-                        subscriptionId=subscription_id
-                    ),
-                    principal_id=principalId,
-                    principal_type=PrincipalType.service_principal,
-                ),
+            logging.info("executing client_authorization.role_assignments.create")
+            logging.info(f"      scope={Scope}")
+            logging.info(f"      role_assignment_name={guid}")
+
+            create_role_assignment(
+                stg_account_name,
+                subscription_id,
+                client_authorization,
+                guid,
+                Scope,
+                principalId,
             )
 
             logging.info("Enabling Server blob auditing policy for Azure SQL Server")
@@ -172,9 +199,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
                 server_name=sql_server_name,
                 parameters=ServerBlobAuditingPolicy(
                     state=BlobAuditingPolicyState.enabled,
-                    storage_endpoint="https://{storage_account_name}.blob.core.windows.net/".format(
-                        storage_account_name=stg_account_name
-                    ),
+                    storage_endpoint=f"https://{stg_account_name}.blob.core.windows.net/",
                 ),
             )
         except Exception as e:
@@ -204,7 +229,9 @@ class SqlServerEnableBlobAuditingPolicy(object):
         client = SqlManagementClient(
             credentials, params["subscription_id"], base_url=None
         )
-        client_storage = StorageManagementClient(credentials1, params["subscription_id"])
+        client_storage = StorageManagementClient(
+            credentials1, params["subscription_id"]
+        )
         client_authorization = AuthorizationManagementClient(
             credentials, params["subscription_id"]
         )
