@@ -1,0 +1,19 @@
+{
+    "properties": {
+      "roleName": "remediate_enable_sql_threat_detection_on_server",
+      "description": "This role has required permissions to make changes to the Azure SQL Server",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.Sql/servers/securityAlertPolicies/write",
+            "Microsoft.Sql/servers/securityAlertPolicies/read"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+  }
