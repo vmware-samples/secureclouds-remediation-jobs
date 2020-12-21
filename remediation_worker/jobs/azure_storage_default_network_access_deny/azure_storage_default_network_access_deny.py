@@ -18,16 +18,18 @@ import sys
 import logging
 
 from azure.mgmt.storage import StorageManagementClient
-from azure.common.credentials import ServicePrincipalCredentials
-from azure.mgmt.storage.models import PublicAccess
+from azure.identity import ClientSecretCredential
+from azure.mgmt.storage.models import (
+    NetworkRuleSet,
+    StorageAccountUpdateParameters,
+)
 
 logging.basicConfig(level=logging.INFO)
 
 
-class StorageBlobRemovePublicAccess(object):
+class StorageAccountDefaultActionDeny(object):
     def parse(self, payload):
         """Parse payload received from Remediation Service.
-
         :param payload: JSON string containing parameters received from the remediation service.
         :type payload: str.
         :returns: Dictionary of parsed parameters
@@ -37,9 +39,6 @@ class StorageBlobRemovePublicAccess(object):
         remediation_entry = json.loads(payload)
 
         object_id = remediation_entry["notificationInfo"]["FindingInfo"]["ObjectId"]
-        object_components = object_id.split(".")
-        account_name = object_components[0]
-        container_name = object_components[-1]
 
         region = remediation_entry["notificationInfo"]["FindingInfo"]["Region"]
 
@@ -58,55 +57,43 @@ class StorageBlobRemovePublicAccess(object):
 
         logging.info("parsed params")
         logging.info(f"  resource_group_name: {resource_group_name}")
-        logging.info(f"  account_name: {account_name}")
-        logging.info(f"  container_name: {container_name}")
+        logging.info(f"  account_name: {object_id}")
         logging.info(f"  subscription_id: {subscription_id}")
         logging.info(f"  region: {region}")
 
         return {
             "resource_group_name": resource_group_name,
-            "account_name": account_name,
-            "container_name": container_name,
+            "account_name": object_id,
             "subscription_id": subscription_id,
             "region": region,
         }
 
-    def remediate(self, client, resource_group_name, account_name, container_name):
-        """Block public access to blob container
-
-        :param client: Instance of the Azure NetworkManagementClient.
+    def remediate(self, client, resource_group_name, account_name):
+        """Set Default Action for network access rule for a Storage Account as Deny
+        :param client: Instance of the Azure StorageManagementClient.
         :param resource_group_name: The name of the resource group to which the storage account belongs
-        :param account_name: The name of the storage account. You must specify the
-            security group name in the request.
-        :param container_name: The name of the container having the violation
+        :param account_name: The name of the storage account.
         :type resource_group_name: str.
         :type account_name: str.
-        :type container_name: str.
         :returns: Integer signaling success or failure
         :rtype: int
         :raises: msrestazure.azure_exceptions.CloudError
         """
 
-        container = client.blob_containers.get(
-            resource_group_name=resource_group_name,
-            account_name=account_name,
-            container_name=container_name,
-        )
-
-        container.public_access = PublicAccess.none
-
-        # Revoke public access permissions for container
-        logging.info("revoking public access for container")
+        # Setting Default Action for network as Deny
+        updated_network_rule_set = NetworkRuleSet(default_action="Deny")
+        logging.info("Setting default action in network rule set to Deny")
         try:
-            logging.info("    executing client.blob_containers.update")
+            logging.info("    executing client.storage_accounts.update")
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      account_name={account_name}")
-            logging.info(f"      container_name={container_name}")
-            client.blob_containers.update(
+
+            client.storage_accounts.update(
                 resource_group_name=resource_group_name,
                 account_name=account_name,
-                container_name=container_name,
-                blob_container=container,
+                parameters=StorageAccountUpdateParameters(
+                    network_rule_set=updated_network_rule_set
+                ),
             )
         except Exception as e:
             logging.error(f"{str(e)}")
@@ -116,27 +103,23 @@ class StorageBlobRemovePublicAccess(object):
 
     def run(self, args):
         """Run the remediation job.
-
         :param args: List of arguments provided to the job.
         :type args: list.
         :returns: int
         """
         params = self.parse(args[1])
 
-        credentials = ServicePrincipalCredentials(
+        credentials = ClientSecretCredential(
             client_id=os.environ.get("AZURE_CLIENT_ID"),
-            secret=os.environ.get("AZURE_CLIENT_SECRET"),
-            tenant=os.environ.get("AZURE_TENANT_ID"),
+            client_secret=os.environ.get("AZURE_CLIENT_SECRET"),
+            tenant_id=os.environ.get("AZURE_TENANT_ID"),
         )
 
         client = StorageManagementClient(credentials, params["subscription_id"])
         return self.remediate(
-            client,
-            params["resource_group_name"],
-            params["account_name"],
-            params["container_name"],
+            client, params["resource_group_name"], params["account_name"],
         )
 
 
 if __name__ == "__main__":
-    sys.exit(StorageBlobRemovePublicAccess().run(sys.argv))
+    sys.exit(StorageAccountDefaultActionDeny().run(sys.argv))
