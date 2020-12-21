@@ -34,10 +34,11 @@ from azure.mgmt.authorization.models import (
 logging.basicConfig(level=logging.INFO)
 
 
-def get_random_string(length):
+def get_random_string(length, prefix):
     letters = string.ascii_lowercase
     random_str = "".join(random.choice(letters) for i in range(length))
-    result_str = "sqlauditing" + random_str
+    prefix = "".join(i for i in prefix if i != "-")
+    result_str = prefix + random_str
     return result_str
 
 
@@ -158,7 +159,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
             else:
                 principalId = server.identity.principal_id
 
-            stg_account_name = get_random_string(6)
+            stg_account_name = get_random_string(6, sql_server_name)
             logging.info(f"Creating a storage account with name {stg_account_name}")
             logging.info("executing client_storage.storage_accounts.begin_create")
             logging.info(f"      resource_group_name={resource_group_name}")
