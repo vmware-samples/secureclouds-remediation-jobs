@@ -34,11 +34,11 @@ from azure.mgmt.authorization.models import (
 logging.basicConfig(level=logging.INFO)
 
 
-def get_random_string(length, prefix):
-    letters = string.ascii_lowercase
-    random_str = "".join(random.choice(letters) for i in range(length))
-    prefix = "".join(i for i in prefix if i != "-")
-    result_str = prefix + random_str
+def get_random_string(prefix):
+    prefix = "".join(i for i in prefix if i.islower() or i.isdigit())
+    if len(prefix) >= 16:
+        prefix = str(prefix[:15])
+    result_str = prefix + "auditlog"
     return result_str
 
 
@@ -57,7 +57,7 @@ def create_storage_account(
         account_name=name,
         parameters=create_params,
     )
-    return poller.result
+    return poller.result()
 
 
 def create_role_assignment(
@@ -159,7 +159,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
             else:
                 principalId = server.identity.principal_id
 
-            stg_account_name = get_random_string(6, sql_server_name)
+            stg_account_name = get_random_string(sql_server_name)
             logging.info(f"Creating a storage account with name {stg_account_name}")
             logging.info("executing client_storage.storage_accounts.begin_create")
             logging.info(f"      resource_group_name={resource_group_name}")
@@ -221,7 +221,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
             secret=os.environ.get("AZURE_CLIENT_SECRET"),
             tenant=os.environ.get("AZURE_TENANT_ID"),
         )
-        credentials1 = ClientSecretCredential(
+        credentials_stg = ClientSecretCredential(
             client_id=os.environ.get("AZURE_CLIENT_ID"),
             client_secret=os.environ.get("AZURE_CLIENT_SECRET"),
             tenant_id=os.environ.get("AZURE_TENANT_ID"),
@@ -231,7 +231,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
             credentials, params["subscription_id"], base_url=None
         )
         client_storage = StorageManagementClient(
-            credentials1, params["subscription_id"]
+            credentials_stg, params["subscription_id"]
         )
         client_authorization = AuthorizationManagementClient(
             credentials, params["subscription_id"]
