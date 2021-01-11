@@ -34,11 +34,11 @@ from azure.mgmt.authorization.models import (
 logging.basicConfig(level=logging.INFO)
 
 
-def get_random_string(prefix):
+def generate_storage_account_name(prefix):
     prefix = "".join(i for i in prefix if i.islower() or i.isdigit())
-    if len(prefix) >= 16:
-        prefix = str(prefix[:15])
-    result_str = prefix + "auditlog"
+    if len(prefix) >= 15:
+        prefix = str(prefix[:14])
+    result_str = prefix + "auditlogs"
     return result_str
 
 
@@ -127,10 +127,12 @@ class SqlServerEnableBlobAuditingPolicy(object):
     ):
         """Enable Server blob auditing policy for Azure SQL Server
         :param client: Instance of the Azure SqlManagementClient.
+        :param client_storage: Instance of the Azure StorageManagementClient.
         :param resource_group_name: The name of the resource group to which the SQL Server belongs.
         :param sql_server_name: The name of the SQL Server.
         :type resource_group_name: str.
         :type sql_server_name: str.
+        :type region: str.
         :returns: Integer signaling success or failure
         :rtype: int
         :raises: msrestazure.azure_exceptions.CloudError
@@ -159,7 +161,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
             else:
                 principalId = server.identity.principal_id
 
-            stg_account_name = get_random_string(sql_server_name)
+            stg_account_name = generate_storage_account_name(sql_server_name)
             logging.info(f"Creating a storage account with name {stg_account_name}")
             logging.info("executing client_storage.storage_accounts.begin_create")
             logging.info(f"      resource_group_name={resource_group_name}")
