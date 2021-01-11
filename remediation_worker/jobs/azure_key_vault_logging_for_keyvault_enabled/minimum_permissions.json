@@ -1,0 +1,22 @@
+{
+    "properties": {
+      "roleName": "remediate_set_default_network_access_deny",
+      "description": "This role has required permissions to make changes to the storage account",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.Storage/storageAccounts/read",
+            "Microsoft.Storage/storageAccounts/write",
+            "Microsoft.Insights/DiagnosticSettings/Write",
+            "Microsoft.KeyVault/vaults/read",
+            "Microsoft.KeyVault/vaults/write"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+  }
