@@ -1,23 +1,20 @@
-# Enable Logging For Keyvault
+# Enable Soft Delete for Storage Account BlobService
 
-This job enables Key Vault Logging.
+This job enables Soft Delete for Storage Account BlobService.
 
 ### Applicable Rule
 
 ##### Rule ID:
-5c8c26687a550e1fb6560c72
+643eb5fc-7747-4df4-b217-41c4e97e0c07
 
 ##### Rule Name:
-Logging For Keyvault Enabled
+Storage account blob service is not configured with soft delete
 
 ## Getting Started
 ### Prerequisites
 The provided Azure service principal must have the following permissions:
-`Microsoft.Storage/storageAccounts/read`
-`Microsoft.Storage/storageAccounts/write`
-`Microsoft.Insights/DiagnosticSettings/Write`
-`Microsoft.KeyVault/vaults/read`
-`Microsoft.KeyVault/vaults/write`
+`Microsoft.Storage/storageAccounts/blobServices/read`
+`Microsoft.Storage/storageAccounts/blobServices/write`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -28,7 +25,7 @@ You may run this script using following commands:
 
 ```shell script
   pip install -r requirements.txt
-  python3 azure_key_vault_logging_for_keyvault_enabled.py
+  python3 azure_storage_soft_delete_not_enabled.py
 ```
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
