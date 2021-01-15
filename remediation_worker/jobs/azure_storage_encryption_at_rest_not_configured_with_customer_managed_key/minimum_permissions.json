@@ -1,7 +1,7 @@
 {
     "properties": {
-      "roleName": "remediate_enable_key_vault_logging",
-      "description": "This role has required permissions to make changes to the KeyVault",
+      "roleName": "remediate_encrypt_storage_account_with_cmk",
+      "description": "This role has required permissions to make changes to the storage account",
       "assignableScopes": [
       ],
       "permissions": [
@@ -9,9 +9,10 @@
           "actions": [
             "Microsoft.Storage/storageAccounts/read",
             "Microsoft.Storage/storageAccounts/write",
-            "Microsoft.Insights/DiagnosticSettings/Write",
             "Microsoft.KeyVault/vaults/read",
-            "Microsoft.KeyVault/vaults/write"
+            "Microsoft.KeyVault/vaults/write",
+            "Microsoft.KeyVault/vaults/keys/read",
+            "Microsoft.KeyVault/vaults/keys/write"
           ],
           "notActions": [],
           "dataActions": [],
