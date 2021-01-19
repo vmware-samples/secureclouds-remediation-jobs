@@ -56,6 +56,7 @@ class TestestEncryptStorageAccountWithCMK(object):
         assert params["region"] == "region"
 
     def test_remediate_success_without_storage_identity(self):
+        monitor_client = Mock()
         graph_client = Mock()
         storage_client = Mock()
         keyvault_client = Mock()
@@ -100,6 +101,7 @@ class TestestEncryptStorageAccountWithCMK(object):
         )
         assert (
             action.remediate(
+                monitor_client,
                 graph_client,
                 storage_client,
                 keyvault_client,
@@ -126,6 +128,7 @@ class TestestEncryptStorageAccountWithCMK(object):
         )
 
     def test_remediate_success_with_storage_identity(self):
+        monitor_client = Mock()
         graph_client = Mock()
         storage_client = Mock()
         keyvault_client = Mock()
@@ -164,6 +167,7 @@ class TestestEncryptStorageAccountWithCMK(object):
 
         assert (
             action.remediate(
+                monitor_client,
                 graph_client,
                 storage_client,
                 keyvault_client,
@@ -190,6 +194,7 @@ class TestestEncryptStorageAccountWithCMK(object):
         )
 
     def test_remediate_with_exception(self):
+        monitor_client = Mock()
         graph_client = Mock()
         storage_client = Mock()
         keyvault_client = Mock()
@@ -201,6 +206,7 @@ class TestestEncryptStorageAccountWithCMK(object):
         with pytest.raises(Exception):
             assert (
                 action.remediate(
+                    monitor_client,
                     graph_client,
                     storage_client,
                     keyvault_client,

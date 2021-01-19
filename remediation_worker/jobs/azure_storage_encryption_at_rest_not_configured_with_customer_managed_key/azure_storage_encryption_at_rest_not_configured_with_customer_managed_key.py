@@ -21,6 +21,7 @@ from dateutil import parser as date_parse
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.keyvault import KeyVaultManagementClient
+from azure.mgmt.monitor import MonitorClient
 from azure.keyvault.keys import KeyClient
 from azure.identity import ClientSecretCredential
 from azure.graphrbac import GraphRbacManagementClient
@@ -40,6 +41,11 @@ from azure.mgmt.keyvault.models import (
     Permissions,
     KeyPermissions,
     SecretPermissions,
+)
+from azure.mgmt.monitor.models import (
+    DiagnosticSettingsResource,
+    LogSettings,
+    RetentionPolicy,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -63,7 +69,7 @@ class StorageAccountNotEncryptedWithCmk(object):
         app_object_id,
         stg_principal_id,
     ):
-        access_policy1 = AccessPolicyEntry(
+        access_policy_storage_account = AccessPolicyEntry(
             tenant_id=tenant_id,
             object_id=stg_principal_id,
             permissions=Permissions(
@@ -72,10 +78,9 @@ class StorageAccountNotEncryptedWithCmk(object):
                     KeyPermissions.UNWRAP_KEY,
                     KeyPermissions.WRAP_KEY,
                 ],
-                secrets=[],
             ),
         )
-        access_policy2 = AccessPolicyEntry(
+        access_policy_app = AccessPolicyEntry(
             tenant_id=tenant_id,
             object_id=app_object_id,
             permissions=Permissions(
@@ -89,15 +94,6 @@ class StorageAccountNotEncryptedWithCmk(object):
                     KeyPermissions.RESTORE,
                     KeyPermissions.RECOVER,
                 ],
-                secrets=[
-                    SecretPermissions.BACKUP,
-                    SecretPermissions.DELETE,
-                    SecretPermissions.GET,
-                    SecretPermissions.LIST,
-                    SecretPermissions.RECOVER,
-                    SecretPermissions.RESTORE,
-                    SecretPermissions.SET,
-                ],
             ),
         )
         key_vault_properties = VaultCreateOrUpdateParameters(
@@ -105,7 +101,7 @@ class StorageAccountNotEncryptedWithCmk(object):
             properties=VaultProperties(
                 tenant_id=tenant_id,
                 sku=Sku(family="A", name="standard",),
-                access_policies=[access_policy1, access_policy2],
+                access_policies=[access_policy_storage_account, access_policy_app],
                 soft_delete_retention_in_days=90,
                 enabled_for_disk_encryption=False,
                 enabled_for_deployment=False,
@@ -133,7 +129,7 @@ class StorageAccountNotEncryptedWithCmk(object):
             vault_url=f"https://{key_vault_name}.vault.azure.net/",
             credential=credential,
         )
-        rsa_key_name = key_vault_name + "-key1"
+        rsa_key_name = key_vault_name + "-key"
         rsa_key = key_client.create_rsa_key(
             rsa_key_name, size=2048, expires_on=expires_on, enabled=True
         )
@@ -181,6 +177,7 @@ class StorageAccountNotEncryptedWithCmk(object):
 
     def remediate(
         self,
+        monitor_client,
         graph_client,
         storage_client,
         keyvault_client,
@@ -191,7 +188,7 @@ class StorageAccountNotEncryptedWithCmk(object):
         account_name,
         region,
     ):
-        """Set Default Action for network access rule for a Storage Account as Deny
+        """Enable Soft Delete for Storage Account Blob Service
         :param storage_client: Instance of the Azure StorageManagementClient.
         :param graph_client: Instance of the AzureGraphRbacManagementClient.
         :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
@@ -256,6 +253,27 @@ class StorageAccountNotEncryptedWithCmk(object):
             logging.info("creating a key")
             key = self.create_key(credentials, key_vault_name)
 
+            log = LogSettings(
+                category="AuditEvent",
+                enabled=True,
+                retention_policy=RetentionPolicy(enabled=True, days=180),
+            )
+
+            logging.info("    Creating a Diagnostic setting for key vault logs")
+            logging.info(
+                "    executing monitor_client.diagnostic_settings.create_or_update"
+            )
+            logging.info(f"      resource_uri={key_vault.id}")
+            logging.info(f"      name={key_vault_name}")
+
+            monitor_client.diagnostic_settings.create_or_update(
+                resource_uri=key_vault.id,
+                name=key_vault_name,
+                parameters=DiagnosticSettingsResource(
+                    storage_account_id=stg_acc.id, logs=[log],
+                ),
+            )
+
             logging.info("executing storage_client.storage_accounts.update")
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      account_name={account_name}")
@@ -306,7 +324,9 @@ class StorageAccountNotEncryptedWithCmk(object):
             credential, params["subscription_id"]
         )
         graph_client = GraphRbacManagementClient(credentials, tenant_id, base_url=None)
+        monitor_client = MonitorClient(credential, params["subscription_id"])
         return self.remediate(
+            monitor_client,
             graph_client,
             storage_client,
             keyvault_client,

@@ -15,6 +15,7 @@ Storage account encryption at rest is not configured with customer-managed key (
 The provided Azure service principal must have the following permissions:
 `Microsoft.Storage/storageAccounts/read`
 `Microsoft.Storage/storageAccounts/write`
+`Microsoft.Insights/DiagnosticSettings/Write`
 `Microsoft.KeyVault/vaults/read`
 `Microsoft.KeyVault/vaults/write`
 `Microsoft.KeyVault/vaults/keys/read`
