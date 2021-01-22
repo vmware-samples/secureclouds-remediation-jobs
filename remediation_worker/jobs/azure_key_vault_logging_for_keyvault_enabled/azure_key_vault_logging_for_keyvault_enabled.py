@@ -180,13 +180,8 @@ class EnableKeyVaultLogging(object):
             client_secret=os.environ.get("AZURE_CLIENT_SECRET"),
             tenant_id=os.environ.get("AZURE_TENANT_ID"),
         )
-        credentials_stg = ClientSecretCredential(
-            client_id=os.environ.get("AZURE_CLIENT_ID"),
-            client_secret=os.environ.get("AZURE_CLIENT_SECRET"),
-            tenant_id=os.environ.get("AZURE_TENANT_ID"),
-        )
         storage_client = StorageManagementClient(
-            credentials_stg, params["subscription_id"]
+            credentials, params["subscription_id"]
         )
         keyvault_client = KeyVaultManagementClient(
             credentials, params["subscription_id"]

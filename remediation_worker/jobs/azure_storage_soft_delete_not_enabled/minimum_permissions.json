@@ -1,6 +1,6 @@
 {
     "properties": {
-      "roleName": "remediate_set_default_network_access_deny",
+      "roleName": "remediate_soft_delete_for_blob_service",
       "description": "This role has required permissions to make changes to the storage account",
       "assignableScopes": [
       ],
