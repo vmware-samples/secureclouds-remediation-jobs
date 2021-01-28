@@ -40,7 +40,6 @@ from azure.mgmt.keyvault.models import (
     AccessPolicyEntry,
     Permissions,
     KeyPermissions,
-    SecretPermissions,
 )
 from azure.mgmt.monitor.models import (
     DiagnosticSettingsResource,
@@ -188,7 +187,7 @@ class StorageAccountNotEncryptedWithCmk(object):
         account_name,
         region,
     ):
-        """Enable Soft Delete for Storage Account Blob Service
+        """Configure Storage Account with Customer Managed Key
         :param storage_client: Instance of the Azure StorageManagementClient.
         :param graph_client: Instance of the AzureGraphRbacManagementClient.
         :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
