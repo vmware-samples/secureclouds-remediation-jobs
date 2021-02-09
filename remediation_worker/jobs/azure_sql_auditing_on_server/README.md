@@ -1,6 +1,6 @@
 # Enable SQL Server Auditing
 
-This job enables server blob auditing policy for the SQL Database Server by checking if the Storage Account created by CHSS exists else it creates a Storage Account and assigns a Storage Blob Data Contributer role to the server.
+This job enables server blob auditing policy for the SQL Database Server. It checks for the existence of the Storage Account created by CHSS, if the Storage Account exists then it assigns a Storage Blob Contributer Role to the SQL Server. If the Storage Account Created by CHSS does not exists then it creates one.
 The Storage Account created by CHSS is prefixed with "chss" and contains tag `{"Created By" : "CHSS"}`.
 
 ### Applicable Rule
@@ -20,7 +20,6 @@ The provided Azure service principal must have the following permissions:
 `Microsoft.Sql/servers/auditingSettings/write`
 `Microsoft.Storage/storageAccounts/write`
 `Microsoft.Storage/storageAccounts/read`
-`Microsoft.Authorization/roleAssignments/write`
 `Microsoft.Storage/storageAccounts/blobServices/write`
 `Microsoft.Storage/storageAccounts/blobServices/read`
 `Microsoft.Authorization/roleAssignments/write`

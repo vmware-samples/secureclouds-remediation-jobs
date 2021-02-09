@@ -66,6 +66,16 @@ logging.basicConfig(level=logging.INFO)
 
 
 def generate_name(region, subscription_id, resource_group_name):
+    """Generates a name for the resource
+    :param region: location in which the resource exists
+    :param subscription_id: Azure Subscription Id
+    :param resource_group_name: Resource group name in which the resource exists
+    :type region: str
+    :type subscription_id: str
+    :type resource_group_name: str
+    :returns: resource name
+    :rtype: str
+    """
     random_str = "".join(i for i in subscription_id if i.islower() or i.isdigit())
     subscription_id = random_str[:5]
     random_str = "".join(i for i in region if i.islower() or i.isdigit())
@@ -113,6 +123,16 @@ class SqlServerEnableBlobAuditingPolicy(object):
         }
 
     def check_stg_account(self, storage_client, region, name, resource_group_name):
+        """Checks For the existence of the Storage Account created by CHSS
+        :param storage_client: Instance of the Azure StorageManagementClient.
+        :param region: The location in which the storage account exists.
+        :param name: The Storage Account name.
+        :param resource_group_name: The name of the resource group.
+        :type region: str
+        :type name: str
+        :type resource_group_name: str
+        :returns: StorageAccount object
+        """
         storage_accounts_paged: ItemPaged[
             StorageAccountListResult
         ] = storage_client.storage_accounts.list()
@@ -130,6 +150,16 @@ class SqlServerEnableBlobAuditingPolicy(object):
         return None
 
     def check_key_vault(self, keyvault_client, region, name, resource_group_name):
+        """Checks for the existence of the Key Vault created by CHSS.
+        :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
+        :param region: The location in which the storage account exists.
+        :param name: The Storage Account name.
+        :param resource_group_name: The name of the resource group.
+        :type region: str
+        :type name: str
+        :type resource_group_name: str
+        :returns: Vault Object
+        """
         key_vault_paged: ItemPaged[
             VaultListResult
         ] = keyvault_client.vaults.list_by_subscription()
@@ -149,6 +179,17 @@ class SqlServerEnableBlobAuditingPolicy(object):
     def check_role_assignment(
         self, client_authorization, scope, principal_id, role_definition_id
     ):
+        """Checks if the Role Assignment already exists
+        :param client_authorization: Instance of the Azure AuthorizationManagementClient.
+        :param scope: Scope for which to check the existence of the Role Assignment.
+        :param principal_id: Principal Id of the SQL Server.
+        :param role_definition_id: Role Definition Id.
+        :type scope: str
+        :type principal_id: str
+        :type role_definition_id: str
+        :returns: Boolean indicating success or failure
+        :rtype: bool
+        """
         role_assignment_paged: ItemPaged[
             RoleAssignmentListResult
         ] = client_authorization.role_assignments.list_for_scope(scope=scope)
@@ -164,6 +205,16 @@ class SqlServerEnableBlobAuditingPolicy(object):
         return False
 
     def create_storage_account(self, resource_group_name, name, region, storage_client):
+        """Creates a Storage Account
+        :param storage_client: Instance of the Azure StorageManagementClient.
+        :param region: The location in which the storage account exists.
+        :param name: The Storage Account name.
+        :param resource_group_name: The name of the resource group.
+        :type region: str
+        :type name: str
+        :type resource_group_name: str
+        :return : StorageAccount object
+        """
         from azure.mgmt.storage.models import Sku
 
         create_params = StorageAccountCreateParameters(
@@ -197,6 +248,17 @@ class SqlServerEnableBlobAuditingPolicy(object):
     def update_storage_account_encryption(
         self, storage_client, resource_group_name, stg_name, key_name, vault_uri
     ):
+        """Updates Storage Account Encryption for a Storage Account.
+        :param storage_client: Instance of the Azure StorageManagementClient.
+        :param resource_group_name: The name of the resource group.
+        :param stg_name: The Storage Account name.
+        :param key_name: Name of the Key to encrypt the Storage Account with.
+        :param vault_uri: Key Vault uri in which the Key exists.
+        :type resource_group_name: str
+        :type stg_name: str
+        :type key_name: str
+        :type vault_uri: str
+        """
         logging.info("    Encrypting Storage Account with Customer Managed Key")
         logging.info("    executing storage_client.storage_accounts.update")
         logging.info(f"      resource_group_name={resource_group_name}")
@@ -219,6 +281,16 @@ class SqlServerEnableBlobAuditingPolicy(object):
     def create_diagnostic_setting(
         self, monitor_client, key_vault_id, key_vault_name, stg_account_id, log
     ):
+        """Creates a diagnostic setting
+        :param monitor_client: Instance of the Azure StorageManagementClient.
+        :param key_vault_id: The resource Id of the Key Vault.
+        :param key_vault_name: Name of the Key Vault.
+        :param stg_account_id: The Storage Account resource Id.
+        :param log: Instance of Azure Monitor LogSettings
+        :type key_vault_id: str
+        :type key_vault_name: str
+        :type stg_account_id: str
+        """
         logging.info("    Creating a Diagnostic setting for key vault logs")
         logging.info(
             "    executing monitor_client.diagnostic_settings.create_or_update"
@@ -243,6 +315,22 @@ class SqlServerEnableBlobAuditingPolicy(object):
         app_object_id,
         stg_principal_id,
     ):
+        """Creates a Key Vault
+        :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
+        :param resource_group_name: The name of the resource group.
+        :param key_vault_name: Name of the Key Vault.
+        :param region: location of the Key Vault.
+        :param tenant_id: Azure tenant Id
+        :param app_object_id: Object Id of the application
+        :param stg_principal_id: Principal Id of the Storage Account
+        :type resource_group_name: str
+        :type key_vault_name: str
+        :type region: str
+        :type tenant_id: str
+        :type app_object_id: str
+        :type stg_principal_id: str
+        :returns: Vault object
+        """
         access_policy_storage_account = AccessPolicyEntry(
             tenant_id=tenant_id,
             object_id=stg_principal_id,
@@ -305,6 +393,21 @@ class SqlServerEnableBlobAuditingPolicy(object):
         app_object_id,
         stg_object_id,
     ):
+        """Updates Key Vault Access Policy
+        :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
+        :param resource_group_name: The name of the resource group.
+        :param key_vault_name: Name of the Key Vault.
+        :param region: The location in which the Key Vault exists.
+        :param tenant_id: Azure tenant Id
+        :param app_object_id: Object Id of the application
+        :param stg_principal_id: Principal Id of the Storage Account
+        :type resource_group_name: str
+        :type key_vault_name: str
+        :type region: str
+        :type tenant_id: str
+        :type app_object_id: str
+        :type stg_principal_id: str
+        """
         access_policy_storage = AccessPolicyEntry(
             tenant_id=tenant_id,
             object_id=stg_object_id,
@@ -348,6 +451,14 @@ class SqlServerEnableBlobAuditingPolicy(object):
         )
 
     def create_key(self, credential, key_vault_name, suffix):
+        """Creates a Key within the given Key Vault
+        :param credential: Azure Credentials
+        :param key_vault_name: Name of the Key Vault.
+        :param suffix: suffix for Key name
+        :type key_vault_name: str
+        :type suffix: str
+        :returns: Azure Key object which was created
+        """
         d = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         date = datetime.datetime.strptime(
             d[0:19], "%Y-%m-%dT%H:%M:%S"
@@ -373,18 +484,33 @@ class SqlServerEnableBlobAuditingPolicy(object):
         subscription_id,
         client_authorization,
         guid,
-        Scope,
+        scope,
         principalId,
         sql_server_name,
     ):
+        """Creates a Role Assignment
+        :param stg_account_name: Storage Account name
+        :param subscription_id: Azure Subscription Id
+        :param client_authorization: Instance of the Azure AuthorizationManagementClient.
+        :param guid: UUID for role name
+        :param scope: The scope of the role assignment.
+        :param principalId: Principal Id of the SQL Server
+        :param sql_server_name: SQL Server Name
+        :type stg_account_name: str
+        :type subscription_id: str
+        :type guid: str
+        :type scope: str
+        :type principalId: str
+        :type sql_server_name: str
+        """
         logging.info(
             f"Creating a Role Assignment for Storage Account {stg_account_name} and assigning Storage Blob Data Contributer Role to the SQL Database Server {sql_server_name}"
         )
         logging.info("executing client_authorization.role_assignments.create")
-        logging.info(f"      scope={Scope}")
+        logging.info(f"      scope={scope}")
         logging.info(f"      role_assignment_name={guid}")
         client_authorization.role_assignments.create(
-            scope=Scope,
+            scope=scope,
             role_assignment_name=guid,
             parameters=RoleAssignmentCreateParameters(
                 properties=RoleAssignmentProperties(
@@ -397,6 +523,15 @@ class SqlServerEnableBlobAuditingPolicy(object):
     def create_server_blob_auditing_policy(
         self, resource_group_name, sql_server_name, stg_account_name, client
     ):
+        """Creates Server Blob Auditing Policy
+        :param resource_group_name: Resource group name
+        :param sql_server_name: SQL Server name
+        :param stg_account_name: Storage Account name
+        :param client: Instance of the Azure SqlManagementClient.
+        :type resource_group_name: str
+        :type sql_server_name: str
+        :type stg_account_name: str
+        """
         logging.info("Enabling Server blob auditing policy for Azure SQL Server")
         logging.info(
             "    executing client.server_blob_auditing_policies.create_or_update"
@@ -416,6 +551,17 @@ class SqlServerEnableBlobAuditingPolicy(object):
     def ensure_identity_assigned(
         self, client, resource_group_name, sql_server_name, region
     ):
+        """Checks if the Identity is assigned to the SQL Server. If not then it assigns the identity
+        :param client: Instance of the Azure SqlManagementClient.
+        :param resource_group_name: Resource group name
+        :param sql_server_name: SQL Server name
+        :param region: location in which the SQL Server exists
+        :type resource_group_name: str
+        :type sql_server_name: str
+        :type region: str
+        :returns: Principal Id of the SQL Server
+        :rtype: str
+        """
         server = client.servers.get(
             resource_group_name=resource_group_name, server_name=sql_server_name,
         )
@@ -468,15 +614,19 @@ class SqlServerEnableBlobAuditingPolicy(object):
         """
         try:
             guid = uuid.uuid4()
+            # Check if identity is assigned. If not then assign the identity.
             principalId = self.ensure_identity_assigned(
                 client, resource_group_name, sql_server_name, region
             )
 
+            # Check if the Storage Account Created by CHSS exists
             stg_name = generate_name(region, subscription_id, resource_group_name)
             stg_account = self.check_stg_account(
                 client_storage, region, stg_name, resource_group_name
             )
+            # If Storage Account created by CHSS does not exists
             if stg_account is None:
+                # Create a Storage Account to store logs if it does not exists
                 stg_account = self.create_storage_account(
                     resource_group_name, stg_name, region, client_storage,
                 )
@@ -491,6 +641,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
                     enabled=True,
                     retention_policy=RetentionPolicy(enabled=True, days=180),
                 )
+                # Check if the keyvault created by CHSS exists
                 encryption_key_vault_name = generate_name(
                     region, subscription_id, resource_group_name
                 )
@@ -500,7 +651,9 @@ class SqlServerEnableBlobAuditingPolicy(object):
                     encryption_key_vault_name,
                     resource_group_name,
                 )
+                # If Key Vault created by CHSS does not exists
                 if key_vault is None:
+                    # Create a Key Vault if it does not exists
                     encryption_key_vault = self.create_key_vault(
                         keyvault_client,
                         resource_group_name,
@@ -510,9 +663,11 @@ class SqlServerEnableBlobAuditingPolicy(object):
                         app_object_id,
                         stg_account.identity.principal_id,
                     )
+                    # Create a Key to encrypt the Storage Account
                     key = self.create_key(
                         credentials, encryption_key_vault_name, stg_account.name
                     )
+                    # Encrypt the Storage Account using the above key
                     self.update_storage_account_encryption(
                         client_storage,
                         resource_group_name,
@@ -520,6 +675,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
                         key.name,
                         encryption_key_vault.properties.vault_uri,
                     )
+                    # Create a diagnostic setting to store Key Vault logs
                     self.create_diagnostic_setting(
                         monitor_client,
                         encryption_key_vault.id,
@@ -528,6 +684,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
                         log,
                     )
                 else:
+                    # If the Key Vault exists. Update the access policy of the Key Vault by giving access to the app and Storage Account
                     self.update_key_vault_access_policy(
                         keyvault_client,
                         resource_group_name,
@@ -536,8 +693,10 @@ class SqlServerEnableBlobAuditingPolicy(object):
                         app_object_id,
                         stg_account.identity.principal_id,
                     )
+                    # Create a Key to encrypt the Storage Account
                     key = self.create_key(credentials, key_vault.name, stg_account.name)
                     key_vault_uri = key_vault.properties.vault_uri
+                    # Encrypt the Storage Account using the above Key
                     self.update_storage_account_encryption(
                         client_storage,
                         resource_group_name,
@@ -546,42 +705,49 @@ class SqlServerEnableBlobAuditingPolicy(object):
                         key_vault_uri,
                     )
 
-                Scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{stg_account.name}"
+                scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{stg_account.name}"
+                # Assign Storage Blob Contributer role to the SQL Server
                 self.create_role_assignment(
                     stg_name,
                     subscription_id,
                     client_authorization,
                     guid,
-                    Scope,
+                    scope,
                     principalId,
                     sql_server_name,
                 )
+                # Enable blob auditing for the SQL Server
                 self.create_server_blob_auditing_policy(
                     resource_group_name, sql_server_name, stg_name, client
                 )
             else:
+                # If the Storage Account Created by CHSS exists
                 stg_id = stg_account.id
                 stg_components = stg_id.split("/")
                 resource_grp = stg_components[4]
-                Scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_grp}/providers/Microsoft.Storage/storageAccounts/{stg_account.name}"
+                scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_grp}/providers/Microsoft.Storage/storageAccounts/{stg_account.name}"
                 role_definition_id = f"/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"
+                # Check if the role assignment for the SQL Server in the Storage Account already exists
                 status = self.check_role_assignment(
-                    client_authorization, Scope, principalId, role_definition_id
+                    client_authorization, scope, principalId, role_definition_id
                 )
                 if status:
+                    # If role assignment exists, enable blob auditing for the SQL Server
                     self.create_server_blob_auditing_policy(
                         resource_group_name, sql_server_name, stg_account.name, client
                     )
                 else:
+                    # If role assignment does not exists, assign the Storage Blob Contributer Role to the SQL Server
                     self.create_role_assignment(
                         stg_account.name,
                         subscription_id,
                         client_authorization,
                         guid,
-                        Scope,
+                        scope,
                         principalId,
                         sql_server_name,
                     )
+                    # Enable blob auditing for the SQL Server
                     self.create_server_blob_auditing_policy(
                         resource_group_name, sql_server_name, stg_account.name, client
                     )
