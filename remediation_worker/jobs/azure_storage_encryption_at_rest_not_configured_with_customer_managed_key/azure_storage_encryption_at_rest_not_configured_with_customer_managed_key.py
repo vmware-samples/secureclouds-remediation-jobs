@@ -19,6 +19,8 @@ import logging
 import datetime
 from dateutil import parser as date_parse
 
+from typing import List
+from azure.core.paging import ItemPaged
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.mgmt.monitor import MonitorClient
@@ -28,10 +30,18 @@ from azure.graphrbac import GraphRbacManagementClient
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.storage.models import (
     StorageAccountUpdateParameters,
+    StorageAccountCreateParameters,
     Encryption,
     KeySource,
     KeyVaultProperties,
     Identity,
+    DefaultAction,
+    SkuName,
+    SkuTier,
+    NetworkRuleSet,
+    BlobServiceProperties,
+    DeleteRetentionPolicy,
+    StorageAccountListResult,
 )
 from azure.mgmt.keyvault.models import (
     VaultCreateOrUpdateParameters,
@@ -40,7 +50,10 @@ from azure.mgmt.keyvault.models import (
     AccessPolicyEntry,
     Permissions,
     KeyPermissions,
-    SecretPermissions,
+    VaultListResult,
+    AccessPolicyUpdateKind,
+    VaultAccessPolicyParameters,
+    VaultAccessPolicyProperties,
 )
 from azure.mgmt.monitor.models import (
     DiagnosticSettingsResource,
@@ -51,14 +64,103 @@ from azure.mgmt.monitor.models import (
 logging.basicConfig(level=logging.INFO)
 
 
-def generate_key_vault_name(prefix):
-    if len(prefix) >= 15:
-        prefix = str(prefix[:14])
-    result_str = prefix + "-keyvault"
+def generate_name(region, subscription_id, resource_group_name):
+    random_str = "".join(i for i in subscription_id if i.islower() or i.isdigit())
+    subscription_id = random_str[:5]
+    random_str = "".join(i for i in region if i.islower() or i.isdigit())
+    region = random_str[-6:]
+    random_str = "".join(i for i in resource_group_name if i.islower() or i.isdigit())
+    resource_group_name = random_str[-5:]
+    result_str = "chss" + subscription_id + resource_group_name + region + "logs"
     return result_str
 
 
 class StorageAccountNotEncryptedWithCmk(object):
+    def check_stg_account(self, storage_client, region, name, resource_group_name):
+        storage_accounts_paged: ItemPaged[
+            StorageAccountListResult
+        ] = storage_client.storage_accounts.list()
+        storage_accounts_list: List[dict] = list(storage_accounts_paged)
+        for stg_account in storage_accounts_list:
+            stg_id = stg_account.id
+            stg_components = stg_id.split("/")
+            resource_grp = stg_components[4]
+            if (
+                stg_account.name == name
+                and stg_account.location == region
+                and resource_grp == resource_group_name
+            ):
+                return stg_account
+        return None
+
+    def check_key_vault(self, keyvault_client, region, name, resource_group_name):
+        key_vault_paged: ItemPaged[
+            VaultListResult
+        ] = keyvault_client.vaults.list_by_subscription()
+        key_vault_list: List[dict] = list(key_vault_paged)
+        for key_vault in key_vault_list:
+            key_vault_id = key_vault.id
+            key_vault_components = key_vault_id.split("/")
+            resource_grp = key_vault_components[4]
+            if (
+                key_vault.name == name
+                and key_vault.location == region
+                and resource_grp == resource_group_name
+            ):
+                return key_vault
+        return None
+
+    def create_storage_account(
+        self, resource_group_name, name, region, storage_client,
+    ):
+        from azure.mgmt.storage.models import Sku
+
+        create_params = StorageAccountCreateParameters(
+            location=region,
+            sku=Sku(name=SkuName.STANDARD_LRS, tier=SkuTier.STANDARD),
+            identity=Identity(type="SystemAssigned"),
+            kind="StorageV2",
+            enable_https_traffic_only=True,
+            network_rule_set=NetworkRuleSet(default_action=DefaultAction.DENY),
+            tags={"Created By": "CHSS"},
+        )
+        stg_account = storage_client.storage_accounts.begin_create(
+            resource_group_name=resource_group_name,
+            account_name=name,
+            parameters=create_params,
+        ).result()
+
+        storage_client.blob_services.set_service_properties(
+            resource_group_name=resource_group_name,
+            account_name=name,
+            parameters=BlobServiceProperties(
+                delete_retention_policy=DeleteRetentionPolicy(enabled=True, days=7)
+            ),
+        )
+        return stg_account
+
+    def update_storage_account_encryption(
+        self, storage_client, resource_group_name, stg_name, key_name, vault_uri
+    ):
+        logging.info("    Encrypting Storage Account with Customer Managed Key")
+        logging.info("    executing storage_client.storage_accounts.update")
+        logging.info(f"      resource_group_name={resource_group_name}")
+        logging.info(f"      account_name={stg_name}")
+        logging.info(f"      key_vault_uri={vault_uri}")
+        logging.info(f"      key_name={key_name}")
+        storage_client.storage_accounts.update(
+            resource_group_name=resource_group_name,
+            account_name=stg_name,
+            parameters=StorageAccountUpdateParameters(
+                encryption=Encryption(
+                    key_source=KeySource.MICROSOFT_KEYVAULT,
+                    key_vault_properties=KeyVaultProperties(
+                        key_name=key_name, key_vault_uri=vault_uri,
+                    ),
+                ),
+            ),
+        )
+
     def create_key_vault(
         self,
         keyvault_client,
@@ -98,6 +200,7 @@ class StorageAccountNotEncryptedWithCmk(object):
         )
         key_vault_properties = VaultCreateOrUpdateParameters(
             location=region,
+            tags={"Created By": "CHSS"},
             properties=VaultProperties(
                 tenant_id=tenant_id,
                 sku=Sku(family="A", name="standard",),
@@ -110,6 +213,10 @@ class StorageAccountNotEncryptedWithCmk(object):
                 enable_purge_protection=True,
             ),
         )
+        logging.info("creating a key vault")
+        logging.info("executing keyvault_client.vaults.begin_create_or_update")
+        logging.info(f"      resource_group_name={resource_group_name}")
+        logging.info(f"      vault_name={key_vault_name}")
         vault = keyvault_client.vaults.begin_create_or_update(
             resource_group_name=resource_group_name,
             vault_name=key_vault_name,
@@ -117,7 +224,7 @@ class StorageAccountNotEncryptedWithCmk(object):
         ).result()
         return vault
 
-    def create_key(self, credential, key_vault_name):
+    def create_key(self, credential, key_vault_name, suffix):
         d = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         date = datetime.datetime.strptime(
             d[0:19], "%Y-%m-%dT%H:%M:%S"
@@ -129,11 +236,105 @@ class StorageAccountNotEncryptedWithCmk(object):
             vault_url=f"https://{key_vault_name}.vault.azure.net/",
             credential=credential,
         )
-        rsa_key_name = key_vault_name + "-key"
+        rsa_key_name = key_vault_name + "-" + suffix
+        logging.info("creating a key")
         rsa_key = key_client.create_rsa_key(
             rsa_key_name, size=2048, expires_on=expires_on, enabled=True
         )
         return rsa_key
+
+    def update_key_vault_access_policy(
+        self,
+        keyvault_client,
+        resource_group_name,
+        key_vault_name,
+        tenant_id,
+        app_object_id,
+        stg_object_id,
+    ):
+        access_policy_storage = AccessPolicyEntry(
+            tenant_id=tenant_id,
+            object_id=stg_object_id,
+            permissions=Permissions(
+                keys=[
+                    KeyPermissions.GET,
+                    KeyPermissions.UNWRAP_KEY,
+                    KeyPermissions.WRAP_KEY,
+                ],
+            ),
+        )
+        access_policy_app = AccessPolicyEntry(
+            tenant_id=tenant_id,
+            object_id=app_object_id,
+            permissions=Permissions(
+                keys=[
+                    KeyPermissions.GET,
+                    KeyPermissions.LIST,
+                    KeyPermissions.CREATE,
+                    KeyPermissions.UPDATE,
+                    KeyPermissions.DELETE,
+                    KeyPermissions.BACKUP,
+                    KeyPermissions.RESTORE,
+                    KeyPermissions.RECOVER,
+                ],
+            ),
+        )
+        access_policy = [access_policy_app, access_policy_storage]
+
+        logging.info("Updating Key Vault Access Policy")
+        logging.info("executing keyvault_client.vaults.update_access_policy")
+        logging.info(f"      resource_group_name={resource_group_name}")
+        logging.info(f"      vault_name={key_vault_name}")
+
+        keyvault_client.vaults.update_access_policy(
+            resource_group_name=resource_group_name,
+            vault_name=key_vault_name,
+            operation_kind=AccessPolicyUpdateKind.ADD,
+            parameters=VaultAccessPolicyParameters(
+                properties=VaultAccessPolicyProperties(access_policies=access_policy),
+            ),
+        )
+
+    def create_diagnostic_setting(
+        self, monitor_client, key_vault_id, key_vault_name, stg_account_id, log
+    ):
+        logging.info("    Creating a Diagnostic setting for key vault logs")
+        logging.info(
+            "    executing monitor_client.diagnostic_settings.create_or_update"
+        )
+        logging.info(f"      resource_uri={key_vault_id}")
+        logging.info(f"      name={key_vault_name}")
+        monitor_client.diagnostic_settings.create_or_update(
+            resource_uri=key_vault_id,
+            name=key_vault_name,
+            parameters=DiagnosticSettingsResource(
+                storage_account_id=stg_account_id, logs=[log],
+            ),
+        )
+
+    def ensure_identity_assigned(
+        self, resource_group_name, account_name, region, storage_client
+    ):
+        stg_acc = storage_client.storage_accounts.get_properties(
+            resource_group_name=resource_group_name, account_name=account_name,
+        )
+        if stg_acc.identity is None:
+
+            logging.info(f"Assigning Identity to the Storage Account {account_name}")
+            logging.info("executing storage_client.storage_accounts.update")
+            logging.info(f"      resource_group_name={resource_group_name}")
+            logging.info(f"      account_name={account_name}")
+
+            updated_stg_acc = storage_client.storage_accounts.update(
+                resource_group_name=resource_group_name,
+                account_name=account_name,
+                parameters=StorageAccountUpdateParameters(
+                    identity=Identity(type="SystemAssigned")
+                ),
+            )
+            return updated_stg_acc.identity.principal_id
+        else:
+            return stg_acc.identity.principal_id
 
     def parse(self, payload):
         """Parse payload received from Remediation Service.
@@ -187,6 +388,7 @@ class StorageAccountNotEncryptedWithCmk(object):
         resource_group_name,
         account_name,
         region,
+        subscription_id,
     ):
         """Enable Soft Delete for Storage Account Blob Service
         :param storage_client: Instance of the Azure StorageManagementClient.
@@ -210,87 +412,104 @@ class StorageAccountNotEncryptedWithCmk(object):
             )
             app_object_id = app_details.value
 
-            stg_acc = storage_client.storage_accounts.get_properties(
-                resource_group_name=resource_group_name, account_name=account_name,
+            principal_id = self.ensure_identity_assigned(
+                resource_group_name, account_name, region, storage_client
             )
-            if stg_acc.identity is None:
 
-                logging.info(
-                    f"Assigning Identity to the Storage Account {account_name}"
+            key_vault_name = generate_name(region, subscription_id, resource_group_name)
+            key_vault = self.check_key_vault(
+                keyvault_client, region, key_vault_name, resource_group_name
+            )
+            if key_vault is None:
+                key_vault = self.create_key_vault(
+                    keyvault_client,
+                    resource_group_name,
+                    key_vault_name,
+                    region,
+                    tenant_id,
+                    app_object_id,
+                    principal_id,
                 )
-                logging.info("executing storage_client.storage_accounts.update")
-                logging.info(f"      resource_group_name={resource_group_name}")
-                logging.info(f"      account_name={account_name}")
+                key = self.create_key(credentials, key_vault_name, account_name)
+                key_vault_uri = key_vault.properties.vault_uri
 
-                updated_stg_acc = storage_client.storage_accounts.update(
-                    resource_group_name=resource_group_name,
-                    account_name=account_name,
-                    parameters=StorageAccountUpdateParameters(
-                        identity=Identity(type="SystemAssigned")
-                    ),
+                self.update_storage_account_encryption(
+                    storage_client,
+                    resource_group_name,
+                    account_name,
+                    key.name,
+                    key_vault_uri,
+                )
+                log = LogSettings(
+                    category="AuditEvent",
+                    enabled=True,
+                    retention_policy=RetentionPolicy(enabled=True, days=180),
                 )
 
-                stg_principal_id = updated_stg_acc.identity.principal_id
+                stg_name = generate_name(region, subscription_id, resource_group_name)
+                stg_account = self.check_stg_account(
+                    storage_client, region, stg_name, resource_group_name
+                )
+                if stg_account is None:
+                    stg_account = self.create_storage_account(
+                        resource_group_name, stg_name, region, storage_client
+                    )
+
+                    new_key = self.create_key(
+                        credentials, key_vault.name, stg_account.name
+                    )
+
+                    principal_id = stg_account.identity.principal_id
+
+                    self.update_key_vault_access_policy(
+                        keyvault_client,
+                        resource_group_name,
+                        key_vault_name,
+                        tenant_id,
+                        app_object_id,
+                        principal_id,
+                    )
+                    self.update_storage_account_encryption(
+                        storage_client,
+                        resource_group_name,
+                        stg_name,
+                        new_key.name,
+                        key_vault_uri,
+                    )
+                    self.create_diagnostic_setting(
+                        monitor_client,
+                        key_vault.id,
+                        key_vault_name,
+                        stg_account.id,
+                        log,
+                    )
+                else:
+                    self.create_diagnostic_setting(
+                        monitor_client,
+                        key_vault.id,
+                        key_vault.name,
+                        stg_account.id,
+                        log,
+                    )
             else:
-                stg_principal_id = stg_acc.identity.principal_id
+                self.update_key_vault_access_policy(
+                    keyvault_client,
+                    resource_group_name,
+                    key_vault_name,
+                    tenant_id,
+                    app_object_id,
+                    principal_id,
+                )
+                key = self.create_key(credentials, key_vault.name, account_name)
+                key_vault_uri = key_vault.properties.vault_uri
+                self.update_storage_account_encryption(
+                    storage_client,
+                    resource_group_name,
+                    account_name,
+                    key.name,
+                    key_vault_uri,
+                )
 
-            key_vault_name = generate_key_vault_name(account_name)
-
-            logging.info("creating a key vault")
-            logging.info("executing keyvault_client.vaults.begin_create_or_update")
-            logging.info(f"      resource_group_name={resource_group_name}")
-            logging.info(f"      vault_name={key_vault_name}")
-
-            key_vault = self.create_key_vault(
-                keyvault_client,
-                resource_group_name,
-                key_vault_name,
-                region,
-                tenant_id,
-                app_object_id,
-                stg_principal_id,
-            )
-            logging.info("creating a key")
-            key = self.create_key(credentials, key_vault_name)
-
-            log = LogSettings(
-                category="AuditEvent",
-                enabled=True,
-                retention_policy=RetentionPolicy(enabled=True, days=180),
-            )
-
-            logging.info("    Creating a Diagnostic setting for key vault logs")
-            logging.info(
-                "    executing monitor_client.diagnostic_settings.create_or_update"
-            )
-            logging.info(f"      resource_uri={key_vault.id}")
-            logging.info(f"      name={key_vault_name}")
-
-            monitor_client.diagnostic_settings.create_or_update(
-                resource_uri=key_vault.id,
-                name=key_vault_name,
-                parameters=DiagnosticSettingsResource(
-                    storage_account_id=stg_acc.id, logs=[log],
-                ),
-            )
-
-            logging.info("executing storage_client.storage_accounts.update")
-            logging.info(f"      resource_group_name={resource_group_name}")
-            logging.info(f"      account_name={account_name}")
-
-            storage_client.storage_accounts.update(
-                resource_group_name=resource_group_name,
-                account_name=account_name,
-                parameters=StorageAccountUpdateParameters(
-                    encryption=Encryption(
-                        key_source=KeySource.MICROSOFT_KEYVAULT,
-                        key_vault_properties=KeyVaultProperties(
-                            key_name=key.name,
-                            key_vault_uri=key_vault.properties.vault_uri,
-                        ),
-                    ),
-                ),
-            )
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
@@ -336,6 +555,7 @@ class StorageAccountNotEncryptedWithCmk(object):
             params["resource_group_name"],
             params["account_name"],
             params["region"],
+            params["subscription_id"],
         )
 
 

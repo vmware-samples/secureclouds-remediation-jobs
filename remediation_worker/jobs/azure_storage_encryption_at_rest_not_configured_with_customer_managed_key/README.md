@@ -1,6 +1,8 @@
 # Configure Storage Account Encryption at rest with Customer Managed Keys
 
-This job configures Storage Account Encryption at rest with Customer Managed Keys.
+This job configures Storage Account Encryption at rest with Customer Managed Keys. It checks for the existence of the Key Vault created by CHSS in a give resource group and region, if the Key Vault exists then it creates a new Key in it and then encrypts the Storage Account. If the Key Vault does not exists then it creates one.
+
+The Key Vault created by CHSS is prefixed with "chss" and contains tag `{"Created By" : "CHSS"}`.
 
 ### Applicable Rule
 
@@ -40,13 +42,16 @@ You may run test using following command under vss-remediation-worker-job-code-p
     python3 -m pytest test
 ```
 ## Deployment
-Provision a Virtual Machine Create an EC2 instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker Install Docker on the newly provisioned EC2 instance. You can refer to the [docs here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html) for more information.
-Deploy the worker image SSH into the EC2 instance and run the command below to deploy the worker image:
+Provision a Virtual Machine Create an Azure Virtual Machine instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
+Setup Docker Install Docker on the newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html) for more information.
+Deploy the worker image SSH into the Azure Virtual Machine instance and run the command below to deploy the worker image:
   ```shell script
-  docker run --rm -it --name worker \
-  -e VSS_CLIENT_ID={ENTER CLIENT ID}
-  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET} \
+  docker run --rm -it --name {worker_name}\
+  -e VSS_CLIENT_ID={ENTER CLIENT ID}\
+  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET}\
+  -e AZURE_CLIENT_ID={ENTER AZURE_CLIENT_ID} \
+  -e AZURE_CLIENT_SECRET={ENTER AZURE_CLIENT_SECRET} \
+  -e AZURE_TENANT_ID={ENTER AZURE_TENANT_ID} \
   vmware/vss-remediation-worker:latest-python
   ```
 ## Contributing

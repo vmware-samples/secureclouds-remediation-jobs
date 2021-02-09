@@ -9,6 +9,8 @@
           "actions": [
             "Microsoft.Storage/storageAccounts/read",
             "Microsoft.Storage/storageAccounts/write",
+            "Microsoft.Storage/storageAccounts/blobServices/write",
+            "Microsoft.Storage/storageAccounts/blobServices/read",
             "Microsoft.Insights/DiagnosticSettings/Write",
             "Microsoft.KeyVault/vaults/read",
             "Microsoft.KeyVault/vaults/write",
