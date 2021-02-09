@@ -2,7 +2,7 @@
 
 This job configures Storage Account Encryption at rest with Customer Managed Keys. It checks for the existence of the Key Vault created by CHSS in a give resource group and region, if the Key Vault exists then it creates a new Key in it and then encrypts the Storage Account. If the Key Vault does not exists then it creates one.
 
-The Key Vault created by CHSS is prefixed with "chss" and contains tag `{"Created By" : "CHSS"}`.
+The Key Vault created by CHSS is prefixed with "chss" and is tagged by `{"Created By" : "CHSS"}`.
 
 ### Applicable Rule
 
