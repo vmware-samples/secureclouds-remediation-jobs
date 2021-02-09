@@ -1,6 +1,7 @@
 # Enable Logging For Keyvault
 
-This job enables Logging for Key Vault. It checks for the existance of Storage Account with tags `{"CreatedBy": "VSS", "Stores": "Key Vault Logs"}` in the given region, if the Storage Account exists then it stores the Key Vault Logs in it. Else it creates a new Storage Account to store the Key Vault logs.
+This job enables Logging for Key Vault. It checks for the existance of Storage Account created by CHSS in the given resource group and region, if the Storage Account exists then it stores the Key Vault Logs in it. Else it creates a new Storage Account to store the Key Vault logs.
+The Storage Account created by CHSS is prefixed with "chss" and contains tag `{"Created By" : "CHSS"}`.
 
 ### Applicable Rule
 
