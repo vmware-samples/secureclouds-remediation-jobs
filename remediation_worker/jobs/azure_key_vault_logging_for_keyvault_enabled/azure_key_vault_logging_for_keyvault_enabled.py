@@ -65,6 +65,16 @@ logging.basicConfig(level=logging.INFO)
 
 
 def generate_name(region, subscription_id, resource_group_name):
+    """Generates a name for the resource
+    :param region: location in which the resource exists
+    :param subscription_id: Azure Subscription Id
+    :param resource_group_name: Resource group name in which the resource exists
+    :type region: str
+    :type subscription_id: str
+    :type resource_group_name: str
+    :returns: resource name
+    :rtype: str
+    """
     random_str = "".join(i for i in subscription_id if i.islower() or i.isdigit())
     subscription_id = random_str[:5]
     random_str = "".join(i for i in region if i.islower() or i.isdigit())
@@ -120,6 +130,16 @@ class EnableKeyVaultLogging(object):
     def create_storage_account(
         self, resource_group_name, name, region, storage_client,
     ):
+        """Creates a Storage Account
+        :param storage_client: Instance of the Azure StorageManagementClient.
+        :param region: The location in which the storage account exists.
+        :param name: The Storage Account name.
+        :param resource_group_name: The name of the resource group.
+        :type region: str
+        :type name: str
+        :type resource_group_name: str
+        :return : StorageAccount object
+        """
         from azure.mgmt.storage.models import Sku
 
         create_params = StorageAccountCreateParameters(
@@ -149,6 +169,17 @@ class EnableKeyVaultLogging(object):
     def update_storage_account_encryption(
         self, storage_client, resource_group_name, stg_name, key_name, vault_uri
     ):
+        """Updates Storage Account Encryption for a Storage Account.
+        :param storage_client: Instance of the Azure StorageManagementClient.
+        :param resource_group_name: The name of the resource group.
+        :param stg_name: The Storage Account name.
+        :param key_name: Name of the Key to encrypt the Storage Account with.
+        :param vault_uri: Key Vault uri in which the Key exists.
+        :type resource_group_name: str
+        :type stg_name: str
+        :type key_name: str
+        :type vault_uri: str
+        """
         logging.info("    Encrypting Storage Account with Customer Managed Key")
         logging.info("    executing storage_client.storage_accounts.update")
         logging.info(f"      resource_group_name={resource_group_name}")
@@ -169,6 +200,16 @@ class EnableKeyVaultLogging(object):
         )
 
     def check_stg_account(self, storage_client, region, name, resource_group_name):
+        """Checks For the existence of the Storage Account created by CHSS
+        :param storage_client: Instance of the Azure StorageManagementClient.
+        :param region: The location in which the storage account exists.
+        :param name: The Storage Account name.
+        :param resource_group_name: The name of the resource group.
+        :type region: str
+        :type name: str
+        :type resource_group_name: str
+        :returns: StorageAccount object
+        """
         storage_accounts_paged: ItemPaged[
             StorageAccountListResult
         ] = storage_client.storage_accounts.list()
@@ -186,6 +227,16 @@ class EnableKeyVaultLogging(object):
         return None
 
     def check_key_vault(self, keyvault_client, region, name, resource_group_name):
+        """Checks for the existence of the Key Vault created by CHSS.
+        :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
+        :param region: The location in which the storage account exists.
+        :param name: The Storage Account name.
+        :param resource_group_name: The name of the resource group.
+        :type region: str
+        :type name: str
+        :type resource_group_name: str
+        :returns: Vault Object
+        """
         key_vault_paged: ItemPaged[
             VaultListResult
         ] = keyvault_client.vaults.list_by_subscription()
@@ -205,6 +256,16 @@ class EnableKeyVaultLogging(object):
     def create_diagnostic_setting(
         self, monitor_client, key_vault_id, key_vault_name, stg_account_id, log
     ):
+        """Creates a diagnostic setting
+        :param monitor_client: Instance of the Azure StorageManagementClient.
+        :param key_vault_id: The resource Id of the Key Vault.
+        :param key_vault_name: Name of the Key Vault.
+        :param stg_account_id: The Storage Account resource Id.
+        :param log: Instance of Azure Monitor LogSettings
+        :type key_vault_id: str
+        :type key_vault_name: str
+        :type stg_account_id: str
+        """
         logging.info("    Creating a Diagnostic setting for key vault logs")
         logging.info(
             "    executing monitor_client.diagnostic_settings.create_or_update"
@@ -229,6 +290,22 @@ class EnableKeyVaultLogging(object):
         app_object_id,
         stg_principal_id,
     ):
+        """Creates a Key Vault
+        :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
+        :param resource_group_name: The name of the resource group.
+        :param key_vault_name: Name of the Key Vault.
+        :param region: location of the Key Vault.
+        :param tenant_id: Azure tenant Id
+        :param app_object_id: Object Id of the application
+        :param stg_principal_id: Principal Id of the Storage Account
+        :type resource_group_name: str
+        :type key_vault_name: str
+        :type region: str
+        :type tenant_id: str
+        :type app_object_id: str
+        :type stg_principal_id: str
+        :returns: Vault object
+        """
         access_policy_storage_account = AccessPolicyEntry(
             tenant_id=tenant_id,
             object_id=stg_principal_id,
@@ -291,6 +368,21 @@ class EnableKeyVaultLogging(object):
         app_object_id,
         stg_object_id,
     ):
+        """Updates Key Vault Access Policy
+        :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
+        :param resource_group_name: The name of the resource group.
+        :param key_vault_name: Name of the Key Vault.
+        :param region: The location in which the Key Vault exists.
+        :param tenant_id: Azure tenant Id
+        :param app_object_id: Object Id of the application
+        :param stg_principal_id: Principal Id of the Storage Account
+        :type resource_group_name: str
+        :type key_vault_name: str
+        :type region: str
+        :type tenant_id: str
+        :type app_object_id: str
+        :type stg_principal_id: str
+        """
         access_policy_storage = AccessPolicyEntry(
             tenant_id=tenant_id,
             object_id=stg_object_id,
@@ -334,6 +426,14 @@ class EnableKeyVaultLogging(object):
         )
 
     def create_key(self, credential, key_vault_name, suffix):
+        """Creates a Key within the given Key Vault
+        :param credential: Azure Credentials
+        :param key_vault_name: Name of the Key Vault.
+        :param suffix: suffix for Key name
+        :type key_vault_name: str
+        :type suffix: str
+        :returns: Azure Key object which was created
+        """
         d = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         date = datetime.datetime.strptime(
             d[0:19], "%Y-%m-%dT%H:%M:%S"
@@ -397,12 +497,13 @@ class EnableKeyVaultLogging(object):
                 application_id=client_id
             )
             app_object_id = app_details.value
-            # Check if the Storage Account Created by CHSS is available in the same region
+            # Check if the Storage Account Created by CHSS is available in the same region and resource group
             stg_name = generate_name(region, subscription_id, resource_group_name)
             stg_account = self.check_stg_account(
                 storage_client, region, stg_name, resource_group_name
             )
             if stg_account is None:
+                # If the Storage Account does not exists, create a storage account to store logs
                 logging.info("    Creating a Storage Account")
                 logging.info(
                     "    executing client_storage.storage_accounts.begin_create"
@@ -412,12 +513,8 @@ class EnableKeyVaultLogging(object):
                 stg_account = self.create_storage_account(
                     resource_group_name, stg_name, region, storage_client
                 )
-                app_details = graph_client.applications.get_service_principals_id_by_app_id(
-                    application_id=client_id
-                )
-                app_object_id = app_details.value
 
-                # Check if the Key Vault created by CHSS exists in that region
+                # Check if the Key Vault created by CHSS exists in the given region and resource group
                 encryption_key_vault_name = generate_name(
                     region, subscription_id, resource_group_name
                 )
@@ -428,7 +525,7 @@ class EnableKeyVaultLogging(object):
                     resource_group_name,
                 )
                 if key_vault is None:
-                    # Creating Key Vault and Key to encrypt Storage Account and storing the key vault logs in the storage account.
+                    # If the Key Vault does not exists, create Key Vault
                     encryption_key_vault = self.create_key_vault(
                         keyvault_client,
                         resource_group_name,
@@ -438,9 +535,11 @@ class EnableKeyVaultLogging(object):
                         app_object_id,
                         stg_account.identity.principal_id,
                     )
+                    # Create a key to encrypt the Storage Account
                     key = self.create_key(
                         credentials, encryption_key_vault_name, stg_account.name
                     )
+                    # Encrypt the Storage Account using the above Key
                     self.update_storage_account_encryption(
                         storage_client,
                         resource_group_name,
@@ -448,6 +547,7 @@ class EnableKeyVaultLogging(object):
                         key.name,
                         encryption_key_vault.properties.vault_uri,
                     )
+                    # Create a diagnostic setting to store Key Vault Logs
                     self.create_diagnostic_setting(
                         monitor_client,
                         encryption_key_vault.id,
@@ -456,7 +556,7 @@ class EnableKeyVaultLogging(object):
                         log,
                     )
                 else:
-                    # Updating the key vault access policy to give permissions for both app and storage account to encrypt the storage account.
+                    # Update the key vault access policy to give permissions for both app and storage account.
                     self.update_key_vault_access_policy(
                         keyvault_client,
                         resource_group_name,
@@ -465,7 +565,9 @@ class EnableKeyVaultLogging(object):
                         app_object_id,
                         stg_account.identity.principal_id,
                     )
+                    # Create a key to encrypt the Storage Account
                     key = self.create_key(credentials, key_vault.name, stg_account.name)
+                    # Encrypt the Storage Account using the above Key
                     self.update_storage_account_encryption(
                         storage_client,
                         resource_group_name,
