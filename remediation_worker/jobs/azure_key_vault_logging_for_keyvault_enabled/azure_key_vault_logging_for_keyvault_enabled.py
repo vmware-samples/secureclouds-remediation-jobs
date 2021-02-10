@@ -28,6 +28,7 @@ from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.graphrbac import GraphRbacManagementClient
 from azure.common.credentials import ServicePrincipalCredentials
+from azure.mgmt.storage.models import Sku as sku_storage
 from azure.mgmt.storage.models import (
     StorageAccountCreateParameters,
     NetworkRuleSet,
@@ -63,6 +64,11 @@ from azure.mgmt.keyvault.models import (
 
 logging.basicConfig(level=logging.INFO)
 
+MAX_COUNT_SUBSCRIPTION = 5
+MAX_COUNT_RESOURCE_NAME = 5
+MAX_COUNT_REGION = 6
+MAX_COUNT_COMPONENT = 4
+
 
 def generate_name(region, subscription_id, resource_group_name):
     """Generates a name for the resource
@@ -76,11 +82,11 @@ def generate_name(region, subscription_id, resource_group_name):
     :rtype: str
     """
     random_str = "".join(i for i in subscription_id if i.islower() or i.isdigit())
-    subscription_id = random_str[:5]
+    subscription_id = random_str[:MAX_COUNT_SUBSCRIPTION]
     random_str = "".join(i for i in region if i.islower() or i.isdigit())
-    region = random_str[-6:]
+    region = random_str[-MAX_COUNT_REGION:]
     random_str = "".join(i for i in resource_group_name if i.islower() or i.isdigit())
-    resource_group_name = random_str[-5:]
+    resource_group_name = random_str[-MAX_COUNT_RESOURCE_NAME:]
     result_str = "chss" + subscription_id + resource_group_name + region + "logs"
     return result_str
 
@@ -135,16 +141,17 @@ class EnableKeyVaultLogging(object):
         :param region: The location in which the storage account exists.
         :param name: The Storage Account name.
         :param resource_group_name: The name of the resource group.
+        :type storage_client: object
         :type region: str
         :type name: str
         :type resource_group_name: str
-        :return : StorageAccount object
+        :returns: StorageAccount object
+        :rtype: object
         """
-        from azure.mgmt.storage.models import Sku
 
         create_params = StorageAccountCreateParameters(
             location=region,
-            sku=Sku(name=SkuName.STANDARD_LRS, tier=SkuTier.STANDARD),
+            sku=sku_storage(name=SkuName.STANDARD_LRS, tier=SkuTier.STANDARD),
             identity=Identity(type="SystemAssigned"),
             kind="StorageV2",
             enable_https_traffic_only=True,
@@ -175,10 +182,13 @@ class EnableKeyVaultLogging(object):
         :param stg_name: The Storage Account name.
         :param key_name: Name of the Key to encrypt the Storage Account with.
         :param vault_uri: Key Vault uri in which the Key exists.
+        :type storage_client: object
         :type resource_group_name: str
         :type stg_name: str
         :type key_name: str
         :type vault_uri: str
+        :returns: None
+        :rtype: None
         """
         logging.info("    Encrypting Storage Account with Customer Managed Key")
         logging.info("    executing storage_client.storage_accounts.update")
@@ -205,53 +215,63 @@ class EnableKeyVaultLogging(object):
         :param region: The location in which the storage account exists.
         :param name: The Storage Account name.
         :param resource_group_name: The name of the resource group.
+        :type storage_client: object
         :type region: str
         :type name: str
         :type resource_group_name: str
         :returns: StorageAccount object
+        :rtype: object
         """
         storage_accounts_paged: ItemPaged[
             StorageAccountListResult
         ] = storage_client.storage_accounts.list()
         storage_accounts_list: List[dict] = list(storage_accounts_paged)
+        storage_account = None
         for stg_account in storage_accounts_list:
             stg_id = stg_account.id
             stg_components = stg_id.split("/")
-            resource_grp = stg_components[4]
-            if (
-                stg_account.name == name
-                and stg_account.location == region
-                and resource_grp == resource_group_name
-            ):
-                return stg_account
-        return None
+            if len(stg_components) > MAX_COUNT_COMPONENT:
+                resource_grp = stg_components[MAX_COUNT_COMPONENT]
+                if (
+                    stg_account.name == name
+                    and stg_account.location == region
+                    and resource_grp == resource_group_name
+                ):
+                    storage_account = stg_account
+                    break
+        return storage_account
 
     def check_key_vault(self, keyvault_client, region, name, resource_group_name):
         """Checks for the existence of the Key Vault created by CHSS.
         :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
-        :param region: The location in which the storage account exists.
-        :param name: The Storage Account name.
+        :param region: The location in which the Key Vault exists.
+        :param name: Key Vault name.
         :param resource_group_name: The name of the resource group.
+        :type keyvault_client: object
         :type region: str
         :type name: str
         :type resource_group_name: str
-        :returns: Vault Object
+        :returns: Vault object
+        :rtype: object
         """
         key_vault_paged: ItemPaged[
             VaultListResult
         ] = keyvault_client.vaults.list_by_subscription()
         key_vault_list: List[dict] = list(key_vault_paged)
+        chss_key_vault = None
         for key_vault in key_vault_list:
             key_vault_id = key_vault.id
             key_vault_components = key_vault_id.split("/")
-            resource_grp = key_vault_components[4]
-            if (
-                key_vault.name == name
-                and key_vault.location == region
-                and resource_grp == resource_group_name
-            ):
-                return key_vault
-        return None
+            if len(key_vault_components) > MAX_COUNT_COMPONENT:
+                resource_grp = key_vault_components[MAX_COUNT_COMPONENT]
+                if (
+                    key_vault.name == name
+                    and key_vault.location == region
+                    and resource_grp == resource_group_name
+                ):
+                    chss_key_vault = key_vault
+                    break
+        return chss_key_vault
 
     def create_diagnostic_setting(
         self, monitor_client, key_vault_id, key_vault_name, stg_account_id, log
@@ -262,9 +282,13 @@ class EnableKeyVaultLogging(object):
         :param key_vault_name: Name of the Key Vault.
         :param stg_account_id: The Storage Account resource Id.
         :param log: Instance of Azure Monitor LogSettings
+        :type monitor_client: object
+        :type log: object
         :type key_vault_id: str
         :type key_vault_name: str
         :type stg_account_id: str
+        :returns: None
+        :rtype: None
         """
         logging.info("    Creating a Diagnostic setting for key vault logs")
         logging.info(
@@ -298,6 +322,7 @@ class EnableKeyVaultLogging(object):
         :param tenant_id: Azure tenant Id
         :param app_object_id: Object Id of the application
         :param stg_principal_id: Principal Id of the Storage Account
+        :type keyvault_client: object
         :type resource_group_name: str
         :type key_vault_name: str
         :type region: str
@@ -305,6 +330,7 @@ class EnableKeyVaultLogging(object):
         :type app_object_id: str
         :type stg_principal_id: str
         :returns: Vault object
+        :rtype: object
         """
         access_policy_storage_account = AccessPolicyEntry(
             tenant_id=tenant_id,
@@ -335,7 +361,7 @@ class EnableKeyVaultLogging(object):
         )
         key_vault_properties = VaultCreateOrUpdateParameters(
             location=region,
-            tags={"CreatedBy": "CHSS"},
+            tags={"Created By": "CHSS"},
             properties=VaultProperties(
                 tenant_id=tenant_id,
                 sku=Sku(family="A", name="standard",),
@@ -376,12 +402,15 @@ class EnableKeyVaultLogging(object):
         :param tenant_id: Azure tenant Id
         :param app_object_id: Object Id of the application
         :param stg_principal_id: Principal Id of the Storage Account
+        :type keyvault_client: object
         :type resource_group_name: str
         :type key_vault_name: str
         :type region: str
         :type tenant_id: str
         :type app_object_id: str
         :type stg_principal_id: str
+        :returns: None
+        :rtype: None
         """
         access_policy_storage = AccessPolicyEntry(
             tenant_id=tenant_id,
@@ -433,6 +462,7 @@ class EnableKeyVaultLogging(object):
         :type key_vault_name: str
         :type suffix: str
         :returns: Azure Key object which was created
+        :rtype: object
         """
         d = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         date = datetime.datetime.strptime(
@@ -473,12 +503,20 @@ class EnableKeyVaultLogging(object):
         :param keyvault_client: Instance of the Azure KeyVaultManagementClient.
         :param storage_client: Instance of the Azure StorageManagementClient.
         :param monitor_client: Instance of the Azure MonitorClient.
+        :param credentials: Azure Credential object.
         :param resource_group_name: The name of the resource group to which the storage account belongs.
         :param key_vault_name: The name of the key vault.
         :param region: The region in which the key vault is present.
+        :param subscription_id: Azure Subscription Id
+        :type graph_client: object
+        :type keyvault_client: object
+        :type storage_client: object
+        :type monitor_client: object
+        :type credentials: object
         :type resource_group_name: str.
         :type key_vault_name: str.
         :type region: str.
+        :type subscription_id: str
         :returns: Integer signaling success or failure
         :rtype: int
         :raises: msrestazure.azure_exceptions.CloudError
@@ -487,7 +525,6 @@ class EnableKeyVaultLogging(object):
             key_vault = keyvault_client.vaults.get(
                 resource_group_name=resource_group_name, vault_name=key_vault_name,
             )
-            key_vault_id = key_vault.id
             log = LogSettings(
                 category="AuditEvent",
                 enabled=True,
@@ -496,7 +533,6 @@ class EnableKeyVaultLogging(object):
             app_details = graph_client.applications.get_service_principals_id_by_app_id(
                 application_id=client_id
             )
-            app_object_id = app_details.value
             # Check if the Storage Account Created by CHSS is available in the same region and resource group
             stg_name = generate_name(region, subscription_id, resource_group_name)
             stg_account = self.check_stg_account(
@@ -532,7 +568,7 @@ class EnableKeyVaultLogging(object):
                         encryption_key_vault_name,
                         region,
                         tenant_id,
-                        app_object_id,
+                        app_details.value,
                         stg_account.identity.principal_id,
                     )
                     # Create a key to encrypt the Storage Account
@@ -562,7 +598,7 @@ class EnableKeyVaultLogging(object):
                         resource_group_name,
                         key_vault.name,
                         tenant_id,
-                        app_object_id,
+                        app_details.value,
                         stg_account.identity.principal_id,
                     )
                     # Create a key to encrypt the Storage Account
@@ -576,15 +612,10 @@ class EnableKeyVaultLogging(object):
                         key_vault.properties.vault_uri,
                     )
 
-                # Creating Diagnostic settings to store violated Key vault's logs
-                self.create_diagnostic_setting(
-                    monitor_client, key_vault_id, key_vault_name, stg_account.id, log
-                )
-            else:
-                # Creating Diagnostic settings to store violated Key vault's logs
-                self.create_diagnostic_setting(
-                    monitor_client, key_vault_id, key_vault_name, stg_account.id, log
-                )
+            # Creating Diagnostic settings to store violated Key vault's logs
+            self.create_diagnostic_setting(
+                monitor_client, key_vault.id, key_vault_name, stg_account.id, log
+            )
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
