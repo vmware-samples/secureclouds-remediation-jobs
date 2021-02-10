@@ -21,6 +21,7 @@ The provided Azure service principal must have the following permissions:
 `Microsoft.KeyVault/vaults/write`
 `Microsoft.KeyVault/vaults/keys/read`
 `Microsoft.KeyVault/vaults/keys/write`
+`Microsoft.KeyVault/vaults/accessPolicies/write`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
