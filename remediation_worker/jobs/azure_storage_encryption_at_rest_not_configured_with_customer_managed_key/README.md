@@ -17,6 +17,8 @@ Storage account encryption at rest is not configured with customer-managed key (
 The provided Azure service principal must have the following permissions:
 `Microsoft.Storage/storageAccounts/read`
 `Microsoft.Storage/storageAccounts/write`
+`"Microsoft.Storage/storageAccounts/blobServices/write`
+`Microsoft.Storage/storageAccounts/blobServices/read`
 `Microsoft.Insights/DiagnosticSettings/Write`
 `Microsoft.KeyVault/vaults/read`
 `Microsoft.KeyVault/vaults/write`
@@ -44,7 +46,7 @@ You may run test using following command under vss-remediation-worker-job-code-p
 ```
 ## Deployment
 Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://azure.microsoft.com/en-in/blog/introducing-docker-in-microsoft-azure-marketplace/) for more information.
+Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
 Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
   ```shell script
   docker run --rm -it --name {worker_name}\

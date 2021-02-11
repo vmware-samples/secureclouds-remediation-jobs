@@ -543,6 +543,8 @@ class StorageAccountNotEncryptedWithCmk(object):
         :param account_name: The name of the Storage Account.
         :param region: The region in which the key vault is present.
         :param subscription_id: Azure Subscription Id
+        :type client_id: str
+        :type tenant_id: str
         :type graph_client: object
         :type keyvault_client: object
         :type storage_client: object
@@ -620,23 +622,10 @@ class StorageAccountNotEncryptedWithCmk(object):
                         key.name,
                         key_vault.properties.vault_uri,
                     )
-                    # Create diagnostic setting to store the logs of the Key Vault which is being created
-                    self.create_diagnostic_setting(
-                        monitor_client,
-                        key_vault.id,
-                        key_vault_name,
-                        stg_account.id,
-                        log,
-                    )
-                else:
-                    # If the Storage Account exists then create diagnostic setting to store the logs of the Key Vault which is being created.
-                    self.create_diagnostic_setting(
-                        monitor_client,
-                        key_vault.id,
-                        key_vault.name,
-                        stg_account.id,
-                        log,
-                    )
+                # Create Diagnostic Setting to store key vault logs
+                self.create_diagnostic_setting(
+                    monitor_client, key_vault.id, key_vault.name, stg_account.id, log,
+                )
             else:
                 # If the Key Vault exists then update the access policy to give access to app and the Storage Account
                 self.update_key_vault_access_policy(
