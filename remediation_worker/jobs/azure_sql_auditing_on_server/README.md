@@ -29,6 +29,7 @@ The provided Azure service principal must have the following permissions:
 `Microsoft.KeyVault/vaults/write`
 `Microsoft.KeyVault/vaults/keys/read`
 `Microsoft.KeyVault/vaults/keys/write`
+`Microsoft.KeyVault/vaults/accessPolicies/write`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -49,9 +50,9 @@ You may run test using following command under vss-remediation-worker-job-code-p
     python3 -m pytest test
 ```
 ## Deployment
-Provision a Virtual Machine Create an Azure Virtual Machine instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker Install Docker on the newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html) for more information.
-Deploy the worker image SSH into the Azure Virtual Machine instance and run the command below to deploy the worker image:
+Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
+Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
+Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
   ```shell script
   docker run --rm -it --name {worker_name}\
   -e VSS_CLIENT_ID={ENTER CLIENT ID}\
