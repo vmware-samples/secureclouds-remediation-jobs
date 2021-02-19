@@ -45,9 +45,12 @@ Install Docker on the newly provisioned EC2 instance. You can refer to the [docs
 3. Deploy the worker image
 SSH into the EC2 instance and run the command below to deploy the worker image:
 ```shell script
-  docker run --rm -it --name worker \
-  -e VSS_CLIENT_ID={ENTER CLIENT ID}
-  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET} \
+  docker run --rm -it --name {worker_name}\
+  -e VSS_CLIENT_ID={ENTER CLIENT ID}\
+  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET}\
+  -e AZURE_CLIENT_ID={ENTER AZURE_CLIENT_ID} \
+  -e AZURE_CLIENT_SECRET={ENTER AZURE_CLIENT_SECRET} \
+  -e AZURE_TENANT_ID={ENTER AZURE_TENANT_ID} \
   vmware/vss-remediation-worker:latest-python
 ```
 
