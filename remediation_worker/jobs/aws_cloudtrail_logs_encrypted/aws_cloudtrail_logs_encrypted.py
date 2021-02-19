@@ -186,8 +186,8 @@ class CloudtrailEncryptLogs(object):
         :returns: int
         """
         params = self.parse(args[1])
-        kms_client = boto3.client("kms")
-        cloudtrail_client = boto3.client("cloudtrail")
+        kms_client = boto3.client("kms", region_name=params["region"])
+        cloudtrail_client = boto3.client("cloudtrail", region_name=params["region"])
         logging.info(
             "acquired kms client, cloudtrail client and parsed params - starting remediation"
         )
