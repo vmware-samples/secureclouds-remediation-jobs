@@ -1,0 +1,16 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "CloudtrailEncryptLogs",
+            "Effect": "Allow",
+            "Action": [
+                "kms:CreateKey",
+                "kms:TagResource",
+                "kms:EnableKeyRotation",
+                "cloudtrail:UpdateTrail"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
