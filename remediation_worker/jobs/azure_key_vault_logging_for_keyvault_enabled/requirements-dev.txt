@@ -1,6 +1,9 @@
 -r requirements.txt
 -c constraints.txt
 
+python-dateutil==2.8.1 \
+    --hash=sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c \
+    --hash=sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a
 attrs==20.1.0 \
     --hash=sha256:0ef97238856430dcf9228e07f316aefc17e8939fc8507e18c6501b761ef1a42a \
     --hash=sha256:2867b7b9f8326499ab5b0e2d12801fa5c98842d2cbd22b35112ae04bf85b4dff

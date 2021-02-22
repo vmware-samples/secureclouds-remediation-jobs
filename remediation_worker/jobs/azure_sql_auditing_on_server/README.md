@@ -1,6 +1,7 @@
 # Enable SQL Server Auditing
 
-This job enables server blob auditing policy for the SQL Database Server by creating a Storage Account and assigning a Storage Blob Data Contributer role to the server.
+This job enables server blob auditing policy for the SQL Database Server. It checks for the existence of the Storage Account created by CHSS, if the Storage Account exists then it assigns a Storage Blob Contributer Role to the SQL Server. If the Storage Account Created by CHSS does not exists then it creates one.
+The Storage Account created by CHSS is prefixed with "chss" and contains tag `{"Created By" : "CHSS"}`.
 
 ### Applicable Rule
 
@@ -19,7 +20,16 @@ The provided Azure service principal must have the following permissions:
 `Microsoft.Sql/servers/auditingSettings/write`
 `Microsoft.Storage/storageAccounts/write`
 `Microsoft.Storage/storageAccounts/read`
+`Microsoft.Storage/storageAccounts/blobServices/write`
+`Microsoft.Storage/storageAccounts/blobServices/read`
 `Microsoft.Authorization/roleAssignments/write`
+`Microsoft.Authorization/roleAssignments/read`
+`Microsoft.Insights/DiagnosticSettings/Write`
+`Microsoft.KeyVault/vaults/read`
+`Microsoft.KeyVault/vaults/write`
+`Microsoft.KeyVault/vaults/keys/read`
+`Microsoft.KeyVault/vaults/keys/write`
+`Microsoft.KeyVault/vaults/accessPolicies/write`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -40,13 +50,16 @@ You may run test using following command under vss-remediation-worker-job-code-p
     python3 -m pytest test
 ```
 ## Deployment
-Provision a Virtual Machine Create an EC2 instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker Install Docker on the newly provisioned EC2 instance. You can refer to the [docs here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html) for more information.
-Deploy the worker image SSH into the EC2 instance and run the command below to deploy the worker image:
+Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
+Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
+Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
   ```shell script
-  docker run --rm -it --name worker \
-  -e VSS_CLIENT_ID={ENTER CLIENT ID}
-  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET} \
+  docker run --rm -it --name {worker_name}\
+  -e VSS_CLIENT_ID={ENTER CLIENT ID}\
+  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET}\
+  -e AZURE_CLIENT_ID={ENTER AZURE_CLIENT_ID} \
+  -e AZURE_CLIENT_SECRET={ENTER AZURE_CLIENT_SECRET} \
+  -e AZURE_TENANT_ID={ENTER AZURE_TENANT_ID} \
   vmware/vss-remediation-worker:latest-python
   ```
 ## Contributing
