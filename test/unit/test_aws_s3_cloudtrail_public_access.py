@@ -16,7 +16,7 @@ import pytest
 from mock import Mock
 from botocore.exceptions import ClientError
 
-from remediation_worker.jobs.s3_cloudtrail_public_access.s3_cloudtrail_public_access import (
+from remediation_worker.jobs.aws_s3_cloudtrail_public_access.aws_s3_cloudtrail_public_access import (
     CloudtrailS3RemovePublicAcces,
 )
 
@@ -42,12 +42,21 @@ def valid_payload():
 class TestCloudtrailS3PublicAccess(object):
     def test_parse_payload(self, valid_payload):
         params = CloudtrailS3RemovePublicAcces().parse(valid_payload)
-        assert params["bucket_name"] == "remediation-cloudtrail"
+        assert params["region"] == "region"
+        assert params["cloudtrail_name"] == "CloudTrail_name"
         assert params["cloud_account_id"] == "cloud_account_id"
 
     def test_remediate_success_with_bucket_policy_public(self):
         client = Mock()
+        cloudtrail_client = Mock()
         action = CloudtrailS3RemovePublicAcces()
+        trail = {
+            "Trail": {
+                "Name": "CloudTrail_name",
+                "S3BucketName": "remediation-cloudtrail",
+            }
+        }
+        cloudtrail_client.get_trail.return_value = trail
         bucket_status = {
             "ResponseMetadata": {
                 "RequestId": "9B28R8BGSR67A459",
@@ -83,7 +92,16 @@ class TestCloudtrailS3PublicAccess(object):
             "Policy": '{"Version":"2012-10-17","Statement":[{"Sid":"AWSCloudTrailAclCheck20150319","Effect":"Allow","Principal":{"Service":"cloudtrail.amazonaws.com"},"Action":"s3:GetBucketAcl","Resource":"arn:aws:s3:::remediation-cloudtrail"},{"Sid":"AllowPublicReadAccess","Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::remediation-cloudtrail/*"},{"Sid":"AWSCloudTrailWrite20150319","Effect":"Allow","Principal":{"Service":"cloudtrail.amazonaws.com"},"Action":"s3:PutObject","Resource":"arn:aws:s3:::remediation-cloudtrail/AWSLogs/159636093902/*","Condition":{"StringEquals":{"s3:x-amz-acl":"bucket-owner-full-control"}}},{"Sid":"PublicRead","Effect":"Allow","Principal":{"AWS":"*"},"Action":["s3:GetObject","s3:GetObjectVersion"],"Resource":"arn:aws:s3:::remediation-cloudtrail/*"}]}',
         }
 
-        assert action.remediate(client, "bucket_name", "cloud_account_id") == 0
+        assert (
+            action.remediate(
+                cloudtrail_client,
+                client,
+                "cloudtrail_name",
+                "region",
+                "cloud_account_id",
+            )
+            == 0
+        )
         assert client.put_public_access_block.call_count == 1
         assert client.get_bucket_policy_status.call_count == 1
         assert client.get_bucket_policy.call_count == 1
@@ -107,7 +125,15 @@ class TestCloudtrailS3PublicAccess(object):
 
     def test_remediate_success_without_bucket_policy_public(self):
         client = Mock()
+        cloudtrail_client = Mock()
         action = CloudtrailS3RemovePublicAcces()
+        trail = {
+            "Trail": {
+                "Name": "CloudTrail_name",
+                "S3BucketName": "remediation-cloudtrail",
+            }
+        }
+        cloudtrail_client.get_trail.return_value = trail
         bucket_status = {
             "ResponseMetadata": {
                 "RequestId": "9B28R8BGSR67A459",
@@ -126,7 +152,16 @@ class TestCloudtrailS3PublicAccess(object):
         }
         client.get_bucket_policy_status.return_value = bucket_status
 
-        assert action.remediate(client, "bucket_name", "cloud_account_id") == 0
+        assert (
+            action.remediate(
+                cloudtrail_client,
+                client,
+                "cloudtrail_name",
+                "region",
+                "cloud_account_id",
+            )
+            == 0
+        )
         assert client.put_public_access_block.call_count == 1
         assert client.get_bucket_policy_status.call_count == 1
 

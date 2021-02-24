@@ -32,29 +32,36 @@ class CloudtrailS3RemovePublicAcces:
         :raises: Exception, JSONDecodeError
         """
         remediation_entry = json.loads(payload)
+        notification_info = remediation_entry.get("notificationInfo", None)
+        finding_info = notification_info.get("FindingInfo", None)
+        cloudtrail_name = finding_info.get("ObjectId", None)
+
         object_chain = remediation_entry["notificationInfo"]["FindingInfo"][
             "ObjectChain"
         ]
         object_chain_dict = json.loads(object_chain)
-        cloud_account = object_chain_dict["cloudAccountId"]
-        properties = object_chain_dict["properties"]
-        S3bucket_name = ""
+        cloud_account_id = object_chain_dict["cloudAccountId"]
+        region = finding_info.get("Region")
 
-        for property in properties:
-            if property["name"] == "S3BucketName" and property["type"] == "string":
-                S3bucket_name = property["stringV"]
-                break
+        logging.info(f"cloud_account_id: {cloud_account_id}")
+        logging.info(f"region: {region}")
 
-        logging.info("parsed params")
-        logging.info(f"  bucket_name: {S3bucket_name}")
-        logging.info(f"  cloud_account_id: {cloud_account}")
+        if cloudtrail_name is None:
+            raise Exception(
+                "Missing parameters for 'payload.notificationInfo.ObjectId'."
+            )
 
-        return {
-            "bucket_name": S3bucket_name,
-            "cloud_account_id": cloud_account,
+        return_dict = {
+            "region": region,
+            "cloudtrail_name": cloudtrail_name,
+            "cloud_account_id": cloud_account_id,
         }
+        logging.info(return_dict)
+        return return_dict
 
-    def remediate(self, client, bucket_name, cloud_account_id):
+    def remediate(
+        self, cloudtrail_client, client, cloudtrail_name, region, cloud_account_id
+    ):
         """Block public access write bucket ACL
         :param client: Instance of the AWS boto3 client.
         :param bucket_name: The name of the bucket for which to block access.
@@ -64,6 +71,8 @@ class CloudtrailS3RemovePublicAcces:
         :raises: botocore.exceptions.ClientError
         """
         try:
+            cloudtrail = cloudtrail_client.get_trail(Name=cloudtrail_name)
+            bucket_name = cloudtrail["Trail"]["S3BucketName"]
             logging.info("making api call to client.put_public_access_block")
             logging.info(f"Bucket_name: {bucket_name}")
             client.put_public_access_block(
@@ -118,14 +127,19 @@ class CloudtrailS3RemovePublicAcces:
         :type args: list.
         :returns: int
         """
-        client = boto3.client("s3")
         params = self.parse(args[1])
-        logging.info("acquired s3 client and parsed params - starting remediation")
-        rc = self.remediate(client=client, **params)
+        cloudtrail_client = boto3.client("cloudtrail", params["region"])
+        client = boto3.client("s3")
+        logging.info(
+            "acquired s3 client, cloudtrail_client and parsed params - starting remediation"
+        )
+        rc = self.remediate(
+            cloudtrail_client=cloudtrail_client, client=client, **params
+        )
         return rc
 
 
 if __name__ == "__main__":
-    logging.info("s3_remove_public_access.py called - running now")
+    logging.info("aws_s3_cloudtrail_public_access.py called - running now")
     obj = CloudtrailS3RemovePublicAcces()
     obj.run(sys.argv)

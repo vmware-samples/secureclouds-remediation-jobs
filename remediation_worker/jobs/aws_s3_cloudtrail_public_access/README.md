@@ -14,7 +14,7 @@ Access to CloudTrail S3 buckets is unrestricted
 
 ### Prerequisites
 
-The provided AWS credential must have access to `s3:PutBucketPublicAccessBlock`, `s3:GetBucketPolicyStatus`, `s3:GetBucketAcl` and `s3:PutBucketAcl`.
+The provided AWS credential must have access to `cloudtrail:GetTrail`, `s3:PutBucketPublicAccessBlock`, `s3:GetBucketPolicyStatus`, `s3:GetBucketAcl` and `s3:PutBucketAcl`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
@@ -23,7 +23,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 s3_cloudtrail_public_access.py
+  python3 aws_s3_cloudtrail_public_access.py
 ```
 
 ## Running the tests
