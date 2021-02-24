@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "roleName": "remediate_enable_sql_data_encrytion",
+    "description": "This role has required permissions to make changes to the Azure SQL Database",
+    "assignableScopes": [
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.Sql/servers/databases/transparentDataEncryption/read",
+          "Microsoft.Sql/servers/databases/transparentDataEncryption/write"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
+  }
+}
