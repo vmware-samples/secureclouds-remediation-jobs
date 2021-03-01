@@ -1,4 +1,4 @@
-# Remove Cloudtrail S3 Public Access
+# Enable encryption for Cloudtrail logs
 
 This job encrypts Cloudtrail logs by creating an AWS Symmetric Customer Master Key (CMK).
 
