@@ -1,4 +1,4 @@
-# Remove Cloudtrail S3 Public Access
+# Enables KMS automated key rotation
 
 This job enables AWS KMS key rotation.
 
