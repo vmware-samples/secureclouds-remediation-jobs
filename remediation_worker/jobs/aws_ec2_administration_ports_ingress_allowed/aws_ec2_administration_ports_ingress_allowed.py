@@ -60,14 +60,10 @@ class RemoveAdministrationPortsPublicAccess(object):
         return return_dict
 
     def remediate(self, client, network_acl_id):
-        """Encrypts Cloudtrail Logs
-        :param region: The buckets region
+        """Remove all the network acl rules that provide public access to administration ports (22 and 3389)
         :param client: Instance of the AWS ec2 client.
         :param network_acl_id: Network ACL Id
-        :param cloud_account_id: AWS Account Id.
-        :type region: str.
         :type client: object.
-        :type cloud_account_id: str.
         :type network_acl_id: str.
         :returns: Integer signaling success or failure
         :rtype: int
@@ -81,15 +77,13 @@ class RemoveAdministrationPortsPublicAccess(object):
                 if (
                     entry["Egress"] is False
                     and entry["RuleAction"] == "allow"
+                    and entry["Protocol"] in ["6", "-1"]
                     and (
-                        entry["CidrBlock"] == "0.0.0.0/0"
-                        or (
-                            "PortRange" not in entry
-                            or entry["PortRange"]
-                            in [{"From": 3389, "To": 3389}, {"From": 22, "To": 22}]
-                        )
-                        or entry["Protocol"] in ["6", "-1"]
+                        "PortRange" not in entry
+                        or entry["PortRange"]
+                        in [{"From": 3389, "To": 3389}, {"From": 22, "To": 22}]
                     )
+                    and entry["CidrBlock"] == "0.0.0.0/0"
                 ):
                     client.delete_network_acl_entry(
                         Egress=False,
