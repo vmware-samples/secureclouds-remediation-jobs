@@ -75,6 +75,7 @@ class CloudtrailS3RemovePublicAcces:
             bucket_name = cloudtrail["Trail"]["S3BucketName"]
             logging.info("making api call to client.put_public_access_block")
             logging.info(f"Bucket_name: {bucket_name}")
+            # Blocking all users and authenticated users access from bucket acl
             client.put_public_access_block(
                 Bucket=bucket_name,
                 PublicAccessBlockConfiguration={
@@ -93,6 +94,7 @@ class CloudtrailS3RemovePublicAcces:
             status = bucket_policy_status["PolicyStatus"]
             logging.info(f"Bucket_policy_status: {status}")
 
+            # If the bucket policy status is public
             if status["IsPublic"] is True:
                 logging.info("making api call to client.get_bucket_policy")
                 logging.info(f"Bucket_name: {bucket_name}")
@@ -101,6 +103,7 @@ class CloudtrailS3RemovePublicAcces:
                 )
                 policy = json.loads(bucket_policy["Policy"])
                 statements = policy["Statement"]
+                # Remove the statements in which Principal is * or {"AWS":"*"} and effect is set to allow
                 for statement in statements:
                     if statement["Effect"] == "Allow" and statement["Principal"] in (
                         {"AWS": "*"},
