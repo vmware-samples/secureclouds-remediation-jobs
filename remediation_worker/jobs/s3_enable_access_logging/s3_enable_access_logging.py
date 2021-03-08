@@ -76,6 +76,12 @@ class S3EnableAccessLogging(object):
         return return_dict
 
     def check_log_delivery_permissions(self, acl):
+        """Checks if the S3 bucket has log delivery permissions.
+        :param acl: S3 bucket acl.
+        :type acl: dict.
+        :returns: Tuple which indicates if read and write permissions were granted.
+        :rtype: tuple.
+        """
         write_grant = False
         read_acp_grant = False
 
@@ -104,8 +110,14 @@ class S3EnableAccessLogging(object):
         return write_grant, read_acp_grant
 
     def grant_log_delivery_permissions(self, client, bucket_name):
-        # Give the group log-delievery WRITE and READ_ACP permisions to the
-        # target bucket
+        """Give the group log-delievery WRITE and READ_ACP permisions to the target bucket.
+        :param client: Instance of the AWS boto3 client.
+        :bucket_name: Name of the bucket.
+        :type client: object.
+        :type bucket_name: str.
+        :returns: None.
+        :rtype: None.
+        """
         acl = client.get_bucket_acl(Bucket=bucket_name)
 
         # check if the required permissions are already granted, and if present return
@@ -137,7 +149,18 @@ class S3EnableAccessLogging(object):
         client.put_bucket_acl(Bucket=bucket_name, AccessControlPolicy=modified_acl)
 
     def ensure_log_target_bucket(self, client, target_bucket, region):
+        """Check if the log target bucket exists if not then creates one.
+        :param client: Instance of the AWS boto3 client.
+        :param target_bucket: Target bucket name.
+        :param region:region in which the target bucket exists.
+        :type client: object.
+        :type target_bucket: str.
+        :type region: str.
+        :returns: None.
+        :rtype: None.
+        """
         try:
+            print(target_bucket)
             client.head_bucket(Bucket=target_bucket)
         except ClientError as e:
             if e.response["Error"]["Code"] == "404":
@@ -149,12 +172,31 @@ class S3EnableAccessLogging(object):
                         Bucket=target_bucket,
                         CreateBucketConfiguration={"LocationConstraint": region},
                     )
+                    self.encrypt_target_bucket(client, target_bucket)
             elif e.response["Error"]["Code"] == "403":
                 # The assumed role does not have the permission
                 logging.error("Not enough permissions to list buckets")
                 raise e
             else:
                 raise e
+
+    def encrypt_target_bucket(self, client, bucket_name):
+        """Encrypting the s3 bucket
+        :param client: Instance of the AWS boto3 client.
+        :param bucket_name: Name of the s3 bucket.
+        :type client: object.
+        :type bucket_name: str.
+        :returns: None.
+        :rtype: None.
+        """
+        client.put_bucket_encryption(
+            Bucket=bucket_name,
+            ServerSideEncryptionConfiguration={
+                "Rules": [
+                    {"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}
+                ]
+            },
+        )
 
     def remediate(self, region, client, source_bucket, target_bucket, target_prefix):
         """Enable access logging for an S3 bucket.
@@ -169,6 +211,8 @@ class S3EnableAccessLogging(object):
         :param target_bucket: Specifies the bucket where you want Amazon S3 to store server access logs.
         :param target_prefix: A prefix for all log object keys. If you store log files from multiple Amazon S3
             buckets in a single bucket, you can use a prefix to distinguish which log files came from which bucket.
+        :type region: str.
+        :type client: object.
         :type source_bucket: str.
         :type target_bucket: str.
         :type target_prefix: str.
@@ -176,29 +220,32 @@ class S3EnableAccessLogging(object):
         :rtype: int
         :raises: botocore.exceptions.ClientError
         """
+
         if source_bucket == target_bucket:
             raise SelfRemediationError(
                 f"Cannot remediate the logging bucket (i.e. write access logs to self). "
                 f"Consider suppressing the violation for this bucket ({source_bucket})."
             )
-
-        self.ensure_log_target_bucket(client, target_bucket, region)
-        logging.info("ensuring logs can be delivered")
-        self.grant_log_delivery_permissions(client, target_bucket)
-        logging.info("making client.put_bucket_logging to enable logging")
-        logging.info(
-            f"  Bucket: {source_bucket} | TargetBucket: {target_bucket} | TargetPrefix: {target_prefix}"
-        )
-        client.put_bucket_logging(
-            Bucket=source_bucket,
-            BucketLoggingStatus={
-                "LoggingEnabled": {
-                    "TargetBucket": target_bucket,
-                    "TargetPrefix": f"{target_prefix}/",
-                }
-            },
-        )
-        logging.info("successfully completed remediation job")
+        try:
+            self.ensure_log_target_bucket(client, target_bucket, region)
+            logging.info("ensuring logs can be delivered")
+            self.grant_log_delivery_permissions(client, target_bucket)
+            logging.info("making client.put_bucket_logging to enable logging")
+            logging.info(
+                f"  Bucket: {source_bucket} | TargetBucket: {target_bucket} | TargetPrefix: {target_prefix}"
+            )
+            client.put_bucket_logging(
+                Bucket=source_bucket,
+                BucketLoggingStatus={
+                    "LoggingEnabled": {
+                        "TargetBucket": target_bucket,
+                        "TargetPrefix": f"{target_prefix}/",
+                    }
+                },
+            )
+            logging.info("successfully completed remediation job")
+        except Exception as e:
+            logging.error(f"{str(e)}")
         return 0
 
     def run(self, args):

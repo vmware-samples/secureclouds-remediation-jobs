@@ -5,6 +5,7 @@
             "Sid": "S3EnableAccessLogging",
             "Effect": "Allow",
             "Action": [
+                "s3:PutEncryptionConfiguration",
                 "s3:PutBucketLogging",
                 "s3:PutBucketAcl",
                 "s3:GetBucketAcl",
