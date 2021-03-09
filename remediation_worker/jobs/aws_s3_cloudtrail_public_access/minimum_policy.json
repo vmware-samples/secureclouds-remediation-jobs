@@ -1,0 +1,17 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "CloudtrailS3RemovePublicAccess",
+            "Effect": "Allow",
+            "Action": [
+                "cloudtrail:GetTrail",
+                "s3:PutBucketPublicAccessBlock",
+                "s3:GetBucketPolicyStatus",
+                "s3:GetBucketAcl",
+                "s3:PutBucketAcl"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
