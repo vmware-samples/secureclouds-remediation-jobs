@@ -8,6 +8,8 @@
                 "kms:CreateKey",
                 "kms:TagResource",
                 "kms:EnableKeyRotation",
+                "s3:GetBucketLocation",
+                "cloudtrail:GetTrail",
                 "cloudtrail:UpdateTrail"
             ],
             "Resource": "*"

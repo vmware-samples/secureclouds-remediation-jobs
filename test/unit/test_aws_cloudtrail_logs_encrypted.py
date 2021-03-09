@@ -46,16 +46,23 @@ class TestCloudtrailS3PublicAccess(object):
         assert params["region"] == "region"
 
     def test_remediate_success_with_bucket_policy_public(self):
-        kms_client = Mock()
+        s3_client = Mock()
         cloudtrail_client = Mock()
         action = CloudtrailEncryptLogs()
         action.create_key = Mock()
-        action.create_key.return_value = "639fa0c5-38b3-438f-acae-315568e91196"
+        cloudtrail_client.get_trail.return_value = {
+            "Trail": {
+                "Name": "cloudtrail_name",
+                "S3BucketName": "remediation-cloudtrail",
+            }
+        }
+        s3_client.get_bucket_location.return_value = {"LocationConstraint": "us-west-2"}
+        action.create_key.return_value = "arn:aws:kms:us-west-2:cloud_account_id:key/8f5234f8-b223-4a20-8355-c7a242eac048"
 
         assert (
             action.remediate(
                 "region",
-                kms_client,
+                s3_client,
                 cloudtrail_client,
                 "cloudtrail_name",
                 "cloud_account_id",
@@ -68,8 +75,8 @@ class TestCloudtrailS3PublicAccess(object):
         assert updated_trail == action.create_key.return_value
 
     def test_remediate_with_exception(self):
-        kms_client = Mock()
+        s3_client = Mock()
         cloudtrail_client = Mock()
         action = CloudtrailEncryptLogs()
         with pytest.raises(Exception):
-            assert action.remediate(kms_client, cloudtrail_client, "cloud_account_id")
+            assert action.remediate(s3_client, cloudtrail_client, "cloud_account_id")

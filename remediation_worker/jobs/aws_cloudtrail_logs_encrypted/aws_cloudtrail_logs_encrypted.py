@@ -22,7 +22,6 @@ import boto3
 
 logging.basicConfig(level=logging.INFO)
 
-
 class CloudtrailEncryptLogs(object):
     def parse(self, payload):
         """Parse payload received from Remediation Service.
@@ -80,81 +79,61 @@ class CloudtrailEncryptLogs(object):
                 {
                     "Sid": "Enable IAM User Permissions",
                     "Effect": "Allow",
-                    "Principal": {"AWS": [f"arn:aws:iam::{cloud_account_id}:root"]},
+                    "Principal": {
+                        "AWS": [
+                            f"arn:aws:iam::{cloud_account_id}:root"
+                        ]
+                    },
                     "Action": "kms:*",
-                    "Resource": "*",
+                    "Resource": "*"
                 },
                 {
                     "Sid": "Allow CloudTrail to encrypt logs",
                     "Effect": "Allow",
-                    "Principal": {"Service": "cloudtrail.amazonaws.com"},
+                    "Principal": {
+                        "Service": "cloudtrail.amazonaws.com"
+                    },
                     "Action": "kms:GenerateDataKey*",
                     "Resource": "*",
                     "Condition": {
                         "StringLike": {
                             "kms:EncryptionContext:aws:cloudtrail:arn": f"arn:aws:cloudtrail:*:{cloud_account_id}:trail/*"
                         }
-                    },
-                },
-                {
-                    "Sid": "Allow CloudTrail to describe key",
-                    "Effect": "Allow",
-                    "Principal": {"Service": "cloudtrail.amazonaws.com"},
-                    "Action": "kms:DescribeKey",
-                    "Resource": "*",
-                },
-                {
-                    "Sid": "Allow principals in the account to decrypt log files",
-                    "Effect": "Allow",
-                    "Principal": {"AWS": "*"},
-                    "Action": ["kms:Decrypt", "kms:ReEncryptFrom"],
-                    "Resource": "*",
-                    "Condition": {
-                        "StringEquals": {"kms:CallerAccount": cloud_account_id},
-                        "StringLike": {
-                            "kms:EncryptionContext:aws:cloudtrail:arn": f"arn:aws:cloudtrail:*:{cloud_account_id}:trail/*"
-                        },
-                    },
-                },
-                {
-                    "Sid": "Enable cross account log decryption",
-                    "Effect": "Allow",
-                    "Principal": {"AWS": "*"},
-                    "Action": ["kms:Decrypt", "kms:ReEncryptFrom"],
-                    "Resource": "*",
-                    "Condition": {
-                        "StringEquals": {"kms:CallerAccount": cloud_account_id},
-                        "StringLike": {
-                            "kms:EncryptionContext:aws:cloudtrail:arn": f"arn:aws:cloudtrail:*:{cloud_account_id}:trail/*"
-                        },
-                    },
-                },
-            ],
+                    }
+                }
+            ]
         }
-        new_key_policy = json.dumps(key_policy)
+        new_key_policy=json.dumps(key_policy)
         key = kms_client.create_key(
-            Policy=new_key_policy,
-            Description="Encrypts Cloudtrail",
-            KeyUsage="ENCRYPT_DECRYPT",
-            CustomerMasterKeySpec="SYMMETRIC_DEFAULT",
-            Origin="AWS_KMS",
-            BypassPolicyLockoutSafetyCheck=False,
-            Tags=[{"TagKey": "Created By", "TagValue": "CHSS"},],
+                Policy=new_key_policy,
+                Description="Encrypts Cloudtrail",
+                KeyUsage='ENCRYPT_DECRYPT',
+                CustomerMasterKeySpec='SYMMETRIC_DEFAULT',
+                Origin='AWS_KMS',
+                BypassPolicyLockoutSafetyCheck=False,
+                Tags=[
+                    {
+                        'TagKey': 'Created By',
+                        'TagValue': 'CHSS'
+                    },
+                ],
+            )
+        kms_client.enable_key_rotation(
+            KeyId=key['KeyMetadata']['Arn']
         )
-        kms_client.enable_key_rotation(KeyId=key["KeyMetadata"]["KeyId"])
-        return key["KeyMetadata"]["KeyId"]
+        return key['KeyMetadata']['Arn']
 
-    def remediate(
-        self, region, kms_client, cloudtrail_client, cloudtrail_name, cloud_account_id
-    ):
+
+
+    def remediate(self, region, s3_client, cloudtrail_client, cloudtrail_name, cloud_account_id):
         """Encrypts Cloudtrail Logs
         :param region: The buckets region
-        :param kms_client: Instance of the AWS boto3 client.
+        :param s3_client: Instance of the AWS boto3 client.
         :param cloudtrail_client: Instance of the AWS boto3 client.
         :param cloudtrail_name: Name of the Cloudtrail.
         :param cloud_account_id: AWS Account Id.
         :type region: str.
-        :type kms_client: object.
+        :type s3_client: object.
         :type cloudtrail_client: object.
         :type cloud_account_id: str.
         :type cloudtrail_name: str.
@@ -163,21 +142,37 @@ class CloudtrailEncryptLogs(object):
         :raises: botocore.exceptions.ClientError
         """
         try:
-            logging.info("Creating an AWS Symmetric CMK")
-            key_id = self.create_key(cloud_account_id, kms_client)
+            
+            #Get S3 Bucket name in which the Cloudtrail is storing logs
+            logging.info("executing cloudtrail_client.get_trail")
+            cloudtrail = cloudtrail_client.get_trail(Name=cloudtrail_name)
+            bucket_name = cloudtrail["Trail"]["S3BucketName"]
 
+            #Get the location of the S3 Bucket
+            logging.info("executing s3_client.get_bucket_location")
+            bucket_location = s3_client.get_bucket_location(Bucket=bucket_name)
+
+            #Create an AWS boto3 client instance for KMS key with the region same as the S3 bucket
+            kms_client = boto3.client('kms', region_name=bucket_location['LocationConstraint'])
+
+            #Create the AWS KMS key in the same location as that of the S3 bucket
+            logging.info("Creating an AWS Symmetric CMK")
+            key_arn = self.create_key(cloud_account_id, kms_client)
+
+            #Enable encryption for Cloudtrail
             logging.info("Encrypting the Cloudtrail logs")
             logging.info("executing cloudtrail_client.update_trail")
             logging.info(f"Name = {cloudtrail_name}")
-            logging.info(f"KmsKeyId = {key_id}")
+            logging.info(f"KmsKeyId = {key_arn}")
             cloudtrail_client.update_trail(
-                Name=cloudtrail_name, KmsKeyId=key_id,
+                Name=cloudtrail_name,
+                KmsKeyId=key_arn,
             )
             logging.info("successfully completed remediation job")
         except Exception as e:
             logging.error(f"{str(e)}")
         return 0
-
+        
     def run(self, args):
         """Run the remediation job.
 
@@ -186,14 +181,10 @@ class CloudtrailEncryptLogs(object):
         :returns: int
         """
         params = self.parse(args[1])
-        kms_client = boto3.client("kms", region_name=params["region"])
+        s3_client = boto3.client("s3")
         cloudtrail_client = boto3.client("cloudtrail", region_name=params["region"])
-        logging.info(
-            "acquired kms client, cloudtrail client and parsed params - starting remediation"
-        )
-        rc = self.remediate(
-            kms_client=kms_client, cloudtrail_client=cloudtrail_client, **params
-        )
+        logging.info("acquired kms client, cloudtrail client and parsed params - starting remediation")
+        rc = self.remediate(s3_client=s3_client, cloudtrail_client=cloudtrail_client, **params)
         return rc
 
 

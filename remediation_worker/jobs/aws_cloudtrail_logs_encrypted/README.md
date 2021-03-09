@@ -1,6 +1,6 @@
 # Enable encryption for Cloudtrail logs
 
-This job encrypts Cloudtrail logs by creating an AWS Symmetric Customer Master Key (CMK).
+This job encrypts Cloudtrail logs by creating an AWS Symmetric Customer Master Key (CMK) in the same region as that of the S3 Bucket that stores Cloudtrail log files.
 
 ### Applicable Rule
 
