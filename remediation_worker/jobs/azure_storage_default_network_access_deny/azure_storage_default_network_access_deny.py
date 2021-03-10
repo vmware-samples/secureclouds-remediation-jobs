@@ -81,7 +81,7 @@ class StorageAccountDefaultActionDeny(object):
         """
 
         # Setting Default Action for network as Deny
-        updated_network_rule_set = NetworkRuleSet(default_action="Deny")
+        updated_network_rule_set = NetworkRuleSet(bypass="AzureServices", default_action="Deny")
         logging.info("Setting default action in network rule set to Deny")
         try:
             logging.info("    executing client.storage_accounts.update")
