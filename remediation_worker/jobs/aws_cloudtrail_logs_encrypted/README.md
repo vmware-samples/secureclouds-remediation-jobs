@@ -1,22 +1,20 @@
-# Enable S3 Access Logging
+# Enable encryption for Cloudtrail logs
 
-This job enable Access Logging for an S3 Bucket. It checks for a target bucket with name "vss-logging-target-{cloud_account_id}-{region}", if the bucket exists then it gives log delivery permissions to that bucket and then stores the logs into it. If the bucket does not exist then it creates one.
+This job encrypts Cloudtrail logs by creating an AWS Symmetric Customer Master Key (CMK) in the same region as that of the S3 Bucket that stores Cloudtrail log files.
 
 ### Applicable Rule
 
 ##### Rule ID:
-* 5c8c265e7a550e1fb6560c67
-* 5c8c265c7a550e1fb6560c63
+5c8c25e47a550e1fb6560bac
 
 ##### Rule Name:
-* S3 access logging is not enabled
-* Access logging is not enabled for CloudTrail S3 buckets
+CloudTrail logs should be encrypted
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided AWS credential must have access to `s3:PutBucketLogging`, `s3:CreateBucket`, `s3:GetBucketAcl`, `s3:PutBucketAcl`, `s3:ListBucket` and `s3:PutEncryptionConfiguration`.
+The provided AWS credential must have access to `kms:CreateKey`, `kms:TagResource`, `kms:EnableKeyRotation` , `cloudtrail:GetTrail`, `cloudtrail:UpdateTrail` and `s3:GetBucketLocation`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
@@ -25,7 +23,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 s3_enable_access_logging.py
+  python3 aws_cloudtrail_logs_encrypted.py
 ```
 
 ## Running the tests
