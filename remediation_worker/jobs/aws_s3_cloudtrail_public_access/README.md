@@ -1,6 +1,6 @@
 # Remove Cloudtrail S3 Public Access
 
-This job will block public access to an S3 Bucket which stores Cloudtrail logs by removing permissions for AllUsers and AuthenticatedUsers in Bucket Access Control List (ACL) or by removing any Statement in Bucket Policy having an Effect set to Allow and a Principal set to "*" or {"AWS" : "*"}.
+This job will block public access to an S3 Bucket which stores Cloudtrail logs by removing permissions for AllUsers and AuthenticatedUsers in Bucket Access Control List (ACL) or by removing any Statement in Bucket Policy having an Effect set to Allow and a Principal set to "\*" or {"AWS" : "\*"}.
 
 ### Applicable Rule
 
