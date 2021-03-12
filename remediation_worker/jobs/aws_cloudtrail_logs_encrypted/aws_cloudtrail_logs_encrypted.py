@@ -153,7 +153,10 @@ class CloudtrailEncryptLogs(object):
             bucket_location = s3_client.get_bucket_location(Bucket=bucket_name)
 
             #Create an AWS boto3 client instance for KMS key with the region same as the S3 bucket
-            kms_client = boto3.client('kms', region_name=bucket_location['LocationConstraint'])
+            if bucket_location['LocationConstraint'] == None:
+                kms_client = boto3.client('kms', region_name='us-east-1')
+            else:
+                kms_client = boto3.client('kms', region_name=bucket_location['LocationConstraint'])
 
             #Create the AWS KMS key in the same location as that of the S3 bucket
             logging.info("Creating an AWS Symmetric CMK")
