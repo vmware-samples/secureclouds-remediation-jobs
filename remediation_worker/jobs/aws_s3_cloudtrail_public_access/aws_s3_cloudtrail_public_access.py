@@ -22,7 +22,7 @@ import boto3
 logging.basicConfig(level=logging.INFO)
 
 
-class CloudtrailS3RemovePublicAcces:
+class CloudtrailS3RemovePublicAccess:
     def parse(self, payload):
         """Parse payload received from Remediation Service.
         :param payload: JSON string containing parameters sent to the remediation job.
@@ -144,5 +144,5 @@ class CloudtrailS3RemovePublicAcces:
 
 if __name__ == "__main__":
     logging.info("aws_s3_cloudtrail_public_access.py called - running now")
-    obj = CloudtrailS3RemovePublicAcces()
+    obj = CloudtrailS3RemovePublicAccess()
     obj.run(sys.argv)
