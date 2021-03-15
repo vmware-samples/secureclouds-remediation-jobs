@@ -1,6 +1,6 @@
 # Enable S3 Access Logging
 
-This job enable Access Logging for an S3 Bucket. It checks for a target bucket with name "vss-logging-target-{cloud_account_id}-{region}", if the bucket exists then it gives log delivery permissions to that bucket and then stores the logs into it. If the bucket does not exist then it creates one.
+This job enables Access Logging for an S3 Bucket. It checks for a target bucket with name "vss-logging-target-{cloud_account_id}-{region}", if the bucket exists then it gives log delivery permissions to that bucket and then stores the logs into it. If the bucket does not exist then it creates one.
 
 ### Applicable Rule
 
