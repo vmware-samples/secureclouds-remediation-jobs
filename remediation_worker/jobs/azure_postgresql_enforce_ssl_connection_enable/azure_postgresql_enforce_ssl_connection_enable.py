@@ -63,7 +63,7 @@ class EnableSslEnforcement(object):
         :raises: msrestazure.azure_exceptions.CloudError
         """
 
-        logging.info("Enabling Transparent Data Encryption for SQL Dtabase")
+        logging.info("Enabling Enforce SSL connection for PostgreSQL Database Server")
 
         try:
             logging.info("    executing client.servers.begin_update")
