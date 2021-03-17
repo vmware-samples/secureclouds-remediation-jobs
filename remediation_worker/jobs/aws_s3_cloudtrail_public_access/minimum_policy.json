@@ -9,7 +9,8 @@
                 "s3:PutBucketPublicAccessBlock",
                 "s3:GetBucketPolicyStatus",
                 "s3:GetBucketAcl",
-                "s3:PutBucketAcl"
+                "s3:PutBucketAcl",
+                "s3:PutBucketPolicy"
             ],
             "Resource": "*"
         }
