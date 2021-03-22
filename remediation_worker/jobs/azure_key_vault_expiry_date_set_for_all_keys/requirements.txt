@@ -10,6 +10,6 @@ azure-graphrbac==0.61.1 \
 azure-keyvault-keys==4.3.1 \
     --hash=sha256:25cf889bbcafd8dee0e068fd48d84e24e11143bf85e35c68d997a222e4a0f7fb \
     --hash=sha256:fbf67bca913ebf68b9075ee9d2e2b899dc3c7892cc40abfe1b08220a382f6ed9
-azure-mgmt-authorization==0.61.0 \
-    --hash=sha256:38f8afcd5c0065e598305de15dbb6b81521ac1e05216049f10ca32a435fd5817 \
-    --hash=sha256:f5cceea3add04e9445ea88492f15eecf6c126f0406d967c95f6e48b79be8db75
+azure-mgmt-authorization==1.0.0 \
+    --hash=sha256:151bebe4352dd5c73d1df8bfc861d6ae6c9697d09ad761c59ce7ec50c476dff7 \
+    --hash=sha256:9a9fc16866b46387853381ab4fa0f84c1765e0afea5b0124709ea9fae10ee752
