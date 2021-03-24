@@ -77,33 +77,28 @@ class KeyVaultIsRecoverable(object):
             key_vault = client.vaults.get(
                 resource_group_name=resource_group_name, vault_name=key_vault_name,
             )
-            logging.info("    executing client.vaults.update")
-            logging.info(f"      resource_group_name={resource_group_name}")
-            logging.info(f"      vault_name={key_vault_name}")
 
             if (
                 key_vault.properties.enable_soft_delete is True
                 and key_vault.properties.enable_purge_protection is None
             ):
-                client.vaults.update(
-                    resource_group_name=resource_group_name,
-                    vault_name=key_vault_name,
-                    parameters=VaultPatchParameters(
-                        properties=VaultPatchProperties(enable_purge_protection=True,)
-                    ),
-                )
+                vault_properties = VaultPatchProperties(enable_purge_protection=True)
+
             elif key_vault.properties.enable_soft_delete is None:
-                client.vaults.update(
-                    resource_group_name=resource_group_name,
-                    vault_name=key_vault_name,
-                    parameters=VaultPatchParameters(
-                        properties=VaultPatchProperties(
-                            enable_soft_delete=True,
-                            soft_delete_retention_in_days=90,
-                            enable_purge_protection=True,
-                        )
-                    ),
+                vault_properties = VaultPatchProperties(
+                    enable_soft_delete=True,
+                    soft_delete_retention_in_days=90,
+                    enable_purge_protection=True,
                 )
+
+            logging.info("    executing client.vaults.update")
+            logging.info(f"      resource_group_name={resource_group_name}")
+            logging.info(f"      vault_name={key_vault_name}")
+            client.vaults.update(
+                resource_group_name=resource_group_name,
+                vault_name=key_vault_name,
+                parameters=VaultPatchParameters(properties=vault_properties),
+            )
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
