@@ -27,7 +27,7 @@ from azure.mgmt.storage.models import (
 logging.basicConfig(level=logging.INFO)
 
 
-class StorageAccountDefaultActionDeny(object):
+class EnableTrustedMicrosoftServices(object):
     def parse(self, payload):
         """Parse payload received from Remediation Service.
         :param payload: JSON string containing parameters received from the remediation service.
@@ -69,32 +69,40 @@ class StorageAccountDefaultActionDeny(object):
         }
 
     def remediate(self, client, resource_group_name, account_name):
-        """Set Default Action for network access rule for a Storage Account as Deny
+        """Enable Trusted Microsoft Services for Storage Account access
         :param client: Instance of the Azure StorageManagementClient.
-        :param resource_group_name: The name of the resource group to which the storage account belongs
+        :param resource_group_name: The name of the resource group to which the storage account belongs.
         :param account_name: The name of the storage account.
+        :param client: str.
         :type resource_group_name: str.
         :type account_name: str.
-        :returns: Integer signaling success or failure
+        :returns: Integer signaling success or failure.
         :rtype: int
         :raises: msrestazure.azure_exceptions.CloudError
         """
-
-        # Setting Default Action for network as Deny
-        updated_network_rule_set = NetworkRuleSet(default_action="Deny")
-        logging.info("Setting default action in network rule set to Deny")
+        logging.info("revoking public access for container")
         try:
-            logging.info("    executing client.storage_accounts.update")
+            storage_account = client.storage_accounts.get_properties(
+                resource_group_name=resource_group_name, account_name=account_name,
+            )
+            if storage_account.network_rule_set.bypass is None:
+                bypass = "AzureServices"
+            else:
+                bypass = storage_account.network_rule_set.bypass + ", AzureServices"
+            logging.info("    executing client.blob_containers.update")
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      account_name={account_name}")
-
+            # Enabling Trusted Microsoft Services for Storage Account access
             client.storage_accounts.update(
                 resource_group_name=resource_group_name,
                 account_name=account_name,
                 parameters=StorageAccountUpdateParameters(
-                    network_rule_set=updated_network_rule_set
+                    network_rule_set=NetworkRuleSet(
+                        bypass=bypass, default_action="Deny"
+                    )
                 ),
             )
+
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
@@ -122,4 +130,4 @@ class StorageAccountDefaultActionDeny(object):
 
 
 if __name__ == "__main__":
-    sys.exit(StorageAccountDefaultActionDeny().run(sys.argv))
+    sys.exit(EnableTrustedMicrosoftServices().run(sys.argv))
