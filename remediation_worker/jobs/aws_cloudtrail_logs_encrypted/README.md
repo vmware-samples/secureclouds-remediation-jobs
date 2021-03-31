@@ -14,7 +14,7 @@ CloudTrail logs should be encrypted
 
 ### Prerequisites
 
-The provided AWS credential must have access to `kms:CreateKey`, `kms:TagResource`, `kms:EnableKeyRotation` , `cloudtrail:GetTrail`, `cloudtrail:UpdateTrail` and `s3:GetBucketLocation`.
+The provided AWS credential must have access to `kms:CreateKey`, `kms:TagResource`, `kms:EnableKeyRotation`, `kms:PutKeyPolicy`, `cloudtrail:GetTrail`, `cloudtrail:UpdateTrail` and `s3:GetBucketLocation`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
