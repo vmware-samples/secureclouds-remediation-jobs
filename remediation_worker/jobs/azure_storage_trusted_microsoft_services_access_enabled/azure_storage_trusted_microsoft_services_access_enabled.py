@@ -80,7 +80,6 @@ class EnableTrustedMicrosoftServices(object):
         :rtype: int
         :raises: msrestazure.azure_exceptions.CloudError
         """
-        logging.info("revoking public access for container")
         try:
             storage_account = client.storage_accounts.get_properties(
                 resource_group_name=resource_group_name, account_name=account_name,
