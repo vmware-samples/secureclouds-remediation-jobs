@@ -1,14 +1,14 @@
-# Set Storage Account Default Network Access to Deny
+# Enable Trusted Microsoft Services for Storage Account access
 
 This job sets DefaultAction in network rule set for a Storage Account as Deny and enables access for Trusted Microsoft Services.
 
 ### Applicable Rule
 
 ##### Rule ID:
-99d645b8-aa87-11ea-bb37-0242ac130002
+7ba94354-ab4c-11ea-bb37-0242ac130002
 
 ##### Rule Name:
-Storage account is publicly accessible
+Storage account is not configured to have access from trusted Microsoft services
 
 ## Getting Started
 ### Prerequisites
@@ -25,7 +25,7 @@ You may run this script using following commands:
 
 ```shell script
   pip install -r requirements.txt
-  python3 azure_storage_default_network_access_deny.py
+  python3 azure_storage_trusted_microsoft_services_access_enabledy.py
 ```
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
