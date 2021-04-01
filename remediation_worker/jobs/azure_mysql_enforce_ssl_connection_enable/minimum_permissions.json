@@ -1,0 +1,19 @@
+{
+    "properties": {
+      "roleName": "remediate_enable_ssl_enforcement",
+      "description": "This role has required permissions to make changes to the MySQL Server",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.DBforMySQL/servers/read",
+            "Microsoft.DBforMySQL/servers/write"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+}
