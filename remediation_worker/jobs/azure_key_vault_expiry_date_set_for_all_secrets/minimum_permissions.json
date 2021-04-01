@@ -1,0 +1,24 @@
+{
+    "properties": {
+      "roleName": "remediate_set_expiry_date_for_secrets",
+      "description": "This role has required permissions to make changes to the Key Vault and Secrets",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.Authorization/roleAssignments/write",
+            "Microsoft.Authorization/roleAssignments/read",
+            "Microsoft.KeyVault/vaults/read",
+            "Microsoft.KeyVault/vaults/write",
+            "Microsoft.KeyVault/vaults/secrets/read",
+            "Microsoft.KeyVault/vaults/secrets/write",
+            "Microsoft.KeyVault/vaults/accessPolicies/write"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+}
