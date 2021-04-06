@@ -65,8 +65,10 @@ class SetExpirationForKey(object):
             )
         resource_group_name = ""
         for property in properties:
-            if property["name"] == "ResourceGroup" and property["type"] == "string":
-                resource_group_name = property["stringV"]
+            if property["name"] == "System:SourceEntityId" and property["type"] == "string":
+                source_entity_id = property["stringV"]
+                source_entity_id_components = source_entity_id.split(".")
+                resource_group_name = source_entity_id_components[3]
                 break
 
         logging.info("parsed params")
