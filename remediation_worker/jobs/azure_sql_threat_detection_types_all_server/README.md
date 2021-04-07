@@ -1,6 +1,6 @@
 # Set Advanced Threat Protection Types to all for SQL Server
 
-This sets Advanced Threat Protection Types to all for an SQL Server.
+This job sets Advanced Threat Protection Types to all for an SQL Server.
 
 ### Applicable Rule
 
