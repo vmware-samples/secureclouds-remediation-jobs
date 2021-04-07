@@ -1,6 +1,6 @@
-# Enable Transparent Data Encryption for SQL Database
+# Enable Enforce SSL connection for PostgreSQL server
 
-This job enables Azure SQL Database Transparent Data Encryption.
+This job enables Enforce SSL connection for PostgreSQL server.
 
 ### Applicable Rule
 
