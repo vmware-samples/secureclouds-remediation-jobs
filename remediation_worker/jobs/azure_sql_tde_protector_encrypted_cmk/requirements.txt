@@ -1,0 +1,21 @@
+azure-identity==1.4.1 \
+    --hash=sha256:6f95b3505fc134ad16bd16da053456e1933188ac43161704d48ddb4edebf72c9 \
+    --hash=sha256:7b071089faf0789059ac24052e311e2b096a002c173d42b96896db09c6e2ba5d
+azure-mgmt-sql==1.0.0 \
+    --hash=sha256:8fae38fc88ba3388b15854f3a8a2c3f8aaeb9cb609ad37b6545abb8d3ae540e6 \
+    --hash=sha256:c7904f8798fbb285a2160c41c8bd7a416c6bd987f5d36a9b98c16f41e24e9f47
+azure-mgmt-storage==16.0.0 \
+    --hash=sha256:2f9d714d9722b1ef4bac6563676612e6e795c4e90f6f3cd323616fdadb0a99e5 \
+    --hash=sha256:a819e421d50c0b58416b551d3e9e9a9cf6029714cf977ffaaee86a37572e7113
+azure-mgmt-keyvault==8.0.0 \
+    --hash=sha256:2c974c6114d8d27152642c82a975812790a5e86ccf609bf370a476d9ea0d2e7d \
+    --hash=sha256:99da24e9455f195d1e45a605af04d663e15cb5d5eb005b0ef60638474bbb2b3f
+azure-graphrbac==0.61.1 \
+    --hash=sha256:53e98ae2ca7c19b349e9e9bb1b6a824aeae8dcfcbe17190d20fe69c0f185b2e2 \
+    --hash=sha256:7b4e0f05676acc912f2b33c71c328d9fb2e4dc8e70ebadc9d3de8ab08bf0b175
+azure-keyvault-keys==4.3.1 \
+    --hash=sha256:25cf889bbcafd8dee0e068fd48d84e24e11143bf85e35c68d997a222e4a0f7fb \
+    --hash=sha256:fbf67bca913ebf68b9075ee9d2e2b899dc3c7892cc40abfe1b08220a382f6ed9
+azure-mgmt-monitor==1.0.1 \
+    --hash=sha256:04bd89d74fe47f966b09e3256ffefcfa5c1a51057a6b33c092afe5ae17a1a7b7 \
+    --hash=sha256:92db4d133f58be900e5a2a9e3f44f4f0c068717bf534bf49c97e070c0280d203
