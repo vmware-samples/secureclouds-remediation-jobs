@@ -14,7 +14,7 @@
 ## Abstract
 These jobs represent open-sourced remediation jobs to be used in conjunction with the
 [SecureState remediation worker for python](https://hub.docker.com/r/vmware/vss-remediation-worker). In order
-to make use of this code, you must utilize the worker and have a SecureState workergroup properly set up.
+to make use of this code, you must utilize the worker and have a Secure State worker group properly set up.
 
 ## Quick Start Guide
 There are a couple conventions that must be followed in order to contribute working jobs to this repository:
@@ -29,13 +29,13 @@ In order to execute a python job, the file must be named the same as the directo
 For example, the job `s3-remove-public-access` must have a `s3-remove-publc-access.py` file within that directory.
 
 The `requirements.txt` file and the `constraints.txt` file are optional but recommended. This ensures
-the worker can install the requirements in a repeatable fashion, which ensures the SecureState
+the worker can install the requirements in a repeatable fashion, which ensures the Secure State
 application will not invalidate jobs due to new requirements being installed.
 
 ## Job execution
 When the worker runs, all requirements found in the (optional) `requirements.txt` and `constraints.txt` files will be installed relative to the job
 directory. When the job is executed, the python runtime is restricted to the requirements in that relative path.
-This ensures all code being executed is known to the SecureState worker and can be verified
+This ensures all code being executed is known to the Secure State worker and can be verified
 via checksum. The worker also moves the entire folder to a separate working directory to
 ensure local imports will not work.
 
@@ -69,7 +69,7 @@ The finding payload is in the form:
 ```
 
 ## Logging
-All stdout and stderr logs are sent to the SecureState web application for display in the
+All stdout and stderr logs are sent to the Secure State web application for display in the
 user interface. Take care when logging and make sure not to log sensitive data.
 
 ## Supported Remediation Jobs
@@ -143,7 +143,7 @@ Members:
 * Paul Allen (VMware)
 
 ## VMware Resources
-* [VMware SecureState](https://www.cloudhealthtech.com/products/vmware-secure-state)
+* [VMware Secure State](https://www.cloudhealthtech.com/products/vmware-secure-state)
 * [VMware Code](https://code.vmware.com/home)
 * [VMware Developer Community](https://communities.vmware.com/community/vmtn/developer)
 
