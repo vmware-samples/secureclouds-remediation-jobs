@@ -54,42 +54,184 @@ class RemoveAdministrationPortsPublicAccess(object):
             )
 
         return_dict = {
+            "cloud_account_id": cloud_account_id,
+            "region": region,
             "network_acl_id": network_acl_id,
         }
         logging.info(return_dict)
         return return_dict
 
-    def remediate(self, client, network_acl_id):
-        """Remove all the network acl rules that provide public access to administration ports (22 and 3389)
-        :param client: Instance of the AWS ec2 client.
-        :param network_acl_id: Network ACL Id
-        :type client: object.
+    def create_list_of_rule_nos(self, network_acl_id, client):
+        """Creates List of Rule Numbers in the Network Acl
+        :param network_acl_id: Network Acl Id.
+        :param client: Instance of the AWS boto3 client.
         :type network_acl_id: str.
+        :type client: object
+        :returns: List of Rule Numbers.
+        :rtype: list.
+        """
+        network_acl = client.describe_network_acls(NetworkAclIds=[network_acl_id])
+        network_acl_entries = network_acl["NetworkAcls"][0]
+        rule_nos = []
+        for entry in network_acl_entries["Entries"]:
+            rule_nos.append(entry["RuleNumber"])
+        return rule_nos
+
+    def find_and_remove_port(
+        self, network_acl_id, client, network_acl_entries, port_no, rule_nos
+    ):
+        """Find and remove port 22 and 3389 from Network Acl Entries
+        :param network_acl_id: Network Acl Id.
+        :param client: Instance of the AWS boto3 client.
+        :param network_acl_entries: List of Network Acl Entries.
+        :param port_no: Port No. to remove.
+        :param rule_nos: List of Rule Numbers.
+        :type rule_nos: list.
+        :type port_no: int.
+        :type network_acl_entries: list.
+        :type network_acl_id: str.
+        :type client: object.
+        :returns: None.
+        :rtype: None.
+        """
+        for entry in network_acl_entries["Entries"]:
+            if (
+                entry["Egress"] is False
+                and entry["RuleAction"] == "allow"
+                and entry["Protocol"] in ["6", "-1"]
+                and entry["CidrBlock"] == "0.0.0.0/0"
+            ):
+                if "PortRange" not in entry or entry["PortRange"] == {
+                    "From": port_no,
+                    "To": port_no,
+                }:
+                    client.delete_network_acl_entry(
+                        Egress=False,
+                        NetworkAclId=network_acl_id,
+                        RuleNumber=entry["RuleNumber"],
+                    )
+                elif (
+                    entry["PortRange"]["From"] < port_no
+                    and entry["PortRange"]["To"] == port_no
+                ):
+                    portrange_to = port_no - 1
+                    if "CidrBlock" not in entry:
+                        client.replace_network_acl_entry(
+                            Egress=entry["Egress"],
+                            Ipv6CidrBlock=entry["Ipv6CidrBlock"],
+                            NetworkAclId=network_acl_id,
+                            PortRange={
+                                "From": entry["PortRange"]["From"],
+                                "To": portrange_to,
+                            },
+                            Protocol=entry["Protocol"],
+                            RuleAction=entry["RuleAction"],
+                            RuleNumber=entry["RuleNumber"],
+                        )
+                    else:
+                        client.replace_network_acl_entry(
+                            CidrBlock=entry["CidrBlock"],
+                            Egress=entry["Egress"],
+                            NetworkAclId=network_acl_id,
+                            PortRange={
+                                "From": entry["PortRange"]["From"],
+                                "To": portrange_to,
+                            },
+                            Protocol=entry["Protocol"],
+                            RuleAction=entry["RuleAction"],
+                            RuleNumber=entry["RuleNumber"],
+                        )
+                elif (
+                    entry["PortRange"]["From"] < port_no
+                    and entry["PortRange"]["To"] > port_no
+                ):
+                    rule_no = entry["RuleNumber"] + 10
+                    while rule_no in rule_nos:
+                        rule_no = rule_no + 10
+
+                    if "CidrBlock" not in entry:
+                        client.replace_network_acl_entry(
+                            Egress=entry["Egress"],
+                            Ipv6CidrBlock=entry["Ipv6CidrBlock"],
+                            NetworkAclId=network_acl_id,
+                            PortRange={
+                                "From": entry["PortRange"]["From"],
+                                "To": port_no - 1,
+                            },
+                            Protocol=entry["Protocol"],
+                            RuleAction=entry["RuleAction"],
+                            RuleNumber=entry["RuleNumber"],
+                        )
+                        portrange_from = port_no + 1
+
+                        client.create_network_acl_entry(
+                            Egress=entry["Egress"],
+                            Ipv6CidrBlock=entry["Ipv6CidrBlock"],
+                            NetworkAclId=network_acl_id,
+                            PortRange={
+                                "From": portrange_from,
+                                "To": entry["PortRange"]["To"],
+                            },
+                            Protocol=entry["Protocol"],
+                            RuleAction=entry["RuleAction"],
+                            RuleNumber=rule_no,
+                        )
+                        rule_nos.append(rule_no)
+                    else:
+                        client.replace_network_acl_entry(
+                            CidrBlock=entry["CidrBlock"],
+                            Egress=entry["Egress"],
+                            NetworkAclId=network_acl_id,
+                            PortRange={
+                                "From": entry["PortRange"]["From"],
+                                "To": port_no - 1,
+                            },
+                            Protocol=entry["Protocol"],
+                            RuleAction=entry["RuleAction"],
+                            RuleNumber=entry["RuleNumber"],
+                        )
+                        portrange_from = port_no + 1
+
+                        client.create_network_acl_entry(
+                            CidrBlock=entry["CidrBlock"],
+                            Egress=entry["Egress"],
+                            NetworkAclId=network_acl_id,
+                            PortRange={
+                                "From": portrange_from,
+                                "To": entry["PortRange"]["To"],
+                            },
+                            Protocol=entry["Protocol"],
+                            RuleAction=entry["RuleAction"],
+                            RuleNumber=rule_no,
+                        )
+                        rule_nos.append(rule_no)
+
+    def remediate(self, region, client, network_acl_id, cloud_account_id):
+        """Remove Network ACL Rules that allows public access to administration ports (3389 and 22)
+        :param region: The buckets region
+        :param client: Instance of the AWS boto3 client.
+        :param network_acl_id: Network Acl Id.
+        :param cloud_account_id: AWS Account Id.
+        :type region: str.
+        :type client: object.
+        :param network_acl_id: str.
+        :type cloud_account_id: str.
         :returns: Integer signaling success or failure
         :rtype: int
         :raises: botocore.exceptions.ClientError
         """
         try:
             logging.info("executing client.describe_network_acls to get network acl")
-            network_acl = client.describe_network_acls(NetworkAclIds=[network_acl_id])
-            network_acl_entries = network_acl["NetworkAcls"][0]
-            for entry in network_acl_entries["Entries"]:
-                if (
-                    entry["Egress"] is False
-                    and entry["RuleAction"] == "allow"
-                    and entry["Protocol"] in ["6", "-1"]
-                    and (
-                        "PortRange" not in entry
-                        or entry["PortRange"]
-                        in [{"From": 3389, "To": 3389}, {"From": 22, "To": 22}]
-                    )
-                    and entry["CidrBlock"] == "0.0.0.0/0"
-                ):
-                    client.delete_network_acl_entry(
-                        Egress=False,
-                        NetworkAclId=network_acl_id,
-                        RuleNumber=entry["RuleNumber"],
-                    )
+            port_nos = [22, 3389]
+            for port_no in port_nos:
+                rule_nos = self.create_list_of_rule_nos(network_acl_id, client)
+                network_acl = client.describe_network_acls(
+                    NetworkAclIds=[network_acl_id]
+                )
+                network_acl_entries = network_acl["NetworkAcls"][0]
+                self.find_and_remove_port(
+                    network_acl_id, client, network_acl_entries, port_no, rule_nos
+                )
             logging.info("successfully completed remediation job")
         except Exception as e:
             logging.error(f"{str(e)}")
@@ -103,13 +245,13 @@ class RemoveAdministrationPortsPublicAccess(object):
         :returns: int
         """
         params = self.parse(args[1])
-        client = boto3.client("ec2")
+        client = boto3.client("ec2", params["region"])
         logging.info("acquired ec2 client and parsed params - starting remediation")
         rc = self.remediate(client=client, **params)
         return rc
 
 
 if __name__ == "__main__":
-    logging.info("aws_ec2_administration_ports_ingress_allowed.py called - running now")
+    logging.info("aws_cloudtrail_logs_encrypted.py called - running now")
     obj = RemoveAdministrationPortsPublicAccess()
     obj.run(sys.argv)
