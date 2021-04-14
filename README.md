@@ -13,7 +13,7 @@
 
 ## Abstract
 These jobs represent open-sourced remediation jobs to be used in conjunction with the
-[SecureState remediation worker for python](https://hub.docker.com/r/vmware/vss-remediation-worker). In order
+[Secure State remediation worker for python](https://hub.docker.com/r/vmware/vss-remediation-worker). In order
 to make use of this code, you must utilize the worker and have a Secure State worker group properly set up.
 
 ## Quick Start Guide
