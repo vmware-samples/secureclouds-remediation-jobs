@@ -1,0 +1,15 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "RemoveDefaultSecurityGroupRules",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeSecurityGroups",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupEgress"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
