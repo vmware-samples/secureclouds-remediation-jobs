@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from __future__ import annotations
-from botocore.exceptions import ClientError
 
 import json
 import logging
@@ -58,13 +57,13 @@ class DefaultSecurityGroupRemoveRules(object):
         return {
             "security_group_id": security_group_id,
             "region": region,
-            "cloud_account_id" : cloud_account_id,
+            "cloud_account_id": cloud_account_id,
         }
 
     def remediate(self, client, security_group_id, region, cloud_account_id):
-        """Restrict all access for EC2 VPC default security group
+        """Restrict all access for EC2 VPC default security group.
         :param client: Instance of the AWS boto3 client.
-        :param security_group_id: The ID of the security group. 
+        :param security_group_id: The ID of the security group.
         :param region: Region in which the security group exists.
         :param cloud_account_id: AWS Account no.
         :type security_group_id: str.
@@ -78,63 +77,68 @@ class DefaultSecurityGroupRemoveRules(object):
             security_group_response = client.describe_security_groups(
                 GroupIds=[security_group_id],
             )
-            if len(security_group_response['SecurityGroups']) != 0:
-                security_group = security_group_response['SecurityGroups'][0]
-            for ingress_rules in security_group['IpPermissions']:
-                if ingress_rules['IpProtocol'] == '-1' and len(ingress_rules['UserIdGroupPairs'])>0:
-                    for user_id_group_pairs in ingress_rules['UserIdGroupPairs']:
-                        if user_id_group_pairs['GroupId'] == security_group_id:
+            if len(security_group_response["SecurityGroups"]) > 0:
+                security_group = security_group_response["SecurityGroups"][0]
+            for ingress_rules in security_group["IpPermissions"]:
+                if (
+                    ingress_rules["IpProtocol"] == "-1"
+                    and len(ingress_rules["UserIdGroupPairs"]) > 0
+                ):
+                    for user_id_group_pairs in ingress_rules["UserIdGroupPairs"]:
+                        if user_id_group_pairs["GroupId"] == security_group_id:
                             client.revoke_security_group_ingress(
                                 GroupId=security_group_id,
-                                GroupName='default',
+                                GroupName="default",
                                 IpPermissions=[
                                     {
-                                        'IpProtocol':ingress_rules['IpProtocol'],
-                                        'UserIdGroupPairs':[
+                                        "IpProtocol": ingress_rules["IpProtocol"],
+                                        "UserIdGroupPairs": [
                                             {
-                                                'GroupId': security_group_id, 
-                                                'UserId': cloud_account_id
+                                                "GroupId": security_group_id,
+                                                "UserId": cloud_account_id,
                                             },
-                                        ]
+                                        ],
                                     },
                                 ],
                             )
-            for egress_rules in security_group['IpPermissionsEgress']:
-                if egress_rules['IpProtocol'] == '-1' and len(egress_rules['IpRanges']) > 0:
-                    for egress_ip_range in egress_rules['IpRanges']:
-                        if egress_ip_range['CidrIp'] == '0.0.0.0/0':
-                            response = client.revoke_security_group_egress(
+            for egress_rules in security_group["IpPermissionsEgress"]:
+                if (
+                    egress_rules["IpProtocol"] == "-1"
+                    and len(egress_rules["IpRanges"]) > 0
+                ):
+                    for egress_ip_range in egress_rules["IpRanges"]:
+                        if egress_ip_range["CidrIp"] == "0.0.0.0/0":
+                            client.revoke_security_group_egress(
                                 GroupId=security_group_id,
                                 IpPermissions=[
                                     {
-                                        'IpProtocol': egress_rules['IpProtocol'],
-                                        'IpRanges': [
-                                            {
-                                                'CidrIp': egress_ip_range['CidrIp']
-                                            },
-                                        ]
+                                        "IpProtocol": egress_rules["IpProtocol"],
+                                        "IpRanges": [
+                                            {"CidrIp": egress_ip_range["CidrIp"]},
+                                        ],
                                     },
                                 ],
                             )
-                if egress_rules['IpProtocol'] == '-1' and len(egress_rules['Ipv6Ranges']) > 0:
-                    for egress_ipv6_range in egress_rules['Ipv6Ranges']:
-                        if egress_ipv6_range['CidrIpv6'] == '::/0':
-                            response = client.revoke_security_group_egress(
+                if (
+                    egress_rules["IpProtocol"] == "-1"
+                    and len(egress_rules["Ipv6Ranges"]) > 0
+                ):
+                    for egress_ipv6_range in egress_rules["Ipv6Ranges"]:
+                        if egress_ipv6_range["CidrIpv6"] == "::/0":
+                            client.revoke_security_group_egress(
                                 GroupId=security_group_id,
                                 IpPermissions=[
                                     {
-                                        'IpProtocol': egress_rules['IpProtocol'],
-                                        'Ipv6Ranges': [
-                                            {
-                                                'CidrIpv6': egress_ipv6_range['CidrIpv6']
-                                            },
-                                        ]
+                                        "IpProtocol": egress_rules["IpProtocol"],
+                                        "Ipv6Ranges": [
+                                            {"CidrIpv6": egress_ipv6_range["CidrIpv6"]},
+                                        ],
                                     },
                                 ],
                             )
         except Exception as e:
             logging.error(f"{str(e)}")
-        
+
         logging.info("successfully executed remediation")
 
         return 0
@@ -147,7 +151,7 @@ class DefaultSecurityGroupRemoveRules(object):
         :returns: int
         """
         params = self.parse(args[1])
-        client = boto3.client('ec2', params['region'])
+        client = boto3.client("ec2", params["region"])
         logging.info("acquired ec2 client and parsed params - starting remediation")
         rc = self.remediate(client=client, **params)
         return rc
