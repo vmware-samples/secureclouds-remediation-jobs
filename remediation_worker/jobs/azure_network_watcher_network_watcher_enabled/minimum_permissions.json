@@ -1,0 +1,20 @@
+{
+    "properties": {
+      "roleName": "remediate_enable_network_watcher",
+      "description": "This role has required permissions to make changes to the Azure Network Watcher",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.Network/networkWatchers/read",
+            "Microsoft.Network/networkWatchers/write"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+
+}
