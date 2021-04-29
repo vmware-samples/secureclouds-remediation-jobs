@@ -15,8 +15,8 @@
 import pytest
 from mock import Mock
 
-from remediation_worker.jobs.aws_iam_password_policy_min_length.aws_iam_password_policy_min_length import (
-    SetPasswordMinimumLength,
+from remediation_worker.jobs.aws_iam_password_reuse_prevention.aws_iam_password_reuse_prevention import (
+    SetPasswordReusePrevention,
 )
 
 
@@ -38,22 +38,22 @@ def valid_payload():
 """
 
 
-class TestSetPasswordMinLength(object):
+class TestSetPasswordReusePolicy(object):
     def test_parse_payload(self, valid_payload):
-        params = SetPasswordMinimumLength().parse(valid_payload)
+        params = SetPasswordReusePrevention().parse(valid_payload)
         assert params["account_id"] == "account_id"
 
     def test_remediate_success(self):
         client = Mock()
-        action = SetPasswordMinimumLength()
+        action = SetPasswordReusePrevention()
         assert action.remediate(client, "account_id") == 0
         assert client.update_account_password_policy.call_count == 1
         call_args = client.update_account_password_policy.call_args
-        password_reuse_policy = call_args[1]["MinimumPasswordLength"]
-        assert password_reuse_policy == 14
+        password_reuse_policy = call_args[1]["PasswordReusePrevention"]
+        assert password_reuse_policy == 24
 
     def test_remediate_with_exception(self):
         client = Mock()
-        action = SetPasswordMinimumLength()
+        action = SetPasswordReusePrevention()
         with pytest.raises(Exception):
             assert action.remediate(client, "account_id")
