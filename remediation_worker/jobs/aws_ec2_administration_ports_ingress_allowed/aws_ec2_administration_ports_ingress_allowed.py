@@ -115,32 +115,18 @@ class RemoveAdministrationPortsPublicAccess(object):
                     and entry["PortRange"]["To"] == port_no
                 ):
                     portrange_to = port_no - 1
-                    if "CidrBlock" not in entry:
-                        client.replace_network_acl_entry(
-                            Egress=entry["Egress"],
-                            Ipv6CidrBlock=entry["Ipv6CidrBlock"],
-                            NetworkAclId=network_acl_id,
-                            PortRange={
-                                "From": entry["PortRange"]["From"],
-                                "To": portrange_to,
-                            },
-                            Protocol=entry["Protocol"],
-                            RuleAction=entry["RuleAction"],
-                            RuleNumber=entry["RuleNumber"],
-                        )
-                    else:
-                        client.replace_network_acl_entry(
-                            CidrBlock=entry["CidrBlock"],
-                            Egress=entry["Egress"],
-                            NetworkAclId=network_acl_id,
-                            PortRange={
-                                "From": entry["PortRange"]["From"],
-                                "To": portrange_to,
-                            },
-                            Protocol=entry["Protocol"],
-                            RuleAction=entry["RuleAction"],
-                            RuleNumber=entry["RuleNumber"],
-                        )
+                    client.replace_network_acl_entry(
+                        CidrBlock=entry["CidrBlock"],
+                        Egress=entry["Egress"],
+                        NetworkAclId=network_acl_id,
+                        PortRange={
+                            "From": entry["PortRange"]["From"],
+                            "To": portrange_to,
+                        },
+                        Protocol=entry["Protocol"],
+                        RuleAction=entry["RuleAction"],
+                        RuleNumber=entry["RuleNumber"],
+                    )
                 elif (
                     entry["PortRange"]["From"] < port_no
                     and entry["PortRange"]["To"] > port_no
@@ -149,62 +135,33 @@ class RemoveAdministrationPortsPublicAccess(object):
                     while rule_no in rule_nos:
                         rule_no = rule_no + 10
 
-                    if "CidrBlock" not in entry:
-                        client.replace_network_acl_entry(
-                            Egress=entry["Egress"],
-                            Ipv6CidrBlock=entry["Ipv6CidrBlock"],
-                            NetworkAclId=network_acl_id,
-                            PortRange={
-                                "From": entry["PortRange"]["From"],
-                                "To": port_no - 1,
-                            },
-                            Protocol=entry["Protocol"],
-                            RuleAction=entry["RuleAction"],
-                            RuleNumber=entry["RuleNumber"],
-                        )
-                        portrange_from = port_no + 1
+                    client.replace_network_acl_entry(
+                        CidrBlock=entry["CidrBlock"],
+                        Egress=entry["Egress"],
+                        NetworkAclId=network_acl_id,
+                        PortRange={
+                            "From": entry["PortRange"]["From"],
+                            "To": port_no - 1,
+                        },
+                        Protocol=entry["Protocol"],
+                        RuleAction=entry["RuleAction"],
+                        RuleNumber=entry["RuleNumber"],
+                    )
+                    portrange_from = port_no + 1
 
-                        client.create_network_acl_entry(
-                            Egress=entry["Egress"],
-                            Ipv6CidrBlock=entry["Ipv6CidrBlock"],
-                            NetworkAclId=network_acl_id,
-                            PortRange={
-                                "From": portrange_from,
-                                "To": entry["PortRange"]["To"],
-                            },
-                            Protocol=entry["Protocol"],
-                            RuleAction=entry["RuleAction"],
-                            RuleNumber=rule_no,
-                        )
-                        rule_nos.append(rule_no)
-                    else:
-                        client.replace_network_acl_entry(
-                            CidrBlock=entry["CidrBlock"],
-                            Egress=entry["Egress"],
-                            NetworkAclId=network_acl_id,
-                            PortRange={
-                                "From": entry["PortRange"]["From"],
-                                "To": port_no - 1,
-                            },
-                            Protocol=entry["Protocol"],
-                            RuleAction=entry["RuleAction"],
-                            RuleNumber=entry["RuleNumber"],
-                        )
-                        portrange_from = port_no + 1
-
-                        client.create_network_acl_entry(
-                            CidrBlock=entry["CidrBlock"],
-                            Egress=entry["Egress"],
-                            NetworkAclId=network_acl_id,
-                            PortRange={
-                                "From": portrange_from,
-                                "To": entry["PortRange"]["To"],
-                            },
-                            Protocol=entry["Protocol"],
-                            RuleAction=entry["RuleAction"],
-                            RuleNumber=rule_no,
-                        )
-                        rule_nos.append(rule_no)
+                    client.create_network_acl_entry(
+                        CidrBlock=entry["CidrBlock"],
+                        Egress=entry["Egress"],
+                        NetworkAclId=network_acl_id,
+                        PortRange={
+                            "From": portrange_from,
+                            "To": entry["PortRange"]["To"],
+                        },
+                        Protocol=entry["Protocol"],
+                        RuleAction=entry["RuleAction"],
+                        RuleNumber=rule_no,
+                    )
+                    rule_nos.append(rule_no)
 
     def remediate(self, region, client, network_acl_id, cloud_account_id):
         """Remove Network ACL Rules that allows public access to administration ports (3389 and 22)
