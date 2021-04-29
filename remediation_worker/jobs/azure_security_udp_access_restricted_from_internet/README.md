@@ -1,6 +1,6 @@
 # Restrict UDP access from Internet
 
-This job deletes inbound security rule that allows open traffic on UDP port.
+This job deletes inbound security rules that allows open traffic on UDP port i.e. it deletes all the rules with protocol as UDP or * and have source address prefix or source address prefixes within ["\*", "Internet", "0.0.0.0/0", "0.0.0.0", "/0", "::/0"]
 
 ### Applicable Rule
 

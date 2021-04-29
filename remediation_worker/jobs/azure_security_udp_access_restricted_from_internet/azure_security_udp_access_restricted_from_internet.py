@@ -81,8 +81,7 @@ class RestrictUdpAccessFromInternet(object):
                 network_security_group_name=network_security_group_name,
             )
             security_rules = network_security_group.security_rules
-            # Sort the security rules according to the priority
-            security_rules.sort(key=lambda security_rule: security_rule.priority)
+
             for rule in security_rules:
                 if (
                     rule.protocol in ["*", "UDP"]
@@ -96,7 +95,7 @@ class RestrictUdpAccessFromInternet(object):
                         )
                     )
                 ):
-                    # Delete the highest priority rule that allows unrestricted access to UDP
+                    # Delete all the rules that allows unrestricted access to UDP
                     logging.info("    executing client.security_rules.begin_delete")
                     logging.info(f"      resource_group_name={resource_group_name}")
                     logging.info(
@@ -108,7 +107,6 @@ class RestrictUdpAccessFromInternet(object):
                         network_security_group_name=network_security_group_name,
                         security_rule_name=rule.name,
                     )
-                    break
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
