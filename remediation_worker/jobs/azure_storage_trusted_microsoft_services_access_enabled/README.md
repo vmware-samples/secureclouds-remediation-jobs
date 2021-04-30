@@ -1,20 +1,20 @@
-# Set Advanced Threat Protection Types to all for SQL Server
+# Enable Trusted Microsoft Services for Storage Account access
 
-This job sets Advanced Threat Protection Types to all for an SQL Server.
+This job sets DefaultAction in network rule set for a Storage Account as Deny and enables access for Trusted Microsoft Services.
 
 ### Applicable Rule
 
 ##### Rule ID:
-5c8c26977a550e1fb6560cd6
+7ba94354-ab4c-11ea-bb37-0242ac130002
 
 ##### Rule Name:
-SQL server should have Advanced Threat Protection types set to all
+Storage account is not configured to have access from trusted Microsoft services
 
 ## Getting Started
 ### Prerequisites
 The provided Azure service principal must have the following permissions:
-`Microsoft.Sql/servers/securityAlertPolicies/write`
-`Microsoft.Sql/servers/securityAlertPolicies/read`
+`Microsoft.Storage/storageAccounts/read`
+`Microsoft.Storage/storageAccounts/write`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -25,7 +25,7 @@ You may run this script using following commands:
 
 ```shell script
   pip install -r requirements.txt
-  python3 azure_sql_threat_detection_types_all_server.py
+  python3 azure_storage_trusted_microsoft_services_access_enabledy.py
 ```
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
@@ -35,9 +35,9 @@ You may run test using following command under vss-remediation-worker-job-code-p
     python3 -m pytest test
 ```
 ## Deployment
-Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
-Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
+Provision a Virtual Machine Create an Azure Virtual Machine instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
+Setup Docker Install Docker on the newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html) for more information.
+Deploy the worker image SSH into the Azure Virtual Machine instance and run the command below to deploy the worker image:
   ```shell script
   docker run --rm -it --name {worker_name}\
   -e VSS_CLIENT_ID={ENTER CLIENT ID}\

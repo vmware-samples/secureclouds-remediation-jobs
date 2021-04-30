@@ -1,0 +1,19 @@
+{
+    "properties": {
+      "roleName": "remediate_enable_trusted_microsoft_services",
+      "description": "This role has required permissions to make changes to the storage account",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.Storage/storageAccounts/read",
+            "Microsoft.Storage/storageAccounts/write"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+  }

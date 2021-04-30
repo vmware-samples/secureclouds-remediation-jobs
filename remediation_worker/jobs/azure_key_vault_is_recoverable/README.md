@@ -1,20 +1,23 @@
-# Set Advanced Threat Protection Types to all for SQL Server
+# Enable Soft Delete and Purge Protection for Key Vault
 
-This job sets Advanced Threat Protection Types to all for an SQL Server.
+This job enables Soft Delete and Purge Protection for the Azure Key Vault.
+The Retention period will be for 90 days.
+
+**NOTE -** Enabling Soft Delete and Purge Protection is irreversible.
 
 ### Applicable Rule
 
 ##### Rule ID:
-5c8c26977a550e1fb6560cd6
+e2090e34-3580-4088-a815-2ead6a72700f
 
 ##### Rule Name:
-SQL server should have Advanced Threat Protection types set to all
+Key Vault should be recoverable
 
 ## Getting Started
 ### Prerequisites
 The provided Azure service principal must have the following permissions:
-`Microsoft.Sql/servers/securityAlertPolicies/write`
-`Microsoft.Sql/servers/securityAlertPolicies/read`
+`Microsoft.KeyVault/vaults/read`,
+`Microsoft.KeyVault/vaults/write`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -25,7 +28,7 @@ You may run this script using following commands:
 
 ```shell script
   pip install -r requirements.txt
-  python3 azure_sql_threat_detection_types_all_server.py
+  python3 azure_key_vault_is_recoverable.py
 ```
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
@@ -36,7 +39,7 @@ You may run test using following command under vss-remediation-worker-job-code-p
 ```
 ## Deployment
 Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
+Setup Docker on newly provisioned Azure Virtual Machine instance.You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
 Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
   ```shell script
   docker run --rm -it --name {worker_name}\

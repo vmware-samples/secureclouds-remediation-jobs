@@ -1,6 +1,6 @@
 # Set Storage Account Default Network Access to Deny
 
-This job sets DefaultAction in network rule set for a Storage Account as Deny.
+This job sets DefaultAction in network rule set for a Storage Account as Deny and enables access for Trusted Microsoft Services.
 
 ### Applicable Rule
 

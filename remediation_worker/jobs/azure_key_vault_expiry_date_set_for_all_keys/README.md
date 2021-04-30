@@ -1,20 +1,26 @@
-# Set Advanced Threat Protection Types to all for SQL Server
+# Set Expiry date for Azure Keyvault Key
 
-This job sets Advanced Threat Protection Types to all for an SQL Server.
+This job sets an expiry date which will be 2 years from current date and time for the Azure Keyvault Key.
 
 ### Applicable Rule
 
 ##### Rule ID:
-5c8c26977a550e1fb6560cd6
+5c8c26677a550e1fb6560c6e
 
 ##### Rule Name:
-SQL server should have Advanced Threat Protection types set to all
+An encryption key has no scheduled expiration
 
 ## Getting Started
 ### Prerequisites
 The provided Azure service principal must have the following permissions:
-`Microsoft.Sql/servers/securityAlertPolicies/write`
-`Microsoft.Sql/servers/securityAlertPolicies/read`
+`Microsoft.Authorization/roleAssignments/write`,
+`Microsoft.Authorization/roleAssignments/read`,
+`Microsoft.KeyVault/vaults/read`,
+`Microsoft.KeyVault/vaults/write`,
+`Microsoft.KeyVault/vaults/keys/read`,
+`Microsoft.KeyVault/vaults/keys/write`,
+`Microsoft.KeyVault/vaults/accessPolicies/write`,
+`Microsoft.KeyVault/vaults/keys/update/action`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -25,7 +31,7 @@ You may run this script using following commands:
 
 ```shell script
   pip install -r requirements.txt
-  python3 azure_sql_threat_detection_types_all_server.py
+  python3 azure_key_vault_expiry_date_set_for_all_keys.py
 ```
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
@@ -36,7 +42,7 @@ You may run test using following command under vss-remediation-worker-job-code-p
 ```
 ## Deployment
 Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
+Setup Docker on newly provisioned Azure Virtual Machine instance.You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
 Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
   ```shell script
   docker run --rm -it --name {worker_name}\

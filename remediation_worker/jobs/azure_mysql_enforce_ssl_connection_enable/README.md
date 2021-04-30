@@ -1,20 +1,20 @@
-# Set Advanced Threat Protection Types to all for SQL Server
+# Enable Enforce SSL connection for MySQL Server
 
-This job sets Advanced Threat Protection Types to all for an SQL Server.
+This job enables Enforce SSL connection for MySQL Server.
 
 ### Applicable Rule
 
 ##### Rule ID:
-5c8c26977a550e1fb6560cd6
+677cbf2f-3096-4111-af16-05da43d95d80
 
 ##### Rule Name:
-SQL server should have Advanced Threat Protection types set to all
+MySQL server should have Enforce SSL connection enabled
 
 ## Getting Started
 ### Prerequisites
 The provided Azure service principal must have the following permissions:
-`Microsoft.Sql/servers/securityAlertPolicies/write`
-`Microsoft.Sql/servers/securityAlertPolicies/read`
+`Microsoft.DBforMySQL/servers/read`
+`Microsoft.DBforMySQL/servers/write`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -25,7 +25,7 @@ You may run this script using following commands:
 
 ```shell script
   pip install -r requirements.txt
-  python3 azure_sql_threat_detection_types_all_server.py
+  python3 azure_mysql_enforce_ssl_connection_enable.py
 ```
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
@@ -35,9 +35,9 @@ You may run test using following command under vss-remediation-worker-job-code-p
     python3 -m pytest test
 ```
 ## Deployment
-Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker on newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
-Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
+Provision a Virtual Machine Create an Azure Virtual Machine instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
+Setup Docker Install Docker on the newly provisioned Azure Virtual Machine instance. You can refer to the [docs here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html) for more information.
+Deploy the worker image SSH into the Azure Virtual Machine instance and run the command below to deploy the worker image:
   ```shell script
   docker run --rm -it --name {worker_name}\
   -e VSS_CLIENT_ID={ENTER CLIENT ID}\
