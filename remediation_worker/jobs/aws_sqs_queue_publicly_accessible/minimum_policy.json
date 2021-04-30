@@ -1,0 +1,15 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "SqsRemovePublicAccess",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+                "sqs:RemovePermission"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
