@@ -280,8 +280,11 @@ class RemoveAdministrationPortsPublicAccess(object):
                     NetworkAclIds=[network_acl_id]
                 )
                 network_acl_entries = network_acl["NetworkAcls"][0]
+                #Create List of Rule Numbers
                 rule_nos = self.create_list_of_rule_nos(network_acl_entries)
+                #Create List of Port Ranges
                 port_ranges = self.create_list_of_port_range(network_acl_entries)
+                #Remove the port from the Network ACL entries
                 self.find_and_remove_port(
                     network_acl_id,
                     client,
