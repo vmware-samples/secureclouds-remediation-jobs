@@ -1,0 +1,19 @@
+{
+    "properties": {
+      "roleName": "remediate_enable_ssl_enforcement",
+      "description": "This role has required permissions to make changes to the PostgreSQL Database Server",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.DBforPostgreSQL/servers/read",
+            "Microsoft.DBforPostgreSQL/servers/write"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+  }

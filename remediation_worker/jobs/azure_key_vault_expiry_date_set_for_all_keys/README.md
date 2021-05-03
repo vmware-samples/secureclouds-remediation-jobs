@@ -1,20 +1,26 @@
-# Set Storage Account Default Network Access to Deny
+# Set Expiry date for Azure Keyvault Key
 
-This job sets DefaultAction in network rule set for a Storage Account as Deny and enables access for Trusted Microsoft Services.
+This job sets an expiry date which will be 2 years from current date and time for the Azure Keyvault Key.
 
 ### Applicable Rule
 
 ##### Rule ID:
-99d645b8-aa87-11ea-bb37-0242ac130002
+5c8c26677a550e1fb6560c6e
 
 ##### Rule Name:
-Storage account is publicly accessible
+An encryption key has no scheduled expiration
 
 ## Getting Started
 ### Prerequisites
 The provided Azure service principal must have the following permissions:
-`Microsoft.Storage/storageAccounts/read`
-`Microsoft.Storage/storageAccounts/write`
+`Microsoft.Authorization/roleAssignments/write`,
+`Microsoft.Authorization/roleAssignments/read`,
+`Microsoft.KeyVault/vaults/read`,
+`Microsoft.KeyVault/vaults/write`,
+`Microsoft.KeyVault/vaults/keys/read`,
+`Microsoft.KeyVault/vaults/keys/write`,
+`Microsoft.KeyVault/vaults/accessPolicies/write`,
+`Microsoft.KeyVault/vaults/keys/update/action`
 
 A sample role with requisite permissions can be found [here](minimum_permissions.json)
 
@@ -25,7 +31,7 @@ You may run this script using following commands:
 
 ```shell script
   pip install -r requirements.txt
-  python3 azure_storage_default_network_access_deny.py
+  python3 azure_key_vault_expiry_date_set_for_all_keys.py
 ```
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
@@ -35,13 +41,16 @@ You may run test using following command under vss-remediation-worker-job-code-p
     python3 -m pytest test
 ```
 ## Deployment
-Provision a Virtual Machine Create an EC2 instance to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
-Setup Docker Install Docker on the newly provisioned EC2 instance. You can refer to the [docs here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html) for more information.
-Deploy the worker image SSH into the EC2 instance and run the command below to deploy the worker image:
+Provision an instance by creating an Azure Virtual Machine to use for the worker. The minimum required specifications are 128 MB memory and 1/2 Core CPU.
+Setup Docker on newly provisioned Azure Virtual Machine instance.You can refer to the [docs here](https://docs.microsoft.com/en-us/previous-versions/azure/virtual-machines/linux/docker-machine) for more information.
+Deploy the worker docker image by SSH into the Azure Virtual Machine instance and run the following commands:
   ```shell script
-  docker run --rm -it --name worker \
-  -e VSS_CLIENT_ID={ENTER CLIENT ID}
-  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET} \
+  docker run --rm -it --name {worker_name}\
+  -e VSS_CLIENT_ID={ENTER CLIENT ID}\
+  -e VSS_CLIENT_SECRET={ENTER CLIENT SECRET}\
+  -e AZURE_CLIENT_ID={ENTER AZURE_CLIENT_ID} \
+  -e AZURE_CLIENT_SECRET={ENTER AZURE_CLIENT_SECRET} \
+  -e AZURE_TENANT_ID={ENTER AZURE_TENANT_ID} \
   vmware/vss-remediation-worker:latest-python
   ```
 ## Contributing
