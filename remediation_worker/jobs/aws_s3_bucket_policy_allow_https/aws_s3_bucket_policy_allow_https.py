@@ -70,31 +70,35 @@ class S3AllowOnlyHttpsRequest:
         :raises: botocore.exceptions.ClientError
         """
 
-        logging.info("making api call to client.get_bucket_policy")
-        logging.info(f"Bucket_name: {bucket_name}")
-        bucket_policy = client.get_bucket_policy(
-            Bucket=bucket_name, ExpectedBucketOwner=cloud_account_id,
-        )
-        policy = json.loads(bucket_policy["Policy"])
-        statements = policy["Statement"]
-        # Policy Statement to restrict http requests
-        restrict_http = {
-            "Sid": "Restrict Non-https Requests",
-            "Effect": "Deny",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": f"arn:aws:s3:::{bucket_name}/*",
-            "Condition": {"Bool": {"aws:SecureTransport": "false"}},
-        }
-        statements.append(restrict_http)
-        logging.info("making api call to client.put_bucket_policy")
-        logging.info(f"Bucket_name: {bucket_name}")
-        client.put_bucket_policy(
-            Bucket=bucket_name,
-            Policy=json.dumps(policy),
-            ExpectedBucketOwner=cloud_account_id,
-        )
-        logging.info(f"successfully executed remediation for bucket: {bucket_name}")
+        try:
+            logging.info("making api call to client.get_bucket_policy")
+            logging.info(f"Bucket_name: {bucket_name}")
+            bucket_policy = client.get_bucket_policy(
+                Bucket=bucket_name, ExpectedBucketOwner=cloud_account_id,
+            )
+            policy = json.loads(bucket_policy["Policy"])
+            statements = policy["Statement"]
+            # Policy Statement to restrict http requests
+            restrict_http = {
+                "Sid": "Restrict Non-https Requests",
+                "Effect": "Deny",
+                "Principal": "*",
+                "Action": "s3:GetObject",
+                "Resource": f"arn:aws:s3:::{bucket_name}/*",
+                "Condition": {"Bool": {"aws:SecureTransport": "false"}},
+            }
+            statements.append(restrict_http)
+            logging.info("making api call to client.put_bucket_policy")
+            logging.info(f"Bucket_name: {bucket_name}")
+            client.put_bucket_policy(
+                Bucket=bucket_name,
+                Policy=json.dumps(policy),
+                ExpectedBucketOwner=cloud_account_id,
+            )
+            logging.info(f"successfully executed remediation for bucket: {bucket_name}")
+        except Exception as e:
+            logging.error(f"{str(e)}")
+            raise
         return 0
 
     def run(self, args):
