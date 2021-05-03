@@ -1,0 +1,19 @@
+{
+    "properties": {
+      "roleName": "remediate_key_vault_is_recoverable",
+      "description": "This role has required permissions to make changes to the Key Vault",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.KeyVault/vaults/read",
+            "Microsoft.KeyVault/vaults/write"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+}

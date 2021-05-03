@@ -1,0 +1,19 @@
+{
+    "properties": {
+      "roleName": "remediate_udp_access_restricted_from_internet",
+      "description": "This role has required permissions to make changes to the Azure Network Security Group and Security Rule",
+      "assignableScopes": [
+      ],
+      "permissions": [
+        {
+          "actions": [
+            "Microsoft.Network/networkSecurityGroups/read",
+            "Microsoft.Network/networkSecurityGroups/securityRules/delete"
+          ],
+          "notActions": [],
+          "dataActions": [],
+          "notDataActions": []
+        }
+      ]
+    }
+}
