@@ -42,6 +42,8 @@ class TestCloudtrailS3PublicAccess(object):
     def test_parse_payload(self, valid_payload):
         params = RemoveAdministrationPortsPublicAccess().parse(valid_payload)
         assert params["network_acl_id"] == "network_acl_id"
+        assert params["cloud_account_id"] == "cloud_account_id"
+        assert params["region"] == "region"
 
     def test_remediate_success_with_bucket_policy_public(self):
         client = Mock()
@@ -135,7 +137,10 @@ class TestCloudtrailS3PublicAccess(object):
             },
         }
         client.describe_network_acls.return_value = network_acls
-        assert action.remediate(client, "network_acl_id") == 0
+        assert (
+            action.remediate("region", client, "network_acl_id", "cloud_account_id")
+            == 0
+        )
 
     def test_remediate_with_exception(self):
         client = Mock()
