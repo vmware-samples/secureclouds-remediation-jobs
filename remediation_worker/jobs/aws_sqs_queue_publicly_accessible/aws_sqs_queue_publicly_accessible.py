@@ -73,31 +73,35 @@ class SqsQueuePubliclyAccessible:
         :raises: botocore.exceptions.ClientError
         """
 
-        logging.info("making api call to client.get_queue_url")
-        logging.info(f"Queue_name: {queue_name}")
-        queue_url_response = client.get_queue_url(
-            QueueName=queue_name, QueueOwnerAWSAccountId=cloud_account_id,
-        )
-        queue_url = queue_url_response["QueueUrl"]
+        try:
+            logging.info("making api call to client.get_queue_url")
+            logging.info(f"Queue_name: {queue_name}")
+            queue_url_response = client.get_queue_url(
+                QueueName=queue_name, QueueOwnerAWSAccountId=cloud_account_id,
+            )
+            queue_url = queue_url_response["QueueUrl"]
 
-        # Get the queue policy
-        logging.info("making api call to client.get_queue_attributes")
-        queue_attributes = client.get_queue_attributes(
-            QueueUrl=queue_url, AttributeNames=["Policy"],
-        )
+            # Get the queue policy
+            logging.info("making api call to client.get_queue_attributes")
+            queue_attributes = client.get_queue_attributes(
+                QueueUrl=queue_url, AttributeNames=["Policy"],
+            )
 
-        queue_policy = json.loads(queue_attributes["Attributes"]["Policy"])
+            queue_policy = json.loads(queue_attributes["Attributes"]["Policy"])
 
-        for statement in queue_policy["Statement"]:
-            if (
-                statement["Effect"] == "Allow"
-                and "Condition" not in statement
-                and statement["Principal"] in ["*", {"AWS": "*"}]
-            ):
-                logging.info("making api call to client.remove_permission")
-                # Removing those policy statements from the Queue that allow public access
-                client.remove_permission(QueueUrl=queue_url, Label=statement["Sid"])
-        logging.info(f"successfully executed remediation for Queue: {queue_name}")
+            for statement in queue_policy["Statement"]:
+                if (
+                    statement["Effect"] == "Allow"
+                    and "Condition" not in statement
+                    and statement["Principal"] in ["*", {"AWS": "*"}]
+                ):
+                    logging.info("making api call to client.remove_permission")
+                    # Removing those policy statements from the Queue that allow public access
+                    client.remove_permission(QueueUrl=queue_url, Label=statement["Sid"])
+            logging.info(f"successfully executed remediation for Queue: {queue_name}")
+        except Exception as e:
+            logging.error(f"{str(e)}")
+            raise
         return 0
 
     def run(self, args):
