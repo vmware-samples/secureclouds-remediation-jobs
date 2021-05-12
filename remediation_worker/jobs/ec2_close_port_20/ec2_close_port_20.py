@@ -18,7 +18,6 @@ import json
 import logging
 import sys
 
-from common.closeport import closeport
 import boto3
 
 logging.basicConfig(level=logging.INFO)
