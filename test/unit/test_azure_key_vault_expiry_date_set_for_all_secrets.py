@@ -29,7 +29,7 @@ def valid_payload():
         "FindingInfo": {
             "FindingId": "d3bb1d9a-fe52-4458-9935-47183f140e6b",
             "ObjectId": "key_vault_name.secret_name",
-            "ObjectChain": "{\\"cloudAccountId\\":\\"subscription_id\\",\\"entityId\\":\\"Azure.KeyVault.Secret.d687b1a3-9b78-43b1-a17b-7de297fd1fce.integration-tests-postgresql-b3wx.Key.postgresqlwnuuobrlrwngs\\",\\"entityName\\":\\"key_vault_name.key_name\\",\\"entityType\\":\\"Azure.KeyVault.Secret\\",\\"lastUpdateTime\\":\\"2020-09-09T00:36:35.000Z\\",\\"partitionKey\\":\\"d687b1a3-9b78-43b1-a17b-7de297fd1fce\\",\\"provider\\":\\"Azure\\",\\"region\\":\\"eastus\\",\\"service\\":\\"PostgreSQL\\", \\"properties\\":[{\\"name\\":\\"ResourceGroup\\",\\"stringV\\":\\"resource_group_name\\",\\"type\\":\\"string\\"}]}",
+            "ObjectChain": "{\\"cloudAccountId\\":\\"subscription_id\\",\\"entityId\\":\\"Azure.KeyVault.Secret.d687b1a3-9b78-43b1-a17b-7de297fd1fce.integration-tests-postgresql-b3wx.Key.postgresqlwnuuobrlrwngs\\",\\"entityName\\":\\"key_vault_name.key_name\\",\\"entityType\\":\\"Azure.KeyVault.Secret\\",\\"lastUpdateTime\\":\\"2020-09-09T00:36:35.000Z\\",\\"partitionKey\\":\\"d687b1a3-9b78-43b1-a17b-7de297fd1fce\\",\\"provider\\":\\"Azure\\",\\"region\\":\\"eastus\\",\\"service\\":\\"PostgreSQL\\", \\"properties\\":[{\\"name\\":\\"System:SourceEntityId\\",\\"stringV\\":\\"Azure.KeyVault.8aa70cc7-bf51-4e8c-baa0-368cb78b3c0c.resource_group_name.Vault.rem-testsjehb\\",\\"type\\":\\"string\\"}]}",
             "Region": "region"
             }
         }

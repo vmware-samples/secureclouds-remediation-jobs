@@ -17,7 +17,7 @@ from mock import Mock
 from botocore.exceptions import ClientError
 
 from remediation_worker.jobs.aws_s3_cloudtrail_public_access.aws_s3_cloudtrail_public_access import (
-    CloudtrailS3RemovePublicAcces,
+    CloudtrailS3RemovePublicAccess,
 )
 
 
@@ -41,7 +41,7 @@ def valid_payload():
 
 class TestCloudtrailS3PublicAccess(object):
     def test_parse_payload(self, valid_payload):
-        params = CloudtrailS3RemovePublicAcces().parse(valid_payload)
+        params = CloudtrailS3RemovePublicAccess().parse(valid_payload)
         assert params["region"] == "region"
         assert params["cloudtrail_name"] == "CloudTrail_name"
         assert params["cloud_account_id"] == "cloud_account_id"
@@ -49,7 +49,7 @@ class TestCloudtrailS3PublicAccess(object):
     def test_remediate_success_with_bucket_policy_public(self):
         client = Mock()
         cloudtrail_client = Mock()
-        action = CloudtrailS3RemovePublicAcces()
+        action = CloudtrailS3RemovePublicAccess()
         trail = {
             "Trail": {
                 "Name": "CloudTrail_name",
@@ -126,7 +126,7 @@ class TestCloudtrailS3PublicAccess(object):
     def test_remediate_success_without_bucket_policy_public(self):
         client = Mock()
         cloudtrail_client = Mock()
-        action = CloudtrailS3RemovePublicAcces()
+        action = CloudtrailS3RemovePublicAccess()
         trail = {
             "Trail": {
                 "Name": "CloudTrail_name",
@@ -188,6 +188,6 @@ class TestCloudtrailS3PublicAccess(object):
                 )
 
         client = TestClient()
-        action = CloudtrailS3RemovePublicAcces()
+        action = CloudtrailS3RemovePublicAccess()
         with pytest.raises(Exception):
             assert action.remediate(client, "bucket_name", "cloud_account_id")
