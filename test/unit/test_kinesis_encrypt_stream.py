@@ -37,3 +37,112 @@ class TestKinesisEncryptStream:
         assert param["stream_name"] == "kinesis-stream"
         assert "region" in param
         assert param["region"] == "us-east-1"
+
+    def test_remediate_success(self):
+        class TestClient(object):
+            def start_stream_encryption(self, **kwargs):
+                return 0
+
+            def describe_stream(self, **kwargs):
+                stream = {'StreamDescription': {'EncryptionType':"NONE"}}
+                return stream
+
+        client = TestClient()
+        obj = KinesisEncryptStream()
+        assert obj.remediate("stream_name", client, "us-west1") == 0
+
+    def test_remediate_not_success_resource_not_found(self):
+        class TestClient(object):
+            def start_stream_encryption(self, **kwargs):
+                return 0
+
+            def describe_stream(self, **kwargs):
+                raise ClientError(
+                    {
+                        "Error": {
+                            "Code": "ResourceNotFoundException",
+                            "Message": "ResourceNotFoundException for reason",
+                        }
+                    },
+                    "KinesisEncryptStream",
+                )
+
+        client = TestClient()
+        obj = KinesisEncryptStream()
+        assert obj.remediate("stream_name", client, "us-west1") == 1
+
+    def test_remediate_not_success_limit_exceed(self):
+        class TestClient(object):
+            def start_stream_encryption(self, **kwargs):
+                return 0
+
+            def describe_stream(self, **kwargs):
+                raise ClientError(
+                    {
+                        "Error": {
+                            "Code": "LimitExceededException",
+                            "Message": "LimitExceededException for reason",
+                        }
+                    },
+                    "KinesisEncryptStream",
+                )
+
+        client = TestClient()
+        obj = KinesisEncryptStream()
+        assert obj.remediate("stream_name", client, "us-west1") == 1
+
+    def test_remediate_not_success_resource_in_use(self):
+        class TestClient(object):
+            def describe_stream(self, **kwargs):
+                stream = {'StreamDescription': {'EncryptionType':"NONE"}}
+                return stream
+
+            def start_stream_encryption(self, **kwargs):
+                raise ClientError(
+                    {
+                        "Error": {
+                            "Code": "ResourceInUseException",
+                            "Message": "ResourceInUseException for reason",
+                        }
+                    },
+                    "KinesisEncryptStream",
+                )
+
+        client = TestClient()
+        obj = KinesisEncryptStream()
+        assert obj.remediate("stream_name", client, "us-west1") == 1
+
+    def test_remediate_not_success_other_aws_exceptions(self):
+        class TestClient(object):
+            def describe_stream(self, **kwargs):
+                stream = {'StreamDescription': {'EncryptionType':"NONE"}}
+                return stream
+
+            def start_stream_encryption(self, **kwargs):
+                raise ClientError(
+                    {
+                        "Error": {
+                            "Code": "InvalidArgumentException",
+                            "Message": "InvalidArgumentException for reason",
+                        }
+                    },
+                    "KinesisEncryptStream",
+                )
+
+        client = TestClient()
+        obj = KinesisEncryptStream()
+        assert obj.remediate("stream_name", client, "us-west1") == 1
+
+    def test_remediate_not_success_other_exceptions(self):
+        class TestClient(object):
+            def describe_stream(self, **kwargs):
+                stream = {'StreamDescription': {'EncryptionType':"NONE"}}
+                return stream
+
+            def start_stream_encryption(self, **kwargs):
+                raise Exception('This is the exception you expect to handle')
+
+        client = TestClient()
+        obj = KinesisEncryptStream()
+        assert obj.remediate("stream_name", client, "us-west1") == 1
+

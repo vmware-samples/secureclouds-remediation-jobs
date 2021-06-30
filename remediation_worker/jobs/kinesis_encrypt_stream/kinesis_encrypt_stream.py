@@ -19,6 +19,7 @@ import logging
 import sys
 
 import boto3
+from botocore.exceptions import ClientError
 
 logging.basicConfig(level=logging.INFO)
 
@@ -74,7 +75,8 @@ class KinesisEncryptStream():
 
         # If kinesis data stream is not encrypted
         if encryption_type == "NONE":
-            self.enable_encryption(client, stream_name)
+            res = self.enable_encryption(client, stream_name)
+            return res 
         # If encryption is enabled
         # We have nothing to do.
         # log and exit
@@ -83,15 +85,13 @@ class KinesisEncryptStream():
                 "Kinesis data stream %s is already encrypted, taking no action.",
                 stream_name
             )
-            sys.exit(0)
+            return 0
         # If anything else returns,
         # log and exit
         else:
-            logging.error(
-                "An unknown encryption type returned for kinesis data stream %s. Exiting.",
-                stream_name
-            )
-            sys.exit(1)
+            error = "An unknown encryption type {0} returned for kinesis data stream {1}. Exiting".format(encryption_type, stream_name) 
+            logging.error(error)
+            return 1
 
     def check_encryption(self, client, stream_name):
         """Checks the kinesis data stream encryption setting.
@@ -106,14 +106,26 @@ class KinesisEncryptStream():
         try:
             encryption_type = client.describe_stream(
                 StreamName=stream_name)["StreamDescription"]["EncryptionType"]
-        except client.exceptions.ResourceNotFoundException as found_error:
-            logging.error(
-                "A failure occured with error: %s. Check if the resource exists.",
-                format(found_error.response['Error']['Code'])
-            )
-            sys.exit(1)
+            return encryption_type
 
-        return encryption_type
+        except ClientError as user_error:
+            print ("Got ClientError: ", user_error)
+            
+            if user_error.response["Error"]["Code"] == "ResourceNotFoundException":
+                logging.error(
+                "A failure occured with error: %s. Check if the resource exists.",
+                format(user_error.response['Error']['Code'])
+            )
+            elif user_error.response["Error"]["Code"] == "LimitExceededException":
+                error = "Receiving LimitExceededException exception: {0} while trying to encrypt kinesis data stream {1}".format(stream_name,user_error.response["Error"]["Code"]) 
+                logging.error(error)
+            
+        
+        except Exception as e:
+            error = "Receiving other exceptions {0} reading kinesis data stream {1}".format(str(e), stream_name)
+            logging.error(error)
+
+        return ""
 
     def enable_encryption(self, client, stream_name):
         """Enable encryption on the kinesis data stream.
@@ -135,16 +147,21 @@ class KinesisEncryptStream():
                 "Encryption enabled on kinesis data stream %s",
                 stream_name
             )
-        except client.exceptions.ResourceInUseException as use_error:
-            if use_error.response["Error"]["Code"] == "ResourceInUseException":
-                logging.info(
+            return 0
+        except ClientError as user_error:
+            if user_error.response["Error"]["Code"] == "ResourceInUseException":
+                logging.error(
                     "Kinesis data stream %s is in an unavailable state.",
                     stream_name
                 )
-            sys.exit(1)
-        except:
-            logging.error("Error reading kinesis data stream %s.", stream_name)
-            sys.exit(1)
+            else:
+               error = "Receiving Kinesis exception: {0} while tyring to encrypt kinesis data stream {1}".format(stream_name,user_error.response["Error"]["Code"]) 
+               logging.error(error)
+            return 1
+        except Exception as e:
+            error = "Receiving exception {0} for kinesis data stream {1}".format(str(e), stream_name)
+            return 1
+
 
     def run(self, args):
         """Run the remediation job.
