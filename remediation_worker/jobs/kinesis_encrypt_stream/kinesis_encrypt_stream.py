@@ -108,11 +108,10 @@ class KinesisEncryptStream():
                 StreamName=stream_name)["StreamDescription"]["EncryptionType"]
             return encryption_type
 
-        except ClientError as user_error:
+        except ClientError as user_error:          
             if user_error.response["Error"]["Code"] == "ResourceNotFoundException":
                 logging.error(
-                "A failure occured with error: %s. Check if the resource exists.",
-                format(user_error.response['Error']['Code'])
+                "A failure occured with error: %s. Check if the resource exists.", user_error.response['Error']['Code']
             )
             elif user_error.response["Error"]["Code"] == "LimitExceededException":
                 error = "Receiving LimitExceededException exception: {0} while trying to encrypt kinesis data stream {1}".format(stream_name,user_error.response["Error"]["Code"]) 
