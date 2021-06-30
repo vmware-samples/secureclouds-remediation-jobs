@@ -134,7 +134,7 @@ The table below lists all the supported jobs with their links.
 |   21.  	| 688d093c-3b8d-11eb-adc1-0242ac120002 	|                     S3 bucket should allow only HTTPS requests                    	|             [aws-s3-bucket-policy-allow-https](remediation_worker/jobs/aws_s3_bucket_policy_allow_https)             	|
 |   22.  	| 09639b9d-98e8-493b-b8a4-916775a7dea9 	|            SQS queue policy should restricted access to required users            	|            [aws-sqs-queue-publicly-accessible](remediation_worker/jobs/aws_sqs_queue_publicly_accessible)            	|
 |   23.  	| 1ec4a1f2-3e08-11eb-b378-0242ac130002 	| Network ACL should restrict administration ports (3389 and 22) from public access 	| [aws-ec2-administration-ports-ingress-allowed](remediation_worker/jobs/aws_ec2_administration_ports_ingress_allowed) 	|
-|   24.  	| ce603728-d631-4bae-8657-c22da6e5944e | Kinesis data stream should be encrypted                                          	| []kinesis-encrypt-stream(remediation_worker/jobs/kinesis_encrypt_stream) 	|
+|   24.  	| ce603728-d631-4bae-8657-c22da6e5944e | Kinesis data stream should be encrypted                                          	| [kinesis-encrypt-stream](remediation_worker/jobs/kinesis_encrypt_stream) 	|
 
 ## Contributing
 The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
