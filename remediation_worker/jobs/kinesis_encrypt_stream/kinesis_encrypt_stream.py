@@ -109,8 +109,6 @@ class KinesisEncryptStream():
             return encryption_type
 
         except ClientError as user_error:
-            print ("Got ClientError: ", user_error)
-            
             if user_error.response["Error"]["Code"] == "ResourceNotFoundException":
                 logging.error(
                 "A failure occured with error: %s. Check if the resource exists.",
