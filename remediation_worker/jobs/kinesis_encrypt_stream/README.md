@@ -19,7 +19,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 ### Running the script
 
 You may run this script using following commands:
-```shell script
+
   pip install -r ../../requirements.txt
   python3 kinesis_encrypt_stream.py "`cat finding.json`"
   where finding.json has kinesis data stream and region info
@@ -31,7 +31,6 @@ You may run this script using following commands:
         }
     }
 }
-```
 
 ## Running the tests
 You may run test using following command under vss-remediation-worker-job-code-python directory:
