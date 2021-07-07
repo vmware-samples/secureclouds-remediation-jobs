@@ -157,6 +157,7 @@ class KinesisEncryptStream():
             return 1
         except Exception as e:
             error = "Receiving exception {0} for kinesis data stream {1}".format(str(e), stream_name)
+            logging.error(error)
             return 1
 
 
