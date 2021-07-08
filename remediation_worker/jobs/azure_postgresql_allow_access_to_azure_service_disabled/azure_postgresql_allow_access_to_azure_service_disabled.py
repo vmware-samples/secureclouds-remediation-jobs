@@ -74,7 +74,7 @@ class DisableAzureServicesAccess(object):
                 resource_group_name=resource_group_name,
                 server_name=postgre_server_name,
                 firewall_rule_name="AllowAllWindowsAzureIps",
-            )
+            ).result()
         except Exception as e:
             logging.error(f"{str(e)}")
             raise

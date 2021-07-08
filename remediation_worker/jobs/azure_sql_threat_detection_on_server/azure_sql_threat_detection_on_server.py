@@ -76,7 +76,7 @@ class EnableSqlServerThreatProtection(object):
                 parameters=ServerSecurityAlertPolicy(
                     state=SecurityAlertPolicyState.enabled
                 ),
-            )
+            ).result()
         except Exception as e:
             logging.error(f"{str(e)}")
             raise

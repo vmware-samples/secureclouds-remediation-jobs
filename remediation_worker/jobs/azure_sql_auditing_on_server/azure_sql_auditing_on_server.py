@@ -578,7 +578,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
                 state=BlobAuditingPolicyState.enabled,
                 storage_endpoint=f"https://{stg_account_name}.blob.core.windows.net/",
             ),
-        )
+        ).result()
 
     def ensure_identity_assigned(
         self, client, resource_group_name, sql_server_name, region

@@ -695,7 +695,7 @@ class SqlServerEncryptTdeProtector(object):
                 parameters=EncryptionProtector(
                     server_key_name=server_key_name, server_key_type="AzureKeyVault"
                 ),
-            )
+            ).result()
         except Exception as e:
             logging.error(f"{str(e)}")
             raise

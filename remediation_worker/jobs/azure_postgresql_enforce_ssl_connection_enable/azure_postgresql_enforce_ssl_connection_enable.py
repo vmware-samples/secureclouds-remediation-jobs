@@ -74,7 +74,7 @@ class EnableSslEnforcement(object):
                 resource_group_name=resource_group_name,
                 server_name=postgre_server_name,
                 parameters=ServerUpdateParameters(ssl_enforcement="Enabled"),
-            )
+            ).result()
         except Exception as e:
             logging.error(f"{str(e)}")
             raise

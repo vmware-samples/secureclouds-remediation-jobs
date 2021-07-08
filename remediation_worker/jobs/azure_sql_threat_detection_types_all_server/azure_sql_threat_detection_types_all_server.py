@@ -79,7 +79,7 @@ class SetAdvanceThreatProtectionToAll(object):
                 parameters=ServerSecurityAlertPolicy(
                     state=SecurityAlertPolicyState.enabled, disabled_alerts=[]
                 ),
-            )
+            ).result()
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
