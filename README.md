@@ -134,6 +134,9 @@ The table below lists all the supported jobs with their links.
 |   21.  	| 688d093c-3b8d-11eb-adc1-0242ac120002 	|                     S3 bucket should allow only HTTPS requests                    	|             [aws-s3-bucket-policy-allow-https](remediation_worker/jobs/aws_s3_bucket_policy_allow_https)             	|
 |   22.  	| 09639b9d-98e8-493b-b8a4-916775a7dea9 	|            SQS queue policy should restricted access to required users            	|            [aws-sqs-queue-publicly-accessible](remediation_worker/jobs/aws_sqs_queue_publicly_accessible)            	|
 |   23.  	| 1ec4a1f2-3e08-11eb-b378-0242ac130002 	| Network ACL should restrict administration ports (3389 and 22) from public access 	| [aws-ec2-administration-ports-ingress-allowed](remediation_worker/jobs/aws_ec2_administration_ports_ingress_allowed) 	|
+|   24.  	| 2cdb8877-7ac3-4483-9ed0-1e792171d125 	| EBS volume snapshot should be private                                                 | [ebs-private-snapshot](remediation_worker/jobs/ebs_private_snapshot) 	|
+|   25.  	| 5c8c26467a550e1fb6560c48              | RDS instance should restrict public access                                            | [rds-remove-public-endpoint](remediation_worker/jobs/rds_remove_public_endpoint) 	|
+|   26.  	| 5c8c264a7a550e1fb6560c4c              | RDS should have automatic minor version upgrades enabled                              | [rds-enable-version-update](remediation_worker/jobs/rds_enable_version_update) 	|
 
 ## Contributing
 The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
