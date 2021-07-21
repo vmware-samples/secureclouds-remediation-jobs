@@ -77,11 +77,17 @@ class EnableSslEnforcement(object):
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      server_name={mysql_server_name}")
 
-            client.servers.begin_update(
+            poller = client.servers.begin_update(
                 resource_group_name=resource_group_name,
                 server_name=mysql_server_name,
                 parameters=ServerUpdateParameters(ssl_enforcement="Enabled"),
-            ).result()
+            )
+            while not poller.done():
+                time.sleep(5)
+                status = poller.status()
+                logging.info(f"The remediation job status: {status}")
+            poller.result()
+            
         except Exception as e:
             logging.error(f"{str(e)}")
             raise

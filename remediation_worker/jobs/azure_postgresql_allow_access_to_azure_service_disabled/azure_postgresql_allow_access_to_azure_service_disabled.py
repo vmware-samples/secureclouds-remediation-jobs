@@ -70,11 +70,17 @@ class DisableAzureServicesAccess(object):
             logging.info(f"      server_name={postgre_server_name}")
             logging.info(f"      firewall_rule_name=AllowAllWindowsAzureIps")
 
-            client.firewall_rules.begin_delete(
+            poller = client.firewall_rules.begin_delete(
                 resource_group_name=resource_group_name,
                 server_name=postgre_server_name,
                 firewall_rule_name="AllowAllWindowsAzureIps",
-            ).result()
+            )
+            while not poller.done():
+                time.sleep(5)
+                status = poller.status()
+                logging.info(f"The remediation job status: {status}")
+            poller.result()
+        
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
