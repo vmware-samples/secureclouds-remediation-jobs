@@ -282,7 +282,7 @@ class EC2ClosePort22(object):
                     MaxResults=1000
                 )
                 print(security_group_rules)
-                self.remove_port(client, security_group_rules["SecurityGroupRules"], security_group_id, port)
+                #self.remove_port(client, security_group_rules["SecurityGroupRules"], security_group_id, port)
                 logging.info("successfully executed remediation")
         except Exception as e:
             logging.error(f"{str(e)}")
