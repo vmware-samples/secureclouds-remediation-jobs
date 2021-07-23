@@ -56,8 +56,207 @@ class EC2ClosePort1521(object):
 
         return {"instance_id": instance_id}, region
 
+    def remove_port(self, client, security_group_rules, security_group_id, port):
+        for rule in security_group_rules:
+            if rule["IpProtocol"] == "tcp" and rule["IsEgress"] == False and "CidrIpv4" in rule and rule["CidrIpv4"] == "0.0.0.0/0" and rule["FromPort"] <= port and rule["ToPort"] >= port:
+                if rule["FromPort"] == port and rule["ToPort"] == port:
+                    logging.info("    executing client.revoke_security_group_ingress")
+                    logging.info('      CidrIp="0.0.0.0/0"')
+                    logging.info(f"      FromPort={port}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={port}")
+                    client.revoke_security_group_ingress(
+                        CidrIp="0.0.0.0/0",
+                        FromPort=port,
+                        GroupId=security_group_id,
+                        IpProtocol="tcp",
+                        ToPort=port,
+                    )
+                elif rule["FromPort"] < port and rule["ToPort"] == port:
+                    logging.info("    executing client.modify_security_group_rules")
+                    logging.info('      CidrIp="0.0.0.0/0"')
+                    logging.info(f"      FromPort={rule['FromPort']}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={port - 1}")
+                    client.modify_security_group_rules(
+                        GroupId=security_group_id,
+                        SecurityGroupRules=[
+                            {
+                                'SecurityGroupRuleId': rule["SecurityGroupRuleId"],
+                                'SecurityGroupRule': {
+                                    'IpProtocol': 'tcp',
+                                    'FromPort': rule["FromPort"],
+                                    'ToPort': port - 1,
+                                    'CidrIpv4': '0.0.0.0/0'
+                                }
+                            }
+                        ]
+                    )
+                elif rule["FromPort"] == port and rule["ToPort"] > port:
+                    logging.info("    executing client.modify_security_group_rules")
+                    logging.info('      CidrIp="0.0.0.0/0"')
+                    logging.info(f"      FromPort={port + 1}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={rule['ToPort']}")
+                    client.modify_security_group_rules(
+                        GroupId=security_group_id,
+                        SecurityGroupRules=[
+                            {
+                                'SecurityGroupRuleId': rule["SecurityGroupRuleId"],
+                                'SecurityGroupRule': {
+                                    'IpProtocol': 'tcp',
+                                    'FromPort': port + 1,
+                                    'ToPort': rule["ToPort"],
+                                    'CidrIpv4': '0.0.0.0/0'
+                                }
+                            }
+                        ]
+                    )
+                elif rule["FromPort"] < port and rule["ToPort"] > port:
+                    logging.info("    executing client.modify_security_group_rules")
+                    logging.info('      CidrIp="0.0.0.0/0"')
+                    logging.info(f"      FromPort={rule['FromPort']}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={port - 1}")
+                    client.modify_security_group_rules(
+                        GroupId=security_group_id,
+                        SecurityGroupRules=[
+                            {
+                                'SecurityGroupRuleId': rule["SecurityGroupRuleId"],
+                                'SecurityGroupRule': {
+                                    'IpProtocol': 'tcp',
+                                    'FromPort': rule["FromPort"],
+                                    'ToPort': port - 1,
+                                    'CidrIpv4': '0.0.0.0/0'
+                                }
+                            }
+                        ]
+                    )
+
+                    logging.info("    executing client.authorize_security_group_ingress")
+                    logging.info('      CidrIp="0.0.0.0/0"')
+                    logging.info(f"      FromPort={port + 1}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={rule['ToPort']}")
+                    client.authorize_security_group_ingress(
+                        CidrIp='0.0.0.0/0',
+                        FromPort=port + 1,
+                        GroupId=security_group_id,
+                        IpProtocol='tcp',
+                        ToPort=rule["ToPort"]
+                    )
+            elif rule["IpProtocol"] == "tcp" and rule["IsEgress"] == False and "CidrIpv6" in rule and rule["CidrIpv6"] == "::/0" and rule["FromPort"] <= port and rule["ToPort"] >= port:
+                if rule["FromPort"] == port and rule["ToPort"] == port:
+                    logging.info("    executing client.revoke_security_group_ingress")
+                    logging.info(f"      FromPort={port}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info('      "Ipv6Ranges": [{"CidrIpv6": "::/0"}]')
+                    logging.info(f"      ToPort={port}")
+                    client.revoke_security_group_ingress(
+                        GroupId=security_group_id,
+                        IpPermissions=[
+                            {
+                                "FromPort": port,
+                                "IpProtocol": "tcp",
+                                "Ipv6Ranges": [{"CidrIpv6": "::/0"}],
+                                "ToPort": port,
+                            },
+                        ],
+                    )
+                elif rule["FromPort"] < port and rule["ToPort"] == port:
+                    logging.info("    executing client.modify_security_group_rules")
+                    logging.info('      CidrIpv6="::/0"')
+                    logging.info(f"      FromPort={rule['FromPort']}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={port - 1}")
+                    client.modify_security_group_rules(
+                        GroupId=security_group_id,
+                        SecurityGroupRules=[
+                            {
+                                'SecurityGroupRuleId': rule["SecurityGroupRuleId"],
+                                'SecurityGroupRule': {
+                                    'IpProtocol': 'tcp',
+                                    'FromPort': rule["FromPort"],
+                                    'ToPort': port - 1,
+                                    'CidrIpv6': '::/0'
+                                }
+                            }
+                        ]
+                    )
+                elif rule["FromPort"] == port and rule["ToPort"] > port:
+                    logging.info("    executing client.modify_security_group_rules")
+                    logging.info('      CidrIpv6="::/0"')
+                    logging.info(f"      FromPort={port + 1}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={rule['ToPort']}")
+                    client.modify_security_group_rules(
+                        GroupId=security_group_id,
+                        SecurityGroupRules=[
+                            {
+                                'SecurityGroupRuleId': rule["SecurityGroupRuleId"],
+                                'SecurityGroupRule': {
+                                    'IpProtocol': 'tcp',
+                                    'FromPort': port + 1,
+                                    'ToPort': rule["ToPort"],
+                                    'CidrIpv6': '::/0'
+                                }
+                            }
+                        ]
+                    )
+                elif rule["FromPort"] < port and rule["ToPort"] > port:
+                    logging.info("    executing client.modify_security_group_rules")
+                    logging.info('      CidrIpv6="::/0"')
+                    logging.info(f"      FromPort={rule['FromPort']}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={port - 1}")
+                    client.modify_security_group_rules(
+                        GroupId=security_group_id,
+                        SecurityGroupRules=[
+                            {
+                                'SecurityGroupRuleId': rule["SecurityGroupRuleId"],
+                                'SecurityGroupRule': {
+                                    'IpProtocol': 'tcp',
+                                    'FromPort': rule["FromPort"],
+                                    'ToPort': port - 1,
+                                    'CidrIpv6': '::/0'
+                                }
+                            }
+                        ]
+                    )
+
+                    logging.info("    executing client.authorize_security_group_ingress")
+                    logging.info('      CidrIpv6="::/0"')
+                    logging.info(f"      FromPort={port + 1}")
+                    logging.info(f"      GroupId={security_group_id}")
+                    logging.info('      IpProtocol="tcp"')
+                    logging.info(f"      ToPort={rule['ToPort']}")
+                    client.authorize_security_group_ingress(
+                        GroupId=security_group_id,
+                        IpPermissions=[
+                            {
+                                'FromPort': port + 1,
+                                'IpProtocol': 'tcp',
+                                'Ipv6Ranges': [
+                                    {
+                                        'CidrIpv6': '::/0',
+                                    },
+                                ],
+                                'ToPort': rule["ToPort"]
+                            },
+                        ]
+                    )
+
     def remediate(self, client, instance_id):
-        """Block public access to port 1521 of all security groups attached to an EC2 instance.
+        """Block public access to port 22 of all security groups attached to an EC2 instance.
 
         :param client: Instance of the AWS boto3 client.
         :param instance_id: The ID of the EC2 instance.
@@ -66,62 +265,27 @@ class EC2ClosePort1521(object):
         :rtype: int
         :raises: botocore.exceptions.ClientError
         """
-
-        port = 1521
-        security_groups = client.describe_instances(InstanceIds=[instance_id])[
-            "Reservations"
-        ][0]["Instances"][0]["SecurityGroups"]
-        for sg_info in security_groups:
-            security_group_id = sg_info["GroupId"]
-
-            # Revoke ipv4 permission
-            logging.info("revoking ivp4 permissions")
-            try:
-                logging.info("    executing client.revoke_security_group_ingress")
-                logging.info('      CidrIp="0.0.0.0/0"')
-                logging.info(f"      FromPort={port}")
-                logging.info(f"      GroupId={security_group_id}")
-                logging.info('      IpProtocol="tcp"')
-                logging.info(f"      ToPort={port}")
-                client.revoke_security_group_ingress(
-                    CidrIp="0.0.0.0/0",
-                    FromPort=port,
-                    GroupId=security_group_id,
-                    IpProtocol="tcp",
-                    ToPort=port,
-                )
-            except ClientError as e:
-                if "InvalidPermission.NotFound" not in str(e):
-                    logging.error(f"{str(e)}")
-                    raise
-
-            # Revoke ipv6 permission
-            logging.info("revoking ivp6 permissions")
-            try:
-                logging.info("    executing client.revoke_security_group_ingress")
-                logging.info(f"      FromPort={port}")
-                logging.info(f"      GroupId={security_group_id}")
-                logging.info('      IpProtocol="tcp"')
-                logging.info('      "Ipv6Ranges": [{"CidrIpv6": "::/0"}]')
-                logging.info(f"      ToPort={port}")
-                client.revoke_security_group_ingress(
-                    GroupId=security_group_id,
-                    IpPermissions=[
+        try:
+            port = 1521
+            security_groups = client.describe_instances(InstanceIds=[instance_id])[
+                "Reservations"
+            ][0]["Instances"][0]["SecurityGroups"]
+            for sg_info in security_groups:
+                security_group_id = sg_info["GroupId"]
+                security_group_rules = client.describe_security_group_rules(
+                    Filters=[
                         {
-                            "FromPort": port,
-                            "IpProtocol": "tcp",
-                            "Ipv6Ranges": [{"CidrIpv6": "::/0"}],
-                            "ToPort": port,
+                            'Name': 'group-id',
+                            'Values': [security_group_id]
                         },
                     ],
+                    MaxResults=1000
                 )
-            except ClientError as e:
-                if "InvalidPermission.NotFound" not in str(e):
-                    logging.error(f"{str(e)}")
-                    raise
-
-        logging.info("successfully executed remediation")
-
+                print(security_group_rules)
+                self.remove_port(client, security_group_rules["SecurityGroupRules"], security_group_id, port)
+                logging.info("successfully executed remediation")
+        except Exception as e:
+            logging.error(f"{str(e)}")
         return 0
 
     def run(self, args):
