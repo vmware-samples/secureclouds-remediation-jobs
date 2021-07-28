@@ -67,7 +67,7 @@ class SetPasswordReusePrevention(object):
                 f"Setting Password Reuse Prevention Policy for the account: {account_id}"
             )
             logging.info("executing client.update_account_password_policy")
-            client.update_account_password_policy(PasswordReusePrevention=24,)
+            client.update_account_password_policy(PasswordReusePrevention=24)
             logging.info("successfully completed remediation job")
         except Exception as e:
             logging.error(f"{str(e)}")
