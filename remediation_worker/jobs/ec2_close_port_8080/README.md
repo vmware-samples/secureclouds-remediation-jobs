@@ -14,7 +14,7 @@ EC2 instance should restrict public access to TCP port (8080)
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:DescribeInstances` and `ec2:RevokeSecurityGroupIngress`.
+The provided AWS credential must have access to `ec2:DescribeInstances`, `ec2:RevokeSecurityGroupIngress`, `ec2:DescribeSecurityGroupRules`, `ec2:AuthorizeSecurityGroupIngress`, `ec2:ModifySecurityGroupRules`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 

@@ -2,11 +2,14 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "EC2ClosePort3389",
+            "Sid": "EC2ClosePort22",
             "Effect": "Allow",
             "Action": [
                 "ec2:DescribeInstances",
-                "ec2:RevokeSecurityGroupIngress"
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:DescribeSecurityGroupRules",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:ModifySecurityGroupRules"
             ],
             "Resource": "*"
         }
