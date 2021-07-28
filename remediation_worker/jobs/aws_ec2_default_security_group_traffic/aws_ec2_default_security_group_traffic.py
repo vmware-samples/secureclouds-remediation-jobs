@@ -74,72 +74,32 @@ class DefaultSecurityGroupRemoveRules(object):
         :raises: botocore.exceptions.ClientError
         """
         try:
-            security_group_response = client.describe_security_groups(
-                GroupIds=[security_group_id],
+            logging.info("    executing client.describe_security_group_rules")
+            logging.info(f"    group-id: {security_group_id}")
+            security_group_rules = client.describe_security_group_rules(
+                Filters=[{"Name": "group-id", "Values": [security_group_id]},],
+                MaxResults=1000,
             )
-            if len(security_group_response["SecurityGroups"]) > 0:
-                security_group = security_group_response["SecurityGroups"][0]
-            for ingress_rules in security_group["IpPermissions"]:
-                if (
-                    ingress_rules["IpProtocol"] == "-1"
-                    and len(ingress_rules["UserIdGroupPairs"]) > 0
-                ):
-                    for user_id_group_pairs in ingress_rules["UserIdGroupPairs"]:
-                        if user_id_group_pairs["GroupId"] == security_group_id:
-                            client.revoke_security_group_ingress(
-                                GroupId=security_group_id,
-                                GroupName="default",
-                                IpPermissions=[
-                                    {
-                                        "IpProtocol": ingress_rules["IpProtocol"],
-                                        "UserIdGroupPairs": [
-                                            {
-                                                "GroupId": security_group_id,
-                                                "UserId": cloud_account_id,
-                                            },
-                                        ],
-                                    },
-                                ],
-                            )
-            for egress_rules in security_group["IpPermissionsEgress"]:
-                if (
-                    egress_rules["IpProtocol"] == "-1"
-                    and len(egress_rules["IpRanges"]) > 0
-                ):
-                    for egress_ip_range in egress_rules["IpRanges"]:
-                        if egress_ip_range["CidrIp"] == "0.0.0.0/0":
-                            client.revoke_security_group_egress(
-                                GroupId=security_group_id,
-                                IpPermissions=[
-                                    {
-                                        "IpProtocol": egress_rules["IpProtocol"],
-                                        "IpRanges": [
-                                            {"CidrIp": egress_ip_range["CidrIp"]},
-                                        ],
-                                    },
-                                ],
-                            )
-                if (
-                    egress_rules["IpProtocol"] == "-1"
-                    and len(egress_rules["Ipv6Ranges"]) > 0
-                ):
-                    for egress_ipv6_range in egress_rules["Ipv6Ranges"]:
-                        if egress_ipv6_range["CidrIpv6"] == "::/0":
-                            client.revoke_security_group_egress(
-                                GroupId=security_group_id,
-                                IpPermissions=[
-                                    {
-                                        "IpProtocol": egress_rules["IpProtocol"],
-                                        "Ipv6Ranges": [
-                                            {"CidrIpv6": egress_ipv6_range["CidrIpv6"]},
-                                        ],
-                                    },
-                                ],
-                            )
+            for rule in security_group_rules["SecurityGroupRules"]:
+                if rule["IsEgress"]:
+                    logging.info("    executing client.revoke_security_group_egress")
+                    logging.info(f"    GroupId: {security_group_id}")
+                    logging.info(f"    SecurityGroupRuleIds: {rule['SecurityGroupRuleId']}")
+                    client.revoke_security_group_egress(
+                        GroupId=security_group_id,
+                        SecurityGroupRuleIds=[rule["SecurityGroupRuleId"]]
+                    )
+                else:
+                    logging.info("    executing client.revoke_security_group_ingress")
+                    logging.info(f"    GroupId: {security_group_id}")
+                    logging.info(f"    SecurityGroupRuleIds: {rule['SecurityGroupRuleId']}")
+                    client.revoke_security_group_ingress(
+                        GroupId=security_group_id,
+                        SecurityGroupRuleIds=[rule["SecurityGroupRuleId"]]
+                    )
+            logging.info("successfully executed remediation")
         except Exception as e:
             logging.error(f"{str(e)}")
-
-        logging.info("successfully executed remediation")
 
         return 0
 

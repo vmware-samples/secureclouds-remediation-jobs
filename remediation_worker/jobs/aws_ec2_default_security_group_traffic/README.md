@@ -1,6 +1,6 @@
 # Configure default Security Group to restrict all access
 
-This job removes default Security Group Ingress and Egress Rules to restrict all access.
+This job removes all the Ingress and Egress Rules of a default Security Group to restrict all access.
 
 ### Applicable Rule
 
@@ -14,7 +14,7 @@ EC2 VPC default security group should restrict all access
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:DescribeSecurityGroups`, `ec2:RevokeSecurityGroupIngress`  and `ec2:RevokeSecurityGroupEgress`.
+The provided AWS credential must have access to `ec2:DescribeSecurityGroupRules`, `ec2:RevokeSecurityGroupIngress`  and `ec2:RevokeSecurityGroupEgress`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
