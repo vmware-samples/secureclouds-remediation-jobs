@@ -64,24 +64,36 @@ class EBSPrivateSnapshot:
         :type snapshot_id: str.
         :returns: Bool signaling success or failure
         :rtype: bool
-        :raises: botocore.exceptions.ClientError
-        """
-        logging.info(f"Trying to remove Public access from {snapshot_id}")
+        """ 
+        logging.info("Removing Public access by executing client.describe_snapshot_attribute")
+        logging.info("Attribute = createVolumePermission")
+        logging.info(f"SnapshotId={snapshot_id}")logging.info(f"Trying to remove Public access from {snapshot_id}")
         
         # Get the permissions of the snapshot, no exeption expected
         snapshot_permissions = client.describe_snapshot_attribute(
             Attribute='createVolumePermission',
             SnapshotId=snapshot_id
            ).get('CreateVolumePermissions')
+        logging.info(f"permission={snapshot_permissions}")
         
         # if createVolumePermission has "Group":"all", remove it
-        if snapshot_permissions:
-            for permission in snapshot_permissions:
-                if 'all' in permission['Group']:
-                    logging.info(f"Found Public Snapshot: {snapshot_id}")
+        try:
+        # Get the permissions of the snapshot, no exeption expected
+           snapshot_permissions = client.describe_snapshot_attribute(
+            Attribute='createVolumePermission',
+            SnapshotId=snapshot_id
+           ).get('CreateVolumePermissions')
+        
+           logging.info(f"permission={snapshot_permissions}")
+        
+           # if createVolumePermission has "Group":"all", remove it
+           if snapshot_permissions:
+               for permission in snapshot_permissions:
+                   if 'all' in permission['Group']:
+                       logging.info(f"Found Public Snapshot: {snapshot_id}")
 
-                    # remove all from the groupname, no exception expected
-                    client.modify_snapshot_attribute(
+                       # remove all from the groupname, no exception expected
+                       client.modify_snapshot_attribute(
                            Attribute='createVolumePermission',
                            GroupNames=[
                             'all',
@@ -89,10 +101,20 @@ class EBSPrivateSnapshot:
                            OperationType='remove',
                            SnapshotId=snapshot_id,
                        )
-                    logging.info(f"Public access removed from {snapshot_id}")
-            return 0
-        else:
+                       logging.info(f"Public access removed from {snapshot_id}")
+               return 0
+           else:
                logging.info(f"Snapshot {snapshot_id} is not public, exiting")
+               return 1
+
+        except ClientError as state_err:
+                error = state_err.response["Error"]["Code"]
+                logging.error(f"Got Exception={error}")
+                return 1
+            
+        except Exception as e:
+               error = "Receiving other exceptions {0}".format(str(e))
+               logging.error(error) 
                return 1
         
     def run(self, args):
