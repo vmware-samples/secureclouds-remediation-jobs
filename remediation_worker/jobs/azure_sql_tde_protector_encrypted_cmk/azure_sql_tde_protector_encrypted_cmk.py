@@ -688,7 +688,7 @@ class SqlServerEncryptTdeProtector(object):
             ).result()
 
             # Update the SQL TDE protector to encrypt using cmk
-            client.encryption_protectors.begin_create_or_update(
+            poller = client.encryption_protectors.begin_create_or_update(
                 resource_group_name=resource_group_name,
                 server_name=sql_server_name,
                 encryption_protector_name="current",
@@ -696,6 +696,12 @@ class SqlServerEncryptTdeProtector(object):
                     server_key_name=server_key_name, server_key_type="AzureKeyVault"
                 ),
             )
+            while not poller.done():
+                time.sleep(5)
+                status = poller.status()
+                logging.info(f"The remediation job status: {status}")
+            poller.result()
+            
         except Exception as e:
             logging.error(f"{str(e)}")
             raise

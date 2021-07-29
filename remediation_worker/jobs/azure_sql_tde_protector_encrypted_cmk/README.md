@@ -27,6 +27,7 @@ The provided Azure service principal must have the following permissions:
 `Microsoft.KeyVault/vaults/accessPolicies/write`,
 `Microsoft.Sql/servers/read`,
 `Microsoft.Sql/servers/write`,
+`Microsoft.Sql/servers/encryptionProtector/read`,
 `Microsoft.Sql/servers/encryptionProtector/write`,
 `Microsoft.Sql/servers/keys/write`
 `Microsoft.Sql/servers/keys/read`.

@@ -571,7 +571,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
         logging.info(f"      resource_group_name={resource_group_name}")
         logging.info(f"      server_name={sql_server_name}")
 
-        client.server_blob_auditing_policies.create_or_update(
+        poller = client.server_blob_auditing_policies.create_or_update(
             resource_group_name=resource_group_name,
             server_name=sql_server_name,
             parameters=ServerBlobAuditingPolicy(
@@ -579,6 +579,11 @@ class SqlServerEnableBlobAuditingPolicy(object):
                 storage_endpoint=f"https://{stg_account_name}.blob.core.windows.net/",
             ),
         )
+        while not poller.done():
+            time.sleep(5)
+            status = poller.status()
+            logging.info(f"The remediation job status: {status}")
+        poller.result()
 
     def ensure_identity_assigned(
         self, client, resource_group_name, sql_server_name, region
