@@ -17,7 +17,7 @@ import logging
 import sys
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientErr
 
 logging.basicConfig(level=logging.INFO)
 
@@ -65,7 +65,6 @@ class EBSPrivateSnapshot:
         :type snapshot_id: str.
         :returns: Bool signaling success or failure
         :rtype: bool
-        :raises: botocore.exceptions.ClientError
         """
         logging.info("Removing Public access by executing client.describe_snapshot_attribute")
         logging.info("Attribute = createVolumePermission")
