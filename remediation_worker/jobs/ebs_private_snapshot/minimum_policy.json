@@ -5,7 +5,7 @@
             "Sid": "ModifyPrivateSnapShot",
             "Effect": "Allow",
             "Action": [
-                "DescribeSnapshotAttribute",
+                "ec2:DescribeSnapshotAttribute",
                 "ec2:ModifySnapshotAttribute"
             ],
             "Resource": "*"

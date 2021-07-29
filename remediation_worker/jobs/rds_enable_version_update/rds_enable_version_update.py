@@ -59,11 +59,12 @@ class RDSUpgradMinorVersion:
         :returns: updates flag for RDS auto upgrade minor version
         """
 
-        logging.info(
-            "updating auto minor version upgrade for %s", database_id)
+        logging.info("Updating auto minor version upgrade for %s", database_id)
 
         # convert the RDS auto minor version flag to True
         try:
+            logging.info("Setting AutoMinorVersionUpgrade to True")
+            logging.info(f"DBInstanceIdentifier={database_id}")         
             client.modify_db_instance(
               DBInstanceIdentifier=database_id,
               AutoMinorVersionUpgrade=True,

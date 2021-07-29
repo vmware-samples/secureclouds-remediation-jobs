@@ -1,6 +1,6 @@
 # Private ebs snapshot
 
-This job remove all from GroupNames to make snapshot private.
+This job makes an EBS snapshot private by removing the keyword 'all' from GroupNames. 
 
 ## Getting Started
 
