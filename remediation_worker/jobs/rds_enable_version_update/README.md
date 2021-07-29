@@ -1,6 +1,6 @@
 # Enable automatic minor version upgrade
 
-This job enables automatic minor version upgrade
+This job enables automatic minor version upgrade RDS
 
 ## Getting Started
 
