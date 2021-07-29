@@ -17,7 +17,7 @@ import logging
 import sys
 
 import boto3
-from botocore.exceptions import ClientErr
+from botocore.exceptions import ClientError
 
 logging.basicConfig(level=logging.INFO)
 
