@@ -1,6 +1,6 @@
 # Private rds snapshot
 
-This job disables rds public accessible to ensure it is not connected by any internet hosts.
+This job removes public access from RDS instances and makes the instances private. 
 
 ## Getting Started
 

@@ -59,15 +59,17 @@ class RDSUpgradMinorVersion:
         :returns: updates flag for RDS auto upgrade minor version
         """
 
-        logging.info(
-            "updating auto minor version upgrade for %s", database_id)
+        logging.info("Updating auto minor version upgrade for %s", database_id)
 
         # convert the RDS auto minor version flag to True
         try:
+            logging.info("Setting AutoMinorVersionUpgrade to True by calling client.modify_db_instance")
+            logging.info(f"DBInstanceIdentifier={database_id}")         
             client.modify_db_instance(
               DBInstanceIdentifier=database_id,
               AutoMinorVersionUpgrade=True,
               ApplyImmediately=True)
+
         except ClientError as state_err:
                 # If the remediation is run during maintenance
                 # or a creation/modification, inform it is not in the right state
@@ -92,6 +94,7 @@ class RDSUpgradMinorVersion:
                logging.error(error) 
                return 1
 
+        logging.info("Updated auto minor version upgrade for %s successfully.", database_id)
         return 0
 
     def run(self, args):

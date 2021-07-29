@@ -76,6 +76,8 @@ class RDSRemovePublicEndpoint():
 
         # Check to see if the database
         # is publicly accessible
+        logging.info("executing client.describe_db_instances")
+        logging.info(f"RDS instance={instance_id}")
         is_public = client.describe_db_instances(
             DBInstanceIdentifier=instance_id).get(
                 "DBInstances")[0]["PubliclyAccessible"]
@@ -83,10 +85,12 @@ class RDSRemovePublicEndpoint():
         # If it is public, set to private
         if is_public:
             logging.info(
-                "RDS database %s is public, setting to private.",
+                "RDS database %s is public, setting to private...",
                 instance_id
                 )
             try:
+                logging.info("executing client.modify_db_instance and apply immediately")
+                logging.info("Attribute=PubliclyAccessible")
                 client.modify_db_instance(
                     DBInstanceIdentifier=instance_id,
                     PubliclyAccessible=False,

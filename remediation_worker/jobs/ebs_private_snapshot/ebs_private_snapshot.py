@@ -17,6 +17,7 @@ import logging
 import sys
 
 import boto3
+from botocore.exceptions import ClientError
 
 logging.basicConfig(level=logging.INFO)
 
@@ -64,19 +65,11 @@ class EBSPrivateSnapshot:
         :type snapshot_id: str.
         :returns: Bool signaling success or failure
         :rtype: bool
-        """ 
+        """
         logging.info("Removing Public access by executing client.describe_snapshot_attribute")
         logging.info("Attribute = createVolumePermission")
-        logging.info(f"SnapshotId={snapshot_id}")logging.info(f"Trying to remove Public access from {snapshot_id}")
+        logging.info(f"SnapshotId={snapshot_id}")
         
-        # Get the permissions of the snapshot, no exeption expected
-        snapshot_permissions = client.describe_snapshot_attribute(
-            Attribute='createVolumePermission',
-            SnapshotId=snapshot_id
-           ).get('CreateVolumePermissions')
-        logging.info(f"permission={snapshot_permissions}")
-        
-        # if createVolumePermission has "Group":"all", remove it
         try:
         # Get the permissions of the snapshot, no exeption expected
            snapshot_permissions = client.describe_snapshot_attribute(
@@ -111,11 +104,11 @@ class EBSPrivateSnapshot:
                 error = state_err.response["Error"]["Code"]
                 logging.error(f"Got Exception={error}")
                 return 1
-            
         except Exception as e:
                error = "Receiving other exceptions {0}".format(str(e))
                logging.error(error) 
                return 1
+       
         
     def run(self, args):
         """Run the remediation job.

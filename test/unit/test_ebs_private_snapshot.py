@@ -67,6 +67,28 @@ class TestEBSPrivateSnapshot:
             def describe_snapshot_attribute(self, **kwargs):
                 return ({})
 
+
+        client = TestClient()
+        obj = EBSPrivateSnapshot()
+        assert obj.remediate(client, "snap-01a972f6209ba8d24", "us-west-2") == 1
+
+    def test_remediate_not_success_exception(self):
+        class TestClient(object):
+
+            def describe_snapshot_attribute(self, **kwargs):
+                return ({})
+
+            def modify_db_instance(self, **kwargs):
+                raise ClientError(
+                   {
+                        "Error": {
+                            "Code": "InvalidSnapshot",
+                            "Message": "NotFound",
+                        }
+                    },
+                    "InvalidSnapshot",
+                )
+
         client = TestClient()
         obj = EBSPrivateSnapshot()
         assert obj.remediate(client, "snap-01a972f6209ba8d24", "us-west-2") == 1
