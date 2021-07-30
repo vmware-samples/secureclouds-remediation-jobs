@@ -1,6 +1,6 @@
 # Close Port 8080 for all Security Groups associated with an EC2 Instance
 
-This job blocks public access to port 22 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
+This job blocks public access to port 8080 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
 
 ### Applicable Rule
 
