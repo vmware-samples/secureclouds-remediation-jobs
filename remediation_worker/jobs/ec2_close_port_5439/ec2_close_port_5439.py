@@ -198,7 +198,7 @@ class EC2ClosePort5439(object):
     def remove_port(
         self, client, security_group_rules, security_group_id, port, port_range_list
     ):
-        """Checks if the given port range already exists
+        """Removes the given port from the security group rules
         :param security_group_rules: Security group rules list.
         :param security_group_id: Security group Id.
         :param port_range_list: list of new or modified port ranges.
