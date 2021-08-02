@@ -1,4 +1,4 @@
-# Private rds snapshot
+# Disable public access to RDS DBInstances
 
 This job removes public access from RDS instances and makes the instances private. 
 
