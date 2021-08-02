@@ -1,4 +1,4 @@
-# Disable public access to RDS DBInstances.
+# Configure the EBS volume snapshot as private.
 
 This job makes an EBS snapshot private by removing the keyword 'all' from GroupNames. 
 
