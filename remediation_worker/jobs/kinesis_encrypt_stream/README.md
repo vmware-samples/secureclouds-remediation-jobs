@@ -1,20 +1,18 @@
-# Remove Network ACL Rules that allows public access to administration ports (3389 and 22)
+# Encrypt Kinesis data stream
 
-This job removes Network ACL Rules that allows public access to administration ports (3389 and 22).
-
-### Applicable Rule
-
-##### Rule ID:
-1ec4a1f2-3e08-11eb-b378-0242ac130002
-
-##### Rule Name:
-Network ACL should restrict administration ports (3389 and 22) from public access
+This job encrypts the Kinesis data stream.
 
 ## Getting Started
 
+##### Rule ID:
+ce603728-d631-4bae-8657-c22da6e5944e
+
+##### Rule Name:
+Kinesis data stream should be encrypted
+
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:CreateNetworkAclEntry`, `ec2:DeleteNetworkAclEntry`, `DescribeNetworkAcls` and `ec2:ReplaceNetworkAclEntry`.
+The provided AWS credential must have access to the Kinesis data stream. 
 
 You may find the latest example policy file [here](minimum_policy.json)
 
@@ -23,7 +21,18 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 aws_ec2_administration_ports_ingress_allowed.py
+  python3 kinesis_encrypt_stream.py "`cat finding.json`"
+```
+where finding.json has kinesis data stream and region info:
+```json
+{
+    "notificationInfo": {
+        "FindingInfo": {
+            "ObjectId": "kinesis-1",
+            "Region": "us-west-2"
+        }
+    }
+}
 ```
 
 ## Running the tests

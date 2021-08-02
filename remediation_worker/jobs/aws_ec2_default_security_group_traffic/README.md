@@ -1,20 +1,20 @@
-# Remove Network ACL Rules that allows public access to administration ports (3389 and 22)
+# Configure default Security Group to restrict all access
 
-This job removes Network ACL Rules that allows public access to administration ports (3389 and 22).
+This job removes all the Ingress and Egress Rules of a default Security Group to restrict all access.
 
 ### Applicable Rule
 
 ##### Rule ID:
-1ec4a1f2-3e08-11eb-b378-0242ac130002
+5c8c25f37a550e1fb6560bca
 
 ##### Rule Name:
-Network ACL should restrict administration ports (3389 and 22) from public access
+EC2 VPC default security group should restrict all access
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:CreateNetworkAclEntry`, `ec2:DeleteNetworkAclEntry`, `DescribeNetworkAcls` and `ec2:ReplaceNetworkAclEntry`.
+The provided AWS credential must have access to `ec2:DescribeSecurityGroupRules`, `ec2:RevokeSecurityGroupIngress`  and `ec2:RevokeSecurityGroupEgress`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
@@ -23,7 +23,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 aws_ec2_administration_ports_ingress_allowed.py
+  python3 aws_ec2_default_security_group_traffic.py
 ```
 
 ## Running the tests

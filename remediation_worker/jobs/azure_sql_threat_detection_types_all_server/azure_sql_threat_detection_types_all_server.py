@@ -73,13 +73,19 @@ class SetAdvanceThreatProtectionToAll(object):
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      server_name={sql_server_name}")
 
-            client.server_security_alert_policies.create_or_update(
+            poller = client.server_security_alert_policies.create_or_update(
                 resource_group_name=resource_group_name,
                 server_name=sql_server_name,
                 parameters=ServerSecurityAlertPolicy(
                     state=SecurityAlertPolicyState.enabled, disabled_alerts=[]
                 ),
             )
+            while not poller.done():
+                time.sleep(5)
+                status = poller.status()
+                logging.info(f"The remediation job status: {status}")
+            poller.result()
+            
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
