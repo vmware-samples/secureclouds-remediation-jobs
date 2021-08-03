@@ -89,13 +89,16 @@ class RemoveAdministrationPortsPublicAccess(object):
                 )
                 network_acl_entries = network_acl["NetworkAcls"][0]
                 for entry in network_acl_entries["Entries"]:
+                    #Searching for the ingress nacl entries with RuleAction = allow,
+                    #protocol as tcp or all traffic, CidrBlock="0.0.0.0/0" and the 
+                    #port range inclusive of port 22 and 3389
                     if (
                         entry["Egress"] is False
                         and entry["RuleAction"] == "allow"
                         and entry["Protocol"] in ["6", "-1"]
                         and entry["CidrBlock"] == "0.0.0.0/0"
                         and (
-                            ("PortRange" not in entry)
+                            "PortRange" not in entry
                             or (
                                 entry["PortRange"]["From"] <= port_no
                                 and entry["PortRange"]["To"] >= port_no
