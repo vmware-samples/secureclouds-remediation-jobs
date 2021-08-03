@@ -1,20 +1,20 @@
-# Remove Network ACL Rules that allows public access to administration ports (3389 and 22)
+# Set Password Reuse Prevention Policy for an AWS Account
 
-This job removes Network ACL Rules that allows public access to administration ports (3389 and 22).
+This job sets password reuse prevention policy for an AWS Account. The number of passwords to remember per user will be set to 24.
 
 ### Applicable Rule
 
 ##### Rule ID:
-1ec4a1f2-3e08-11eb-b378-0242ac130002
+5c8c26107a550e1fb6560bfc
 
 ##### Rule Name:
-Network ACL should restrict administration ports (3389 and 22) from public access
+IAM password policy should prevent password reuse
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:CreateNetworkAclEntry`, `ec2:DeleteNetworkAclEntry`, `DescribeNetworkAcls` and `ec2:ReplaceNetworkAclEntry`.
+The provided AWS credential must have access to `iam:UpdateAccountPasswordPolicy`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
@@ -23,7 +23,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 aws_ec2_administration_ports_ingress_allowed.py
+  python3 aws_iam_password_reuse_prevention.py
 ```
 
 ## Running the tests

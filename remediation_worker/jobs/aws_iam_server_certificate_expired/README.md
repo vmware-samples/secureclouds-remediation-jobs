@@ -1,20 +1,22 @@
-# Remove Network ACL Rules that allows public access to administration ports (3389 and 22)
+# Delete Expired IAM Server Certificate
 
-This job removes Network ACL Rules that allows public access to administration ports (3389 and 22).
+This job deletes expired IAM Server Certificate.
+
+**NOTE -** Deleting the certificate could have implications for your application if you are using an expired server certificate with Elastic Load Balancing, Cloudfront etc. One has to make configurations at respective services to ensure there is no interruption in application.
 
 ### Applicable Rule
 
 ##### Rule ID:
-1ec4a1f2-3e08-11eb-b378-0242ac130002
+7fe4eb28-3b82-11eb-adc1-0242ac120002
 
 ##### Rule Name:
-Network ACL should restrict administration ports (3389 and 22) from public access
+IAM server certificates that are expired should be removed
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:CreateNetworkAclEntry`, `ec2:DeleteNetworkAclEntry`, `DescribeNetworkAcls` and `ec2:ReplaceNetworkAclEntry`.
+The provided AWS credential must have access to `iam:DeleteServerCertificate`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
@@ -23,7 +25,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 aws_ec2_administration_ports_ingress_allowed.py
+  python3 aws_iam_server_certificate_expired.py
 ```
 
 ## Running the tests

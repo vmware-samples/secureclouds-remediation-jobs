@@ -77,6 +77,7 @@ class TestSqlServerAuditing(object):
         action.ensure_identity_assigned = Mock()
         action.create_role_assignment = Mock()
         action.create_server_blob_auditing_policy = Mock()
+        action.check_role_assignment = Mock()
 
         identity = Identity(
             principal_id="139bcf82-e14e-4773-bcf4-1da136674792",
@@ -106,6 +107,7 @@ class TestSqlServerAuditing(object):
             location="eastus",
             identity=identity,
         )
+        action.check_role_assignment.return_value = True
         action.check_stg_account.return_value = None
         action.check_key_vault.return_value = None
         assert (
@@ -134,7 +136,6 @@ class TestSqlServerAuditing(object):
         assert action.create_storage_account.call_count == 1
         assert action.create_key_vault.call_count == 1
         assert action.create_diagnostic_setting.call_count == 1
-        assert action.create_role_assignment.call_count == 1
         assert action.create_server_blob_auditing_policy.call_count == 1
 
     def test_remediate_without_stg_with_keyvault(self):
@@ -159,6 +160,7 @@ class TestSqlServerAuditing(object):
         action.ensure_identity_assigned = Mock()
         action.create_role_assignment = Mock()
         action.create_server_blob_auditing_policy = Mock()
+        action.check_role_assignment = Mock()
 
         identity = Identity(
             principal_id="139bcf82-e14e-4773-bcf4-1da136674792",
@@ -189,6 +191,7 @@ class TestSqlServerAuditing(object):
                 vault_uri="https://stg-keyvault-rem.vault.azure.net",
             ),
         )
+        action.check_role_assignment.return_value = False
         assert (
             action.remediate(
                 client_id,
