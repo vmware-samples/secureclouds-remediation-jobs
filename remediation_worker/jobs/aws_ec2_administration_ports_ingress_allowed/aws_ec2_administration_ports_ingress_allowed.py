@@ -83,7 +83,7 @@ class RemoveAdministrationPortsPublicAccess(object):
                 )
                 logging.info("    executing client.describe_network_acls")
                 logging.info(f"    NetworkAclId: {network_acl_id}")
-                #List network acl details
+                # List network acl details
                 network_acl = client.describe_network_acls(
                     NetworkAclIds=[network_acl_id]
                 )
@@ -102,7 +102,7 @@ class RemoveAdministrationPortsPublicAccess(object):
                             )
                         )
                     ):
-                        #Delete nacl entry which provides public access to administration ports (3389 and 22)
+                        # Delete nacl entry which provides public access to administration ports (3389 and 22)
                         logging.info("    executing client.delete_network_acl_entry")
                         logging.info(f"    NetworkAclId: {network_acl_id}")
                         logging.info(f"    RuleNumber: {entry['RuleNumber']}")
