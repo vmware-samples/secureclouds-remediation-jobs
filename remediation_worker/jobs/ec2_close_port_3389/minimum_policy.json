@@ -7,9 +7,7 @@
             "Action": [
                 "ec2:DescribeInstances",
                 "ec2:RevokeSecurityGroupIngress",
-                "ec2:DescribeSecurityGroupRules",
-                "ec2:AuthorizeSecurityGroupIngress",
-                "ec2:ModifySecurityGroupRules"
+                "ec2:DescribeSecurityGroupRules"
             ],
             "Resource": "*"
         }

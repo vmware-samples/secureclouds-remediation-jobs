@@ -1,6 +1,6 @@
 # Close Port 3389 for all Security Groups associated with an EC2 Instance
 
-This job blocks public access to port 3389 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
+This job blocks public access to port 3389 for both IPv4 and IPv6 for all security groups associated with an EC2 instance by removing all the ingress security group rules containing port 3389 in the port range and source as "0.0.0.0/0" or "::/0".
 
 ### Applicable Rule
 
@@ -14,7 +14,7 @@ An EC2 instance's Remote Desktop port (3389) is accessible from the public Inter
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:DescribeInstances`, `ec2:RevokeSecurityGroupIngress`, `ec2:DescribeSecurityGroupRules`, `ec2:AuthorizeSecurityGroupIngress`, `ec2:ModifySecurityGroupRules`.
+The provided AWS credential must have access to `ec2:DescribeInstances`, `ec2:RevokeSecurityGroupIngress`, `ec2:DescribeSecurityGroupRules`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 
