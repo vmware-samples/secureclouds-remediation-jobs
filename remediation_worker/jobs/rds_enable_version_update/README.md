@@ -1,4 +1,4 @@
-# Enable automatic minor version upgrade
+# Enable automatic minor version upgrade for RDS DBInstance
 
 This job enables automatic minor version upgrade RDS DBInstance.
 
