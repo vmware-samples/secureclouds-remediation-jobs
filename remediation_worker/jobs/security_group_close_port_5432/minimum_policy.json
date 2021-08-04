@@ -2,10 +2,11 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "SecurityGroupClosePort5432",
+            "Sid": "SecurityGroupClosePort22",
             "Effect": "Allow",
             "Action": [
-                "ec2:RevokeSecurityGroupIngress"
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:DescribeSecurityGroupRules"
             ],
             "Resource": "*"
         }

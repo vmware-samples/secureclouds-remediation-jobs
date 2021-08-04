@@ -1,6 +1,6 @@
 # Close Port 21 for all Security Groups associated with an EC2 Instance
 
-This job blocks public access to port 21 for both IPv4 and IPv6 for all security groups associated with an EC2 instance.
+This job blocks public access to port 21 for both IPv4 and IPv6 for all security groups associated with an EC2 instance by removing all the ingress security group rules containing port 21 in the port range and source as "0.0.0.0/0" or "::/0".
 
 ### Applicable Rule
 
@@ -15,7 +15,7 @@ EC2 instance should restrict public access to FTP control port (21)
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:DescribeInstances` and `ec2:RevokeSecurityGroupIngress`.
+The provided AWS credential must have access to `ec2:DescribeInstances`, `ec2:RevokeSecurityGroupIngress`, `ec2:DescribeSecurityGroupRules`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 

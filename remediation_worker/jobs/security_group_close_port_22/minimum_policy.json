@@ -5,7 +5,8 @@
             "Sid": "SecurityGroupClosePort22",
             "Effect": "Allow",
             "Action": [
-                "ec2:RevokeSecurityGroupIngress"
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:DescribeSecurityGroupRules"
             ],
             "Resource": "*"
         }

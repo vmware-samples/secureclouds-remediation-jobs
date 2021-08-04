@@ -6,7 +6,8 @@
             "Effect": "Allow",
             "Action": [
                 "ec2:DescribeInstances",
-                "ec2:RevokeSecurityGroupIngress"
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:DescribeSecurityGroupRules"
             ],
             "Resource": "*"
         }

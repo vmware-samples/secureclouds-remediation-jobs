@@ -5,10 +5,8 @@
             "Sid": "RemoveAdministrationPortsIngress",
             "Effect": "Allow",
             "Action": [
-                "ec2:CreateNetworkAclEntry",
                 "ec2:DescribeNetworkAcls",
-                "ec2:DeleteNetworkAclEntry",
-                "ec2:ReplaceNetworkAclEntry"
+                "ec2:DeleteNetworkAclEntry"
             ],
             "Resource": "*"
         }

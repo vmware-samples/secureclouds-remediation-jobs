@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from __future__ import annotations
-from botocore.exceptions import ClientError
 import json
 import logging
 import sys
@@ -57,8 +56,8 @@ class EC2ClosePort1521(object):
         return {"instance_id": instance_id}, region
 
     def remediate(self, client, instance_id):
-        """Block public access to port 1521 of all security groups attached to an EC2 instance.
-
+        """Block public access to port 1521 of all security groups attached to an EC2 instance
+        by removing all the rules with port 1521 in the port range
         :param client: Instance of the AWS boto3 client.
         :param instance_id: The ID of the EC2 instance.
         :type instance_id: str
@@ -66,62 +65,50 @@ class EC2ClosePort1521(object):
         :rtype: int
         :raises: botocore.exceptions.ClientError
         """
-
-        port = 1521
-        security_groups = client.describe_instances(InstanceIds=[instance_id])[
-            "Reservations"
-        ][0]["Instances"][0]["SecurityGroups"]
-        for sg_info in security_groups:
-            security_group_id = sg_info["GroupId"]
-
-            # Revoke ipv4 permission
-            logging.info("revoking ivp4 permissions")
-            try:
-                logging.info("    executing client.revoke_security_group_ingress")
-                logging.info('      CidrIp="0.0.0.0/0"')
-                logging.info(f"      FromPort={port}")
-                logging.info(f"      GroupId={security_group_id}")
-                logging.info('      IpProtocol="tcp"')
-                logging.info(f"      ToPort={port}")
-                client.revoke_security_group_ingress(
-                    CidrIp="0.0.0.0/0",
-                    FromPort=port,
-                    GroupId=security_group_id,
-                    IpProtocol="tcp",
-                    ToPort=port,
+        try:
+            port = 1521
+            logging.info("    executing client.describe_instances")
+            logging.info(f"    InstanceId: {instance_id}")
+            # Extract security group Id
+            security_groups = client.describe_instances(InstanceIds=[instance_id])[
+                "Reservations"
+            ][0]["Instances"][0]["SecurityGroups"]
+            for sg_info in security_groups:
+                security_group_id = sg_info["GroupId"]
+                logging.info("    executing client.describe_security_group_rules")
+                logging.info(f"    group-id: {security_group_id}")
+                # List all the security group rules
+                security_group_rules = client.describe_security_group_rules(
+                    Filters=[{"Name": "group-id", "Values": [security_group_id]},],
+                    MaxResults=1000,
                 )
-            except ClientError as e:
-                if "InvalidPermission.NotFound" not in str(e):
-                    logging.error(f"{str(e)}")
-                    raise
-
-            # Revoke ipv6 permission
-            logging.info("revoking ivp6 permissions")
-            try:
-                logging.info("    executing client.revoke_security_group_ingress")
-                logging.info(f"      FromPort={port}")
-                logging.info(f"      GroupId={security_group_id}")
-                logging.info('      IpProtocol="tcp"')
-                logging.info('      "Ipv6Ranges": [{"CidrIpv6": "::/0"}]')
-                logging.info(f"      ToPort={port}")
-                client.revoke_security_group_ingress(
-                    GroupId=security_group_id,
-                    IpPermissions=[
-                        {
-                            "FromPort": port,
-                            "IpProtocol": "tcp",
-                            "Ipv6Ranges": [{"CidrIpv6": "::/0"}],
-                            "ToPort": port,
-                        },
-                    ],
-                )
-            except ClientError as e:
-                if "InvalidPermission.NotFound" not in str(e):
-                    logging.error(f"{str(e)}")
-                    raise
-
-        logging.info("successfully executed remediation")
-
+                for rule in security_group_rules["SecurityGroupRules"]:
+                    if (
+                        rule["IpProtocol"] == "tcp"
+                        and rule["IsEgress"] is False
+                        and rule["FromPort"] <= port
+                        and rule["ToPort"] >= port
+                        and (
+                            ("CidrIpv4" in rule and rule["CidrIpv4"] == "0.0.0.0/0")
+                            or ("CidrIpv6" in rule and rule["CidrIpv6"] == "::/0")
+                        )
+                    ):
+                        # Removes Ingress security group rule containing port 1521 in the range with
+                        # protocol 'tcp', source '0.0.0.0/0' or '::/0'
+                        logging.info(
+                            "    executing client.revoke_security_group_ingress"
+                        )
+                        logging.info(f"    GroupId: {security_group_id}")
+                        logging.info(
+                            f"    SecurityGroupRuleIds: {rule['SecurityGroupRuleId']}"
+                        )
+                        client.revoke_security_group_ingress(
+                            GroupId=security_group_id,
+                            SecurityGroupRuleIds=[rule["SecurityGroupRuleId"]],
+                        )
+                logging.info("successfully executed remediation")
+        except Exception as e:
+            logging.error(f"{str(e)}")
         return 0
 
     def run(self, args):
