@@ -149,6 +149,10 @@ The table below lists all the supported jobs with their links.
 |   36.  	| 2cdb8877-7ac3-4483-9ed0-1e792171d125 	| EBS volume snapshot should be private                                                 | [ebs-private-snapshot](remediation_worker/jobs/ebs_private_snapshot) 	|
 |   37.  	| 5c8c26467a550e1fb6560c48              | RDS instance should restrict public access                                            | [rds-remove-public-endpoint](remediation_worker/jobs/rds_remove_public_endpoint) 	|
 |   38.  	| 5c8c264a7a550e1fb6560c4c              | RDS should have automatic minor version upgrades enabled                              | [rds-enable-version-update](remediation_worker/jobs/rds_enable_version_update) 	|
+|   39.  	| 5c8c25f37a550e1fb6560bca              | EC2 VPC default security group should restrict all access                               | [aws-ec2-default-security-group-traffic](remediation_worker/jobs/aws_ec2_default_security_group_traffic) 	|
+|   40.  	| 5c8c260b7a550e1fb6560bf4              | IAM password policy should set a minimum length                               | [aws-iam-password-policy-min-length](remediation_worker/jobs/aws_iam_password_policy_min_length) 	|
+|   41.  	| 5c8c26107a550e1fb6560bfc              | IAM password policy should prevent password reuse                               | [aws-iam-password-reuse-prevention](remediation_worker/jobs/aws_iam_password_reuse_prevention) 	|
+|   42.  	| 7fe4eb28-3b82-11eb-adc1-0242ac120002              | IAM server certificates that are expired should be removed                               | [aws-iam-server-certificate-expired](remediation_worker/jobs/aws_iam_server_certificate_expired) 	|
 
 ## Contributing
 The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
