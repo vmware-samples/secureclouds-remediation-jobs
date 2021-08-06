@@ -12,6 +12,7 @@ from azure.keyvault.keys import KeyClient
 from azure.mgmt.monitor import MonitorClient
 from azure.identity import ClientSecretCredential
 from azure.graphrbac import GraphRbacManagementClient
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.authorization import AuthorizationManagementClient
@@ -69,7 +70,6 @@ MAX_COUNT_SUBSCRIPTION = 5
 MAX_COUNT_RESOURCE_NAME = 5
 MAX_COUNT_REGION = 6
 MAX_COUNT_COMPONENT = 4
-
 
 def generate_name(region, subscription_id, resource_group_name):
     """Generates a name for the resource
@@ -571,7 +571,7 @@ class SqlServerEnableBlobAuditingPolicy(object):
         logging.info(f"      resource_group_name={resource_group_name}")
         logging.info(f"      server_name={sql_server_name}")
 
-        client.server_blob_auditing_policies.create_or_update(
+        poller = client.server_blob_auditing_policies.create_or_update(
             resource_group_name=resource_group_name,
             server_name=sql_server_name,
             parameters=ServerBlobAuditingPolicy(
@@ -579,6 +579,11 @@ class SqlServerEnableBlobAuditingPolicy(object):
                 storage_endpoint=f"https://{stg_account_name}.blob.core.windows.net/",
             ),
         )
+        while not poller.done():
+            time.sleep(5)
+            status = poller.status()
+            logging.info(f"The remediation job status: {status}")
+        poller.result()
 
     def ensure_identity_assigned(
         self, client, resource_group_name, sql_server_name, region
@@ -741,16 +746,28 @@ class SqlServerEnableBlobAuditingPolicy(object):
                 )
 
                 scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{stg_account.name}"
-                # Assign Storage Blob Contributer role to the SQL Server
-                self.create_role_assignment(
-                    stg_name,
-                    subscription_id,
-                    client_authorization,
-                    guid,
-                    scope,
-                    principalId,
-                    sql_server_name,
+                role_definition_id = f"/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"
+                status = self.check_role_assignment(
+                    client_authorization, scope, principalId, role_definition_id
                 )
+                try:
+                    if status is False:
+                        # Assign Storage Blob Contributer role to the SQL Server
+                        self.create_role_assignment(
+                            stg_name,
+                            subscription_id,
+                            client_authorization,
+                            guid,
+                            scope,
+                            principalId,
+                            sql_server_name,
+                        )
+                except HttpResponseError as e:
+                    if e.status_code == 400:
+                        logging.error(f"{str(e)}")
+                        logging.info("In case of PrincipalNotFound error, retry remediating this finding after few minutes")
+                    return -1
+                    
             else:
                 # If the Storage Account Created by CHSS exists
                 stg_id = stg_account.id
@@ -763,17 +780,23 @@ class SqlServerEnableBlobAuditingPolicy(object):
                     status = self.check_role_assignment(
                         client_authorization, scope, principalId, role_definition_id
                     )
-                    if status is False:
-                        # If role assignment does not exists, assign the Storage Blob Contributer Role to the SQL Server
-                        self.create_role_assignment(
-                            stg_account.name,
-                            subscription_id,
-                            client_authorization,
-                            guid,
-                            scope,
-                            principalId,
-                            sql_server_name,
-                        )
+                    try:
+                        if status is False:
+                            # If role assignment does not exists, assign the Storage Blob Contributer Role to the SQL Server
+                            self.create_role_assignment(
+                                stg_account.name,
+                                subscription_id,
+                                client_authorization,
+                                guid,
+                                scope,
+                                principalId,
+                                sql_server_name,
+                            )
+                    except HttpResponseError as e:
+                        if e.status_code == 400:
+                            logging.error(f"{str(e)}")
+                            logging.info("In case of PrincipalNotFound error, retry remediating this finding after few minutes")
+                        return -1
                 else:
                     logging.error("Resource group name not found")
                     return -1

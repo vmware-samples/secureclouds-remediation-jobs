@@ -1,0 +1,14 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Kinesis",
+            "Effect": "Allow",
+            "Action": [
+                "Kinesis:DescribeStream",
+                "Kinesis:StartStreamEncryption"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

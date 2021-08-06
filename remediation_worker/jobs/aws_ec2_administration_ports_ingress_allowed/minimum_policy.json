@@ -6,7 +6,7 @@
             "Effect": "Allow",
             "Action": [
                 "ec2:DescribeNetworkAcls",
-                "ec2:DeleteNetworkAcl"
+                "ec2:DeleteNetworkAclEntry"
             ],
             "Resource": "*"
         }

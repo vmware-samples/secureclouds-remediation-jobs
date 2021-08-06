@@ -14,7 +14,7 @@ Network ACL should restrict administration ports (3389 and 22) from public acces
 
 ### Prerequisites
 
-The provided AWS credential must have access to `ec2:DeleteNetworkAcl`, `ec2:DescribeNetworkAcls` and `ec2:ReplaceNetworkAclEntry`.
+The provided AWS credential must have access to `ec2:DeleteNetworkAclEntry`, `ec2:DescribeNetworkAcls`.
 
 You may find the latest example policy file [here](minimum_policy.json)
 

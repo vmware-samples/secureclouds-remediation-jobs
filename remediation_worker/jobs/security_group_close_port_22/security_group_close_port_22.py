@@ -49,7 +49,8 @@ class SecurityGroupClosePort22(object):
         }
 
     def remediate(self, client, security_group_id):
-        """Block public access to port 22 for both IPv4 and IPv6.
+        """Block public access to port 22 for both IPv4 and IPv6 by
+        removing all the rules containing port 22 in the range.
 
         :param client: Instance of the AWS boto3 client.
         :param security_group_id: The ID of the security group. You must specify either the security group ID or the
@@ -62,33 +63,39 @@ class SecurityGroupClosePort22(object):
         """
 
         port = 22
-
-        # Revoke ipv4 permission
-        logging.info("revoking ivp4 permissions")
-        logcall(
-            client.revoke_security_group_ingress,
-            CidrIp="0.0.0.0/0",
-            FromPort=port,
-            GroupId=security_group_id,
-            IpProtocol="tcp",
-            ToPort=port,
-        )
-
-        # Revoke ipv6 permission
-        logging.info("revoking ivp6 permissions")
-        logcall(
-            client.revoke_security_group_ingress,
-            GroupId=security_group_id,
-            IpPermissions=[
-                {
-                    "FromPort": port,
-                    "IpProtocol": "tcp",
-                    "Ipv6Ranges": [{"CidrIpv6": "::/0"}],
-                    "ToPort": port,
-                },
-            ],
-        )
-
+        try:
+            logging.info("    executing client.describe_security_group_rules")
+            logging.info(f"    group-id: {security_group_id}")
+            # List all the security group rules
+            security_group_rules = client.describe_security_group_rules(
+                Filters=[{"Name": "group-id", "Values": [security_group_id]},],
+                MaxResults=1000,
+            )
+            for rule in security_group_rules["SecurityGroupRules"]:
+                if (
+                    rule["IpProtocol"] == "tcp"
+                    and rule["IsEgress"] is False
+                    and rule["FromPort"] <= port
+                    and rule["ToPort"] >= port
+                    and (
+                        ("CidrIpv4" in rule and rule["CidrIpv4"] == "0.0.0.0/0")
+                        or ("CidrIpv6" in rule and rule["CidrIpv6"] == "::/0")
+                    )
+                ):
+                    # Removes Ingress security group rule containing port 22 in the range with
+                    # protocol 'tcp', source '0.0.0.0/0' or '::/0'
+                    logging.info("    executing client.revoke_security_group_ingress")
+                    logging.info(f"    GroupId: {security_group_id}")
+                    logging.info(
+                        f"    SecurityGroupRuleIds: {rule['SecurityGroupRuleId']}"
+                    )
+                    client.revoke_security_group_ingress(
+                        GroupId=security_group_id,
+                        SecurityGroupRuleIds=[rule["SecurityGroupRuleId"]],
+                    )
+            logging.info("successfully executed remediation")
+        except Exception as e:
+            logging.error(f"{str(e)}")
         return 0
 
     def run(self, args):
