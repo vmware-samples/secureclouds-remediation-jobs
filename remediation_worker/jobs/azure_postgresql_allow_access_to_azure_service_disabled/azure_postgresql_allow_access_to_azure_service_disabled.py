@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import logging
+import time
 
 from azure.mgmt.rdbms.postgresql import PostgreSQLManagementClient
 from azure.identity import ClientSecretCredential
