@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import logging
+import time
 
 from azure.mgmt.sql import SqlManagementClient
 from azure.common.credentials import ServicePrincipalCredentials
