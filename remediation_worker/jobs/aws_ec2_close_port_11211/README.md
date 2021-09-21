@@ -23,7 +23,7 @@ You may find the latest example policy file [here](minimum_policy.json)
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 ec2_close_port_23.py
+  python3 ec2_close_port_11211.py
 ```
 
 ## Running the tests
