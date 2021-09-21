@@ -1,6 +1,6 @@
-# Disable public access to RDS DBInstances
+# Disable public access to RDS Snapshots
 
-This job removes public access from RDS instances and makes the instances private. 
+This job removes public access from RDS snapshots and makes the snapshots private. 
 
 ## Getting Started
 
@@ -8,7 +8,7 @@ This job removes public access from RDS instances and makes the instances privat
 5c8c26467a550e1fb6560c48
 
 ##### Rule Name:
-RDS instance should restrict public access
+RDS snapshot should restrict public access
 
 ### Prerequisites
 
@@ -18,9 +18,9 @@ The provided AWS credential must have permissions that listed in the policy file
 You may run this script using following commands:
 ```shell script
   pip install -r ../../requirements.txt
-  python3 rds_remove_public_endpoint.py "`cat finding.json`"
+  python3 aws_rds_snapshot_remove_publicaccess.py "`cat finding.json`"
 ```
-  where finding.json has volume id and region info:
+  where finding.json has snapshotid id and region info:
 ```json
   {
     "notificationInfo": {
