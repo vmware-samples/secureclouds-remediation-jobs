@@ -5,7 +5,7 @@ This job blocks public access to port 11211 for both IPv4 and IPv6 for all secur
 ### Applicable Rule
 
 ##### Rule ID:
-5c8c263e7a550e1fb6560c3b
+bd9d77b6-635d-4e06-9760-8957d8eaeb38
 
 ##### Rule Name:
 EC2 instance should restrict public access to Memcache UDP port (11211)
