@@ -153,6 +153,8 @@ The table below lists all the supported jobs with their links.
 |   40.  	| 5c8c260b7a550e1fb6560bf4              | IAM password policy should set a minimum length                               | [aws-iam-password-policy-min-length](remediation_worker/jobs/aws_iam_password_policy_min_length) 	|
 |   41.  	| 5c8c26107a550e1fb6560bfc              | IAM password policy should prevent password reuse                               | [aws-iam-password-reuse-prevention](remediation_worker/jobs/aws_iam_password_reuse_prevention) 	|
 |   42.  	| 7fe4eb28-3b82-11eb-adc1-0242ac120002              | IAM server certificates that are expired should be removed                               | [aws-iam-server-certificate-expired](remediation_worker/jobs/aws_iam_server_certificate_expired) 	|
+|   43.  	| 5c8c26567a550e1fb6560c5d              | S3 bucket should not give full access to all authenticated users | [aws_s3_remove_fullaccess_authenticatedusers](remediation_worker/jobs/aws_s3_remove_fullaccess_authenticatedusers) 	|
+
 
 ## Contributing
 The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
