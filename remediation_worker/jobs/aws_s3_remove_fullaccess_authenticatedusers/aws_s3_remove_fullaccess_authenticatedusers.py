@@ -56,7 +56,6 @@ class S3RemoveFullAccessAuthUsers:
         :type bucket_name: str.
         :returns: Integer signaling success or failure
         :rtype: int
-        :raises: botocore.exceptions.ClientError
         """
 
         logging.info("making api call to client.get_bucket_acl")

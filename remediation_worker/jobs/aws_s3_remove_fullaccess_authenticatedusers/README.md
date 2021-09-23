@@ -5,16 +5,16 @@ This job will remove the public "full access privileges" permission. All other A
 ### Applicable Rule
 
 ##### Rule ID:
-5c8c26617a550e1fb6560c69
+5c8c26567a550e1fb6560c5d
 
 ##### Rule Name:
-The S3 bucket policy allows unrestricted access
+S3 bucket should not give full access to all authenticated users
 
 ## Getting Started
 
 ### Prerequisites
 
-The provided AWS credential must have access to `s3:PutBucketPublicAccessBlock`.
+The provided AWS credential must have access to `s3:GetBucketAcl` and `s3:PutBucketAcl`
 
 You may find the latest example policy file [here](minimum_policy.json)
 
