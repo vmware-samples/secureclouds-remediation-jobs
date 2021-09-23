@@ -214,3 +214,19 @@ class TestS3RemoveFullAccessAuthUsers (object):
         action = S3RemoveFullAccessAuthUsers()
         assert action.remediate(client, "bucket_name") == 0
 
+    def test_remediate_with_exception(self):
+        class TestClient(object):
+            def put_bucket_encryption(self, **kwargs):
+                raise ClientError(
+                    {
+                        "Error": {
+                            "Code": "NotFound",
+                            "Message": "InvalidPermission.NotFound",
+                        }
+                    },
+                    "TestS3RemovePublicAdminAcl",
+                )
+
+        client = TestClient()
+        action = S3RemoveFullAccessAuthUsers()
+        assert action.remediate(client, "bucket_name") == 1

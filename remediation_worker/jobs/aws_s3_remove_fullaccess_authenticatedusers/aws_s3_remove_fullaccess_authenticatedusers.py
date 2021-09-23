@@ -59,26 +59,28 @@ class S3RemoveFullAccessAuthUsers:
         """
 
         logging.info("making api call to client.get_bucket_acl")
-        bucket_acl = client.get_bucket_acl(Bucket=bucket_name)
-        new_grants = []
-        for grant in bucket_acl["Grants"]:
-            if "URI" in grant["Grantee"]:
-                if grant["Grantee"][
-                    "URI"
-                ] == "http://acs.amazonaws.com/groups/global/AuthenticatedUsers" and (
-                    grant["Permission"] == "FULL_CONTROL"
-                    
-                ):
-                    logging.info(
+        try:
+            bucket_acl = client.get_bucket_acl(Bucket=bucket_name)
+            new_grants = []
+            for grant in bucket_acl["Grants"]:
+                if "URI" in grant["Grantee"]:
+                    if grant["Grantee"][
+                        "URI"] == "http://acs.amazonaws.com/groups/global/AuthenticatedUsers" and (
+                        grant["Permission"] == "FULL_CONTROL"):
+                        logging.info(
                         "found public full_control grant - excluding it from the new list of grants"
                     )
                 else:
                     new_grants.append(grant)                                            
 
-        acl_policy = {"Grants": new_grants, "Owner": bucket_acl["Owner"]}
-        logging.info("making api call to client.put_bucket_acl")
-        client.put_bucket_acl(AccessControlPolicy=acl_policy, Bucket=bucket_name)
-        logging.info(f"successfully executed remediation for bucket: {bucket_name}")
+            acl_policy = {"Grants": new_grants, "Owner": bucket_acl["Owner"]}
+            logging.info("making api call to client.put_bucket_acl")
+            client.put_bucket_acl(AccessControlPolicy=acl_policy, Bucket=bucket_name)
+            logging.info(f"successfully executed remediation for bucket: {bucket_name}")
+        except Exception as e:
+               error = "Receiving other exceptions {0} while excluding full access privilges for authenticated users for the s3 bucket {1}".format(str(e), bucket_name)
+               logging.error(error) 
+               return 1
         return 0
 
     def run(self, args):
