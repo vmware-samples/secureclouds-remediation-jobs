@@ -78,10 +78,10 @@ class RDSSnapShotRemovePublicAccess():
         # is shared publicly 
         logging.info("executing client.describe_db_snapshot_attributes")
         logging.info(f"RDS instance={snapshot_identifier}")
-        snapshot_attrs = client.describe_db_snapshot_attributes(DBInstanceIdentifier=snapshot_identifier)
-        snapshot_restore_attr = next(snapshot_attr for snapshot_attr in snapshot_attrs if snapshot_attr["AttributeName"] == 'restore')
-        is_public = True if snapshot_restore_attr['AttributeValue'] == 'all' else False
-
+        snapshot_attrs_result = client.describe_db_snapshot_attributes(DBInstanceIdentifier=snapshot_identifier).get('DBSnapshotAttributesResult')
+        snapshot_attrs = snapshot_attrs_result.get("DBSnapshotAttributes")
+        snapshot_restore_attr = next(snapshot_attr for snapshot_attr in snapshot_attrs if snapshot_attr["AttributeName"] == "restore")
+        is_public = True if "all" in snapshot_restore_attr["AttributeValues"] else False
         # If it is public, set to private
         if is_public:
             logging.info(
@@ -93,7 +93,7 @@ class RDSSnapShotRemovePublicAccess():
                 logging.info("Attribute=Restore,Remove all AttributeValue")
                 client.modify_db_snapshot_attribute(
                     DBInstanceIdentifier=snapshot_identifier,
-                    AttributeName='restore',ValuesToRemove=['all']
+                    AttributeName="restore",ValuesToRemove=["all"]
                     )
                 logging.info(
                     "RDS snapshot %s is now private.",
@@ -106,8 +106,8 @@ class RDSSnapShotRemovePublicAccess():
                 # This is b/c you can describe a bad instance state
                 # with no errors, but not modify.
                 # Otherwise, we would catch this error
-                # on the "describe_db_instances" call
-                if state_err.response["Error"]["Code"] == "InvalidDBInstanceState":
+                # on the "describe_db_snapshot_attributes" call
+                if state_err.response["Error"]["Code"] == "InvalidDBSnapshotState":
                     logging.info(
                         "RDS database snapshot %s is in an unavailable state. Waiting..",
                         snapshot_identifier
