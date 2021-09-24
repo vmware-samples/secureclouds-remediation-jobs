@@ -152,7 +152,7 @@ The table below lists all the supported jobs with their links.
 |   39.  	| 5c8c25f37a550e1fb6560bca              | EC2 VPC default security group should restrict all access                               | [aws-ec2-default-security-group-traffic](remediation_worker/jobs/aws_ec2_default_security_group_traffic) 	|
 |   40.  	| 5c8c260b7a550e1fb6560bf4              | IAM password policy should set a minimum length                               | [aws-iam-password-policy-min-length](remediation_worker/jobs/aws_iam_password_policy_min_length) 	|
 |   41.  	| 5c8c26107a550e1fb6560bfc              | IAM password policy should prevent password reuse                               | [aws-iam-password-reuse-prevention](remediation_worker/jobs/aws_iam_password_reuse_prevention) 	|
-|   42.  	| 7fe4eb28-3b82-11eb-adc1-0242ac120002              | IAM server certificates that are expired should be removed                               | [aws-iam-server-certificate-expired](remediation_worker/jobs/aws_iam_server_certificate_expired) 	|
+|   42.  	| bd9d77b6-635d-4e06-9760-8957d8eaeb38  | EC2 instance should restrict public access to Memcache UDP port (11211)                 | [aws_ec2_close_port_11211](remediation_worker/jobs/aws_ec2_close_port_11211) 	|
 
 ## Contributing
 The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
