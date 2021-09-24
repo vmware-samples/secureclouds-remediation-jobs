@@ -5,7 +5,7 @@ This job removes public access from RDS snapshots and makes the snapshots privat
 ## Getting Started
 
 ##### Rule ID:
-5c8c26497a550e1fb6560c4b
+5c8c26487a550e1fb6560c4a
 
 ##### Rule Name:
 RDS snapshot should restrict public access
