@@ -154,6 +154,7 @@ The table below lists all the supported jobs with their links.
 |   41.  	| 5c8c26107a550e1fb6560bfc              | IAM password policy should prevent password reuse                               | [aws-iam-password-reuse-prevention](remediation_worker/jobs/aws_iam_password_reuse_prevention) 	|
 |   42.  	| 7fe4eb28-3b82-11eb-adc1-0242ac120002              | IAM server certificates that are expired should be removed                               | [aws-iam-server-certificate-expired](remediation_worker/jobs/aws_iam_server_certificate_expired) 	|
 |   43.  	| 5c8c26487a550e1fb6560c4a              | RDS snapshot should restrict public access                               | [aws-rds-snapshot-remove-publicaccess](remediation_worker/jobs/aws_rds_snapshot_remove_publicaccess) 	|
+|   44.  	| 5c8c26567a550e1fb6560c5d              | S3 bucket should not give full access to all authenticated users | [aws_s3_remove_fullaccess_authenticatedusers](remediation_worker/jobs/aws_s3_remove_fullaccess_authenticatedusers) 	|
 
 
 ## Contributing
