@@ -1,0 +1,14 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "S3RemovePublicAdminACL",
+            "Effect": "Allow",
+            "Action": [
+               "s3:GetBucketAcl",
+               "s3:PutBucketAcl"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
