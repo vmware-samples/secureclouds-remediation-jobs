@@ -84,7 +84,7 @@ class EC2ClosePort11211(object):
                 )
                 for rule in security_group_rules["SecurityGroupRules"]:
                     if (
-                        rule["IpProtocol"] == "tcp"
+                        rule["IpProtocol"] == "udp"
                         and rule["IsEgress"] is False
                         and rule["FromPort"] <= port
                         and rule["ToPort"] >= port
