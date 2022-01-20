@@ -78,7 +78,7 @@ class RDSSnapShotRemovePublicAccess():
         # is shared publicly 
         logging.info("executing client.describe_db_snapshot_attributes")
         logging.info(f"RDS instance={snapshot_identifier}")
-        snapshot_attrs_result = client.describe_db_snapshot_attributes(DBInstanceIdentifier=snapshot_identifier).get('DBSnapshotAttributesResult')
+        snapshot_attrs_result = client.describe_db_snapshot_attributes(DBSnapshotIdentifier=snapshot_identifier).get('DBSnapshotAttributesResult')
         snapshot_attrs = snapshot_attrs_result.get("DBSnapshotAttributes")
         snapshot_restore_attr = next(snapshot_attr for snapshot_attr in snapshot_attrs if snapshot_attr["AttributeName"] == "restore")
         is_public = True if "all" in snapshot_restore_attr["AttributeValues"] else False
@@ -92,7 +92,7 @@ class RDSSnapShotRemovePublicAccess():
                 logging.info("executing client.modify_db_snapshot_attribute and apply immediately")
                 logging.info("Attribute=Restore,Remove all AttributeValue")
                 client.modify_db_snapshot_attribute(
-                    DBInstanceIdentifier=snapshot_identifier,
+                    DBSnapshotIdentifier=snapshot_identifier,
                     AttributeName="restore",ValuesToRemove=["all"]
                     )
                 logging.info(
