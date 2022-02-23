@@ -110,6 +110,7 @@ class EC2ClosePort9200_9300(object):
             logging.info("successfully executed remediation")
         except Exception as e:
             logging.error(f"{str(e)}")
+            raise
 
         return 0
 

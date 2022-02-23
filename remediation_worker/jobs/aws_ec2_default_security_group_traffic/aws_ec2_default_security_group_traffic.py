@@ -100,6 +100,7 @@ class DefaultSecurityGroupRemoveRules(object):
             logging.info("successfully executed remediation")
         except Exception as e:
             logging.error(f"{str(e)}")
+            raise
 
         return 0
 
