@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import logging
+import time
 
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.network.models import DdosProtectionPlanListResult, SubResource
@@ -117,11 +118,16 @@ class VirtualNetworkEnableDdosProtection(object):
             logging.info(f"      resource_group_name={resource_group_name}")
             logging.info(f"      virtual_network_name={virtual_network_name}")
 
-            client.virtual_networks.begin_create_or_update(
+            poller = client.virtual_networks.begin_create_or_update(
                 resource_group_name=resource_group_name,
                 virtual_network_name=virtual_network_name,
                 parameters=virtual_network,
             )
+            while not poller.done():
+                time.sleep(5)
+                status = poller.status()
+                logging.info(f"The remediation job status: {status}")
+            poller.result()
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
