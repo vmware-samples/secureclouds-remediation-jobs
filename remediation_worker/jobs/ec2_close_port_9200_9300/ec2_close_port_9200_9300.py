@@ -111,7 +111,6 @@ class EC2ClosePort9200_9300(object):
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
-
         return 0
 
     def run(self, args):
