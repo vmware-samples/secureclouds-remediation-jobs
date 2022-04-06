@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import logging
+import time
 
 from azure.mgmt.network import NetworkManagementClient
 from azure.identity import ClientSecretCredential
@@ -102,11 +103,16 @@ class RestrictUdpAccessFromInternet(object):
                         f"      network_security_group_name={network_security_group_name}"
                     )
                     logging.info(f"      security_rule_name={rule.name}")
-                    client.security_rules.begin_delete(
+                    poller = client.security_rules.begin_delete(
                         resource_group_name=resource_group_name,
                         network_security_group_name=network_security_group_name,
                         security_rule_name=rule.name,
                     )
+                    while not poller.done():
+                        time.sleep(5)
+                        status = poller.status()
+                        logging.info(f"The remediation job status: {status}")
+                    poller.result()
         except Exception as e:
             logging.error(f"{str(e)}")
             raise
