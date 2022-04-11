@@ -71,6 +71,7 @@ class SetPasswordReusePrevention(object):
             logging.info("successfully completed remediation job")
         except Exception as e:
             logging.error(f"{str(e)}")
+            raise
         return 0
 
     def run(self, args):

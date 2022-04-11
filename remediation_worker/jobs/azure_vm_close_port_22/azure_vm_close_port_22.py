@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import logging
+import time
 
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.network import NetworkManagementClient
@@ -123,9 +124,14 @@ class VMSecurityGroupClosePort22(object):
                 )
                 logging.info(f"      resource_group_name={resource_group_name}")
                 logging.info(f"      network_security_group_name={security_group_name}")
-                network_client.network_security_groups.create_or_update(
+                poller = network_client.network_security_groups.create_or_update(
                     resource_group_name, security_group_name, network_security_group
                 )
+                while not poller.done():
+                    time.sleep(5)
+                    status = poller.status()
+                    logging.info(f"The remediation job status: {status}")
+                poller.result()
             except Exception as e:
                 logging.error(f"{str(e)}")
                 raise
