@@ -24,6 +24,8 @@ from azure.common.credentials import ServicePrincipalCredentials
 
 logging.basicConfig(level=logging.INFO)
 
+source_address_list = ["*", "Internet", "0.0.0.0/0", "0.0.0.0", "/0", "::/0"]
+
 
 class VMSecurityGroupClosePort22(object):
     def parse(self, payload):
@@ -101,18 +103,24 @@ class VMSecurityGroupClosePort22(object):
 
             for rule in security_rules:
                 if (
-                    rule.access != "Allow"
-                    or rule.direction != "Inbound"
-                    or rule.source_address_prefix != "*"
+                    rule.protocol in ["*", "TCP"]
+                    and rule.direction == "Inbound"
+                    and rule.access == "Allow"
+                    and (
+                        rule.source_address_prefix in source_address_list
+                        or any(
+                            item in rule.source_address_prefixes
+                            for item in source_address_list
+                        )
+                    )
                 ):
-                    continue
-                if rule.destination_port_range is not None:
-                    if int(rule.destination_port_range) == port:
-                        security_rules.remove(rule)
-                else:
-                    port_ranges = rule.destination_port_ranges
-                    new_ranges = self._find_and_remove_port(port_ranges, port)
-                    rule.destination_port_ranges = new_ranges
+                    if rule.destination_port_range is not None:
+                        if int(rule.destination_port_range) == port:
+                            security_rules.remove(rule)
+                    else:
+                        port_ranges = rule.destination_port_ranges
+                        new_ranges = self._find_and_remove_port(port_ranges, port)
+                        rule.destination_port_ranges = new_ranges
 
             network_security_group.security_rules = security_rules
 
