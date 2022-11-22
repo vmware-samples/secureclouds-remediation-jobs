@@ -103,7 +103,7 @@ class S3AllowOnlyHttpsRequest:
                 "Sid": "Restrict Non-https Requests",
                 "Effect": "Deny",
                 "Principal": "*",
-                "Action": "s3:GetObject",
+                "Action": "s3:*",
                 "Resource": f"arn:aws:s3:::{bucket_name}/*",
                 "Condition": {"Bool": {"aws:SecureTransport": "false"}},
             }
