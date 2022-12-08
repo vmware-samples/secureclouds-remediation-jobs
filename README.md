@@ -157,6 +157,7 @@ The table below lists all the supported jobs with their links.
 |   44.  	| 5c8c26487a550e1fb6560c4a              | RDS snapshot should restrict public access                               | [aws-rds-snapshot-remove-publicaccess](remediation_worker/jobs/aws_rds_snapshot_remove_publicaccess) 	|
 |   45.  	| 5c8c26567a550e1fb6560c5d              | S3 bucket should not give full access to all authenticated users | [aws_s3_remove_fullaccess_authenticatedusers](remediation_worker/jobs/aws_s3_remove_fullaccess_authenticatedusers) 	|
 
+
 ## Contributing
 The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
 All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.

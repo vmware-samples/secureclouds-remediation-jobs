@@ -98,7 +98,7 @@ class TestCloudtrailS3PublicAccess(object):
                     "Sid": "Restrict Non-https Requests",
                     "Effect": "Deny",
                     "Principal": "*",
-                    "Action": "s3:GetObject",
+                    "Action": "s3:*",
                     "Resource": "arn:aws:s3:::bucket_name/*",
                     "Condition": {"Bool": {"aws:SecureTransport": "false"}},
                 },
