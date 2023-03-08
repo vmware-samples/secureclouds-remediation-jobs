@@ -1,7 +1,7 @@
-Secure State Remediation Jobs
-Copyright (c) 2020 VMware, Inc.  All rights reserved.
+VMware Aria Automation for Secure Clouds Remediation Jobs
+Copyright (c) 2023 VMware, Inc.  All rights reserved.
 
-The Apache 2.0 license (the "License") set forth below applies to all parts of the Secure State Remediation Jobs project. You may not use this file except in compliance with the License.
+The Apache 2.0 license (the "License") set forth below applies to all parts of the VMware Aria Automation for Secure Clouds Remediation Jobs project. You may not use this file except in compliance with the License.
 
 Apache License
 
