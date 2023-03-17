@@ -50,7 +50,7 @@ SSH into the EC2 instance and run the command below to deploy the worker image:
 
 
 ## Contributing
-The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
+The VMware Aria Automation for Secure Clouds team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
 All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.
 
 For more detailed information, refer to [CONTRIBUTING.md](../../../CONTRIBUTING.md).
@@ -61,7 +61,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **VMware Secure State** - *Initial work*
+* **VMware VMware Aria Automation for Secure Clouds** - *Initial work*
 
 See also the list of [contributors](https://github.com/vmware-samples/secure-state-remediation-jobs/contributors) who participated in this project.
 
