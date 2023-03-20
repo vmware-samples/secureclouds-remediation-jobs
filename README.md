@@ -1,4 +1,4 @@
-# Secure State Remediation Jobs
+# VMware Aria Automation for Secure Clouds Remediation Jobs
 [![License][license-img]][license]
 
 ## Table of Contents
@@ -13,8 +13,8 @@
 
 ## Abstract
 These jobs represent open-sourced remediation jobs to be used in conjunction with the
-[Secure State remediation worker for python](https://hub.docker.com/r/vmware/vss-remediation-worker). In order
-to make use of this code, you must utilize the worker and have a Secure State worker group properly set up.
+[VMware Aria Automation for Secure Clouds remediation worker for python](https://hub.docker.com/r/vmware/vss-remediation-worker). In order
+to make use of this code, you must utilize the worker and have a VMware Aria Automation for Secure Clouds worker group properly set up.
 
 ## Quick Start Guide
 There are a couple conventions that must be followed in order to contribute working jobs to this repository:
@@ -29,13 +29,13 @@ In order to execute a python job, the file must be named the same as the directo
 For example, the job `s3-remove-public-access` must have a `s3-remove-publc-access.py` file within that directory.
 
 The `requirements.txt` file and the `constraints.txt` file are optional but recommended. This ensures
-the worker can install the requirements in a repeatable fashion, which ensures the Secure State
+the worker can install the requirements in a repeatable fashion, which ensures the VMware Aria Automation for Secure Clouds
 application will not invalidate jobs due to new requirements being installed.
 
 ## Job execution
 When the worker runs, all requirements found in the (optional) `requirements.txt` and `constraints.txt` files will be installed relative to the job
 directory. When the job is executed, the python runtime is restricted to the requirements in that relative path.
-This ensures all code being executed is known to the Secure State worker and can be verified
+This ensures all code being executed is known to the VMware Aria Automation for Secure Clouds worker and can be verified
 via checksum. The worker also moves the entire folder to a separate working directory to
 ensure local imports will not work.
 
@@ -69,7 +69,7 @@ The finding payload is in the form:
 ```
 
 ## Logging
-All stdout and stderr logs are sent to the Secure State web application for display in the
+All stdout and stderr logs are sent to the VMware Aria Automation for Secure Clouds web application for display in the
 user interface. Take care when logging and make sure not to log sensitive data.
 
 ## Supported Remediation Jobs
@@ -159,7 +159,7 @@ The table below lists all the supported jobs with their links.
 
 
 ## Contributing
-The Secure State team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
+The VMware Aria Automation for Secure Clouds team welcomes welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
 All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch.
 
 For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -172,7 +172,7 @@ Members:
 * Paul Allen (VMware)
 
 ## VMware Resources
-* [VMware Secure State](https://www.cloudhealthtech.com/products/vmware-secure-state)
+* [VMware VMware Aria Automation for Secure Clouds](https://www.cloudhealthtech.com/products/vmware-secure-state)
 * [VMware Code](https://code.vmware.com/home)
 * [VMware Developer Community](https://communities.vmware.com/community/vmtn/developer)
 
