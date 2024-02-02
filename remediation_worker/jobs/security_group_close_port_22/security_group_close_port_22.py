@@ -41,11 +41,12 @@ class SecurityGroupClosePort22(object):
         :raises: KeyError, JSONDecodeError
         """
         payload_dict = json.loads(payload)
+        finding = payload_dict["notificationInfo"]["FindingInfo"]
+
         return {
-            "security_group_id": payload_dict["notificationInfo"]["FindingInfo"][
-                "ObjectId"
-            ],
-            "region": payload_dict["notificationInfo"]["FindingInfo"]["Region"],
+            "security_group_id": finding["ObjectId"],
+            "region": finding["Region"],
+            "finding_id": finding["FindingId"],
         }
 
     def remediate(self, client, security_group_id):
@@ -63,40 +64,48 @@ class SecurityGroupClosePort22(object):
         """
 
         port = 22
-        try:
-            logging.info("    executing client.describe_security_group_rules")
-            logging.info(f"    group-id: {security_group_id}")
-            # List all the security group rules
-            security_group_rules = client.describe_security_group_rules(
-                Filters=[{"Name": "group-id", "Values": [security_group_id]},],
-                MaxResults=1000,
+        logging.info(f"Security Group Id to remediate: {security_group_id}")
+
+        # List all the security group rules
+        security_group_rules = client.describe_security_group_rules(
+            Filters=[
+                {"Name": "group-id", "Values": [security_group_id]},
+            ],
+            MaxResults=5,
+        )
+
+        logging.info(security_group_rules)
+
+        if len(security_group_rules["SecurityGroupRules"]) == 0:
+            raise Exception(
+                "Failure retrieving SecurityGroupRules for the group. "
+                "Check that proper Role ARN specified for this account. "
+                "https://docs.vmware.com/en/CloudHealth-Secure-State/"
+                "services/chss-usage/GUID-remediation-aws-config.html"
             )
-            for rule in security_group_rules["SecurityGroupRules"]:
-                if (
-                    rule["IpProtocol"] == "tcp"
-                    and rule["IsEgress"] is False
-                    and rule["FromPort"] <= port
-                    and rule["ToPort"] >= port
-                    and (
-                        ("CidrIpv4" in rule and rule["CidrIpv4"] == "0.0.0.0/0")
-                        or ("CidrIpv6" in rule and rule["CidrIpv6"] == "::/0")
-                    )
-                ):
-                    # Removes Ingress security group rule containing port 22 in the range with
-                    # protocol 'tcp', source '0.0.0.0/0' or '::/0'
-                    logging.info("    executing client.revoke_security_group_ingress")
-                    logging.info(f"    GroupId: {security_group_id}")
-                    logging.info(
-                        f"    SecurityGroupRuleIds: {rule['SecurityGroupRuleId']}"
-                    )
-                    client.revoke_security_group_ingress(
-                        GroupId=security_group_id,
-                        SecurityGroupRuleIds=[rule["SecurityGroupRuleId"]],
-                    )
-            logging.info("successfully executed remediation")
-        except Exception as e:
-            logging.error(f"{str(e)}")
-            raise
+
+        logging.info("Remediating")
+
+        for rule in security_group_rules["SecurityGroupRules"]:
+            if (
+                rule["IpProtocol"] == "tcp"
+                and rule["IsEgress"] is False
+                and rule["FromPort"] <= port
+                and rule["ToPort"] >= port
+                and (
+                    ("CidrIpv4" in rule and rule["CidrIpv4"] == "0.0.0.0/0")
+                    or ("CidrIpv6" in rule and rule["CidrIpv6"] == "::/0")
+                )
+            ):
+                # Removes Ingress security group rule containing port 22 in the range with
+                # protocol 'tcp', source '0.0.0.0/0' or '::/0'
+                logging.info(f"Removing rule: {rule}")
+                client.revoke_security_group_ingress(
+                    GroupId=security_group_id,
+                    SecurityGroupRuleIds=[rule["SecurityGroupRuleId"]],
+                )
+        logging.info("successfully executed remediation")
+
         return 0
 
     def run(self, args):
